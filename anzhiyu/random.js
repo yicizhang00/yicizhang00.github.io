@@ -1,3 +1,3 @@
-var posts=["2025/08/12/数据库/","2025/08/12/hello-world/","2025/08/12/数据结构/","2025/08/18/math/","2025/08/12/深入Linux内核/","2025/08/12/线段树/"];function toRandomPost(){
+var posts=["2025/08/12/数据库/","2025/08/12/hello-world/","2025/08/12/数据结构/","2025/08/18/math/","2025/08/12/深入Linux内核/","2025/08/12/线段树/","2025/08/12/leetcode/leetcode3000/","2025/08/13/算法/","2025/08/12/xxl-job/","2025/08/12/JVM自动内存管理/","2025/08/13/JVM垃圾收集器/","2025/08/12/大厂笔试题/滴滴/","2025/08/12/java基础/","2025/08/12/leetcode/leetcode1-10/"];function toRandomPost(){
     pjax.loadUrl('/'+posts[Math.floor(Math.random() * posts.length)]);
   };

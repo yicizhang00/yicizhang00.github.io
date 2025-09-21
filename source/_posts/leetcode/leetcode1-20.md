@@ -6,7 +6,7 @@ categories:
 tags:
   - leetcode
 ---
-# leetcode1
+# leetcode 1
 
 ## 题目
 

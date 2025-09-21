@@ -145,3 +145,518 @@ String a = "111";
 String b = "111";
 ```
 
+## Error 和 Exception
+
+所有的异常都继承于`java.lang.Throwable`，其有两个子类
+
+- Exception：程序本身可以处理的异常，可以通过`catch`进行捕获。Exception又分为Checked和Unchecked异常
+- Error：属于程序无法处理的，不建议通过catch来捕获，因为捕获了后续也没法处理，例如无法恢复现场，不能保证系统能安全恢复，通常只是能打印日志或做一些清理工作。如`OutOfMemoryError`,`Virtual MachineError`,`NoClassDefFoundError`等
+
+### Checked Exception和Unchecked Exception
+
+**Checked Exception** 即 受检查异常 ，Java 代码在编译过程中，如果受检查异常没有被 `catch`或者`throws` 关键字处理的话，就没办法通过编译。最常见的如FileNotFoundException，强制要求在编译阶段就对其进行catch或者throws，否则编译无法通过。
+
+除了`RuntimeException`及其子类以外，其他的`Exception`类及其子类都属于受检查异常 。常见的受检查异常有：IO 相关的异常、`ClassNotFoundException`、`SQLException`...。
+
+**Unchecked Exception** 即 **不受检查异常** ，Java 代码在编译过程中 ，我们即使不处理不受检查异常也可以正常通过编译。
+
+`RuntimeException` 及其子类都统称为非受检查异常，常见的有（建议记下来，日常开发中会经常用到）：
+
+- `NullPointerException`(空指针错误)
+- `IllegalArgumentException`(参数错误比如方法入参类型错误)
+- `NumberFormatException`（字符串转换为数字格式错误，`IllegalArgumentException`的子类）
+- `ArrayIndexOutOfBoundsException`（数组越界错误）
+- `ClassCastException`（类型转换错误）
+- `ArithmeticException`（算术错误）
+- `SecurityException` （安全错误比如权限不够）
+- `UnsupportedOperationException`(不支持的操作错误比如重复创建同一用户)
+
+这些异常无法在编译阶段被感知到，因此只有在运行时才能捕获这些异常
+
+### throwable-类常用方法有哪些
+
+- `String getMessage()`: 返回异常发生时的详细信息
+- `String toString()`: 返回异常发生时的简要描述
+- `String getLocalizedMessage()`: 返回异常对象的本地化信息。使用 `Throwable` 的子类覆盖这个方法，可以生成本地化信息。如果子类没有覆盖该方法，则该方法返回的信息与 `getMessage()`返回的结果相同
+- `void printStackTrace()`: 在控制台上打印 `Throwable` 对象封装的异常信息
+
+### try-catch-finally-如何使用
+
+- `try`块：用于捕获异常。其后可接零个或多个 `catch` 块，如果没有 `catch` 块，则必须跟一个 `finally` 块。
+- `catch`块：用于处理 try 捕获到的异常。
+- `finally` 块：无论是否捕获或处理异常，`finally` 块里的语句都会被执行。当在 `try` 块或 `catch` 块中遇到 `return` 语句时，`finally` 语句块将在方法返回之前被执行。
+
+> 如果try语句里有return，返回的是try语句块中变量值。 
+> 详细执行过程如下：
+> a.如果有返回值，就把返回值保存到局部变量中；
+> b.执行jsr指令跳到finally语句里执行；
+> c.执行完finally语句后，返回之前保存在局部变量表里的值。
+> **如果try，finally语句里均有return，忽略try的return，而使用finally的return.
+
+### finally中的代码一定会被执行吗？
+
+finally中的代码在虚拟机被终止时，finally中的代码就不会被执行。
+
+### try-with-resources
+
+`try-with-resources` 其实是一个语法糖，其目的是自动、安全地关闭实现了 `AutoCloseable`（或 `Closeable`）的资源，替代手写的 `try...finally` 关闭资源，避免资源泄漏并且正确处理关闭时抛出的异常。
+
+
+
+#### 语法示例
+
+```
+try (InputStream in = new FileInputStream("file.txt")) {
+    // 使用 in
+} catch (IOException e) {
+    // 处理读取异常
+}
+```
+
+可以声明多个资源，用分号分隔：
+
+```
+try (
+    InputStream in = new FileInputStream("a");
+    OutputStream out = new FileOutputStream("b")
+) {
+    // body
+}
+```
+
+#### 资源类型与可用性
+
+- 资源类型必须实现 `java.lang.AutoCloseable`（`java.io.Closeable` 也可以，因为它继承自 `AutoCloseable`）。
+- `AutoCloseable.close()` 声明为 `throws Exception`，而 `Closeable.close()` 声明为 `throws IOException`。因此如果资源的 `close()` 抛出受检异常，调用方法必须声明或捕获该异常。
+
+#### Java 7 vs Java 9 的差别（重要）
+
+- Java 7/8：资源必须在 `try(...)` 中声明（即在括号内创建变量）。
+
+- Java 9+：允许把**已经存在的 final 或 \*effectively final\* 本地变量**放入 `try` 的括号中：
+
+  ```
+  BufferedReader br = new BufferedReader(...);
+  // br 必须在此之后不再被修改（effectively final）
+  try (br) {
+      // use br
+  }
+  ```
+
+#### 资源关闭的顺序
+
+- 创建顺序：左到右。
+- 关闭顺序：**反向**（右到左）。也就是最后创建的资源最先关闭。
+
+#### 异常处理：主异常与 suppressed（关键点）
+
+- 如果 try 块中抛出了异常 A，而在关闭资源时抛出了异常 B，那么：
+  - 异常 A 是**主异常**（会被抛出）。
+  - 关闭时抛出的异常 B 会被作为被抑制异常（suppressed）加入主异常：`A.addSuppressed(B)`。
+- 如果 try 块没有异常，但关闭时抛出异常，则该关闭异常成为主异常并被抛出。
+- 你可以通过 `Throwable[] t.getSuppressed()` 获取被抑制的异常；在打印栈跟踪时 JVM 也会显示 suppressed 列表。
+
+示例（演示 suppressed）：
+
+```
+class R implements AutoCloseable {
+    @Override
+    public void close() throws Exception {
+        throw new Exception("close failed");
+    }
+}
+
+public static void main(String[] args) {
+    try (R r = new R()) {
+        throw new Exception("try failed");
+    } catch (Exception e) {
+        System.out.println("Primary: " + e.getMessage());
+        for (Throwable s : e.getSuppressed()) {
+            System.out.println("Suppressed: " + s.getMessage());
+        }
+    }
+}
+```
+
+输出：
+
+```
+Primary: try failed
+Suppressed: close failed
+```
+
+#### 编译器如何“糖化”为 try-finally（反糖化示例）
+
+单资源的近似编译后形式（示意）：
+
+```
+MyResource r = new MyResource();
+Throwable primaryExc = null;
+try {
+    // try-body
+} catch (Throwable t) {
+    primaryExc = t;
+    throw t;
+} finally {
+    if (r != null) {
+        if (primaryExc != null) {
+            try {
+                r.close();
+            } catch (Throwable closeExc) {
+                primaryExc.addSuppressed(closeExc);
+            }
+        } else {
+            r.close();
+        }
+    }
+}
+```
+
+- 注意重点：如果主异常存在，`close()` 抛出的异常不会覆盖它，而是被 `addSuppressed`；如果没有主异常，`close()` 抛出的异常会向上抛出。
+- 对于多个资源，编译器会按资源个数生成嵌套的类似逻辑，最终达到“反向关闭并抑制”的效果。
+- 编译器还会在调用 `close()` 前检查资源是否为 `null`（因此如果资源变量为 `null`，不会 NPE）。
+
+#### 关于 null 资源
+
+- 如果资源表达式结果是 `null`，编译器生成的代码会检查并跳过关闭（不会调用 `close()` 导致 NPE）。
+
+#### 结合 catch / finally
+
+- `try-with-resources` 支持 `catch` 和 `finally`：
+
+```
+try (R r = ...) {
+   // body
+} catch (SomeException e) {
+   // 处理
+} finally {
+   // 最后仍然会在这里执行（close 已在 try 退出时调用）
+}
+```
+
+- `finally` 中的代码在资源关闭之后执行（因为关闭是在隐式 finally 中完成的 —— 但语义上资源关闭是在 try 退出后、外层 finally 执行前完成）。
+
+#### 常见误区与注意点（实务建议）
+
+1. **不要在 close() 中做复杂的恢复逻辑**——close 应该尽量简洁、幂等；如果 close 失败会抑制真正的业务异常，排查会麻烦。
+2. **处理 suppressed**：日志或错误处理时，最好记录主异常和 `getSuppressed()` 的内容，避免失去关键信息。
+3. **不要捕获 `Error` 或 `Throwable`（除非框架层）**：业务代码应捕获可恢复的异常类型；框架/容器可能会用 `catch(Throwable)` 做最后兜底并记录日志。
+4. **JDBC 的使用**：`Connection`, `Statement`, `ResultSet` 从 JDBC 4.1 起都实现了 `AutoCloseable`，推荐在 try-with-resources 中使用，确保按逆序关闭。
+5. **方法签名注意**：如果资源的 `close()` 声明抛出受检异常，那么 enclosing 方法如果不捕获这些异常就需要声明相应的 throws。
+
+#### **进阶示例**（多资源、Java9 语法、锁释放包装器）
+
+多资源（关闭顺序：out -> in）：
+
+```
+try (InputStream in = new FileInputStream("a");
+     OutputStream out = new FileOutputStream("b")) {
+    // ...
+}
+```
+
+Java 9+, 使用已声明变量：
+
+```
+BufferedReader br = new BufferedReader(new FileReader("f"));
+try (br) { // br 必须是 effectively final
+    System.out.println(br.readLine());
+}
+```
+
+把 `ReentrantLock` 用作 try-with-resources（包装成 AutoCloseable）：
+
+```
+class LockWrapper implements AutoCloseable {
+    private final ReentrantLock lock;
+    LockWrapper(ReentrantLock lock) {
+        this.lock = lock; lock.lock();
+    }
+    @Override
+    public void close() { lock.unlock(); }
+}
+
+// 使用：
+ReentrantLock lock = new ReentrantLock();
+try (LockWrapper lw = new LockWrapper(lock)) {
+    // 在这里持有 lock
+}
+```
+
+#### 实践建议（短句）
+
+- 优先使用 `try-with-resources` 来管理流、文件、数据库连接等资源。
+- 在需要记录或转发异常时，注意同时查看 `getSuppressed()`。
+- 实现 `AutoCloseable` 时让 `close()` 简单且幂等，尽量不抛出不可预期的异常；若必须抛出，文档清楚标注。
+
+## 泛型
+
+### 泛型的设计目的
+
+在java1.5之前，没有泛型的设计，导致所有的集合容器存放的都是Object型，使用时必须进行强制类型转换。
+
+```java
+List list = new ArrayList();
+list.add("hello");
+String s = (String) list.get(0); // 需要强转
+
+```
+
+运行时容易出错，出现`ClassCastException`
+
+因此引入了泛型，能够提供：
+
+1. 编译时的类型检查
+2. 消除类型强制转换
+3. 可读性更好
+
+### 泛型擦除
+
+java的泛型本质是伪泛型，只会在编译时进行泛型的类型检查，而在运行时会进行泛型擦除，编译器在使用泛型的`get()`方法前，会插入`(<T>)`进行类型转换，意味JVM在运行时实际上无法获得泛型信息，`List<String>`和`List<Integer>`在JVM看来实际上都是都是`List`。
+
+由于在运行时JVM没有泛型信息，我们不能在运行时进行类型判断
+
+```java
+List<String> list = new ArrayList<>();
+if (list instanceof List<String>) {} // 编译错误
+
+```
+
+也不能创建泛型类型数组
+
+```java
+List<String>[] arr = new List<String>[10]; // 编译错误
+```
+
+### 泛型边界与通配符
+
+##### 上界 extends
+
+```java
+class Box<T extends Number> {  // T 必须是 Number 或其子类
+    T value;
+}
+
+```
+
+上界的extends能够确定当前泛型T所继承的父类，也就是说T一定是其子类
+
+#### 下界 super
+
+```java
+List<? super Integer> list; // 可以存放 Integer 及其子类，但取出时只保证是 Object
+
+```
+
+下界的super能够确定当前泛型T所拥有的子类，也就是说T一定是其父类
+
+#### 无界通配符
+
+```
+void printList(List<?> list) {
+    for (Object o : list) {
+        System.out.println(o);
+    }
+}
+
+```
+
+
+
+#### PECS原则(Producer Extends, Consumer Super)
+
+上界意味着你能确定当前泛型T，一定是某个类的子类，能够安全地读出，意味着可以用父类来接受它，例如<T extends Number>可以用Number这个父类来接受，但是不能安全地写入，因为无法判断其是什么具体类，是Integer还是Double。
+
+而下界作为某个类的父类，能够安全的写入，因为至少能够写入Integer，最基础的类，而不能安全的读出，取出时只能保证其是超类Object自身或者其子类。
+
+### 协变/逆变
+
+java的泛型没有协变/逆变，因此不能写如下的代码：
+
+```java
+List<Number> list = new ArrayList<Integer>(); // 编译错误
+
+```
+
+必须使用通配符表达：
+
+```java
+List<? extends Number> list = new ArrayList<Integer>(); // 合法
+
+```
+
+### 泛型擦除
+
+由于jvm在运行时会进行泛型擦除，因此想要获得具体的泛型信息，需要借助反射和`type`的API
+
+```java
+Field f = MyClass.class.getDeclaredField("list");
+Type type = f.getGenericType();  // 可能是 ParameterizedType
+
+```
+
+### 最佳实践
+
+**基本类型不能作为泛型参数**
+
+- `List<int>` 不合法，必须用 `Integer`。
+
+**静态变量不能使用类型参数**
+
+- 因为泛型参数属于实例层面，不属于类层面。
+
+**泛型类不能直接创建泛型数组**
+
+**类型擦除导致的桥方法 (Bridge Method)**
+ 如果泛型方法在子类中被重写，编译器可能生成桥方法保证多态一致。
+
+**在 API 设计中，用通配符表达灵活性（PECS 原则）。**
+
+**在内部实现时，用确切的类型参数，减少歧义。**
+
+**避免原生类型（raw type）`List list`，这样会失去泛型检查。**
+
+**在必要时使用 `@SuppressWarnings("unchecked")`，但要小心**。
+
+**写工具类时优先考虑泛型方法，而不是泛型类。**
+
+
+
+## 反射
+
+简单来说，Java 反射 (Reflection) 是一种**在程序运行时，动态地获取类的信息并操作类或对象（方法、属性）的能力**。
+
+通常情况下，我们写的代码在编译时类型就已经确定了，要调用哪个方法、访问哪个字段都是明确的。但反射允许我们在**运行时**才去探知一个类有哪些方法、哪些属性、它的构造函数是怎样的，甚至可以动态地创建对象、调用方法或修改属性，哪怕这些方法或属性是私有的。
+
+正是这种在运行时“反观自身”并进行操作的能力，使得反射成为许多**通用框架和库的基石**。它让代码更加灵活，能够处理在编译时未知的类型。
+
+### 优点
+
+**灵活性和动态性**：反射允许程序在运行时动态地加载类、创建对象、调用方法和访问字段。这样可以根据实际需求（如配置文件、用户输入、注解等）动态地适应和扩展程序的行为，显著提高了系统的灵活性和适应性。
+
+**框架开发的基础**：许多现代 Java 框架（如 Spring、Hibernate、MyBatis）都大量使用反射来实现依赖注入（DI）、面向切面编程（AOP）、对象关系映射（ORM）、注解处理等核心功能。反射是实现这些“魔法”功能不可或缺的基础工具。
+
+**解耦合和通用性**：通过反射，可以编写更通用、可重用和高度解耦的代码，降低模块之间的依赖。例如，可以通过反射实现通用的对象拷贝、序列化、Bean 工具等。
+
+### 缺点：
+
+**性能开销**：反射操作通常比直接代码调用要慢。因为涉及到动态类型解析、方法查找以及 JIT 编译器的优化受限等因素。不过，对于大多数框架场景，这种性能损耗通常是可以接受的，或者框架本身会做一些缓存优化。
+
+**安全性问题**：反射可以绕过 Java 语言的访问控制机制（如访问 `private` 字段和方法），破坏了封装性，可能导致数据泄露或程序被恶意篡改。此外，还可以绕过泛型检查，带来类型安全隐患。
+
+**代码可读性和维护性**：过度使用反射会使代码变得复杂、难以理解和调试。错误通常在运行时才会暴露，不像编译期错误那样容易发现。
+
+### 应用场景 
+
+1. DI和IOC：以 Spring/Spring Boot 为代表的 IoC 框架，会在启动时扫描带有特定注解（如 `@Component`, `@Service`, `@Repository`, `@Controller`）的类，利用反射实例化对象（Bean），并通过反射注入依赖（如 `@Autowired`、构造器注入等）。
+
+2. 注解处理：框架通过反射检查类、方法、字段上有没有特定的注解，然后根据注解信息执行相应的逻辑。比如，看到 `@Value`，就用反射读取注解内容，去配置文件找对应的值，再用反射把值设置给字段。
+3. 动态代理和AOP：JDK 自带的动态代理（Proxy 和 InvocationHandler）就离不开反射。代理对象在内部调用真实对象的方法时，就是通过反射的 `Method.invoke` 来完成的。
+4. ORM关系对象映射：ORM通过反射获取 Java 类的属性列表，然后把查询结果按名字或配置对应起来，再用反射调用 setter 或直接修改字段值。反过来，保存对象到数据库时，也是用反射读取属性值来拼 SQL。
+
+## 注解
+
+`Annotation` （注解） 是 Java5 开始引入的新特性，可以看作是一种特殊的注释，主要用于修饰类、方法或者变量，提供某些信息供程序在编译或者运行时使用。
+
+注解本质是一个继承了`Annotation` 的特殊接口：
+
+```java
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Override {
+
+}
+
+public interface Override extends Annotation{
+
+}
+```
+
+注解只有被解析之后才会生效，常见的解析方法有两种：
+
+- **编译期直接扫描**：编译器在编译 Java 代码的时候扫描对应的注解并处理，比如某个方法使用`@Override` 注解，编译器在编译的时候就会检测当前的方法是否重写了父类对应的方法。
+- **运行期通过反射处理**：像框架中自带的注解(比如 Spring 框架的 `@Value`、`@Component`)都是通过反射来进行处理的。
+
+
+
+## SPI和API
+
+当实现方提供了接口和实现，我们可以通过调用实现方的接口从而拥有实现方给我们提供的能力，这就是 **API**。这种情况下，接口和实现都是放在实现方的包中。调用方通过接口调用实现方的功能，而不需要关心具体的实现细节。
+
+当接口存在于调用方这边时，这就是 **SPI** 。由接口调用方确定接口规则，然后由不同的厂商根据这个规则对这个接口进行实现，从而提供服务。
+
+## 序列化和反序列化
+
+- **序列化**：将数据结构或对象转换成可以存储或传输的形式，通常是二进制字节流，也可以是 JSON, XML 等文本格式，即对象->JSON。
+- **反序列化**：将在序列化过程中所生成的数据转换为原始数据结构或者对象的过程，即JSON->对象。
+
+## 语法糖
+
+语法糖实际上不是一个真正的语法，只是为了简化某些语法表达而创建的，例如`for-each`就是一个语法糖，JVM并不能识别语法糖，语法糖只在编译器层面被看见，编译器编译代码为字节码时会调用`desugar()`来解码语法糖。
+
+# Java重要知识
+
+## 值传递与引用传递
+
+Java只有值传递没有引用传递，对于传参，在 Java 方法调用时，**实参的值**会被复制一份，传递给形参。
+
+- 如果参数是 **基本类型**，复制的是 **具体的数值**。
+- 如果参数是 **引用类型**，复制的是 **引用的值**（也就是对象在堆里的地址）。
+
+### 传递基本类型
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        int x = 5;
+        change(x);
+        System.out.println(x); // 还是 5
+    }
+    static void change(int a) {
+        a = 10; // 只改了副本
+    }
+}
+
+```
+
+### 传递引用复制
+
+```java
+class Person {
+    String name;
+    Person(String name) { this.name = name; }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Person p = new Person("Alice");
+        change(p);
+        System.out.println(p.name); // 输出 Bob
+    }
+    static void change(Person x) {
+        x.name = "Bob"; // 修改的是同一个对象
+    }
+}
+
+```
+
+### 无法改变原引用的值
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        Person p = new Person("Alice");
+        reassign(p);
+        System.out.println(p.name); // 还是 Alice
+    }
+    static void reassign(Person x) {
+        x = new Person("Charlie"); // x 指向新对象，但不影响外部的 p
+    }
+}
+
+```
+
+真正的引用传递可以修改调用者的变量绑定。
+
+
+

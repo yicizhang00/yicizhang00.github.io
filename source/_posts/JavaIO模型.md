@@ -332,3 +332,6 @@ Java 7+ 引入 `AsynchronousSocketChannel`、`AsynchronousServerSocketChannel`�
 - `AsynchronousSocketChannel.read(ByteBuffer, attachment, CompletionHandler)`：IO 完成后回调 `CompletionHandler`。
 - 异步模型让操作更贴近 OS 的真正异步（在 Windows 是 IOCP，在 Linux 早期可能用线程池做模拟，现代内核可借助 io_uring 更高效）。
 - 与 Selector 模型相比：异步模型更易写出“事件回调”风格代码，但也要处理并发回调、资源竞争。
+
+# 传统IO流
+

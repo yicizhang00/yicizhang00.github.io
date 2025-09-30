@@ -430,7 +430,7 @@ List<String>[] arr = new List<String>[10]; // 编译错误
 
 ### 泛型边界与通配符
 
-##### 上界 extends
+#### 上界 extends
 
 ```java
 class Box<T extends Number> {  // T 必须是 Number 或其子类

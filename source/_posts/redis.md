@@ -484,7 +484,15 @@ ziplist2: [c, d, e]
 
 其结构如下：
 
-![img](https://pic4.zhimg.com/v2-ad4928756bc89b47fd2ff17cec1519a5_1440w.jpg)
+![img](https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014163041375.jpeg)
+
+相对比ziplist，去除了zltail节点，意味着没法通过O(1)找到列表结尾。其主要改进在ListPackEntry中。
+
+#### ListPackEntry
+
+
+
+
 
 ## Redis的功能
 

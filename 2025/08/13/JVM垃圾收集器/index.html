@@ -1,0 +1,737 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>JVM垃圾收集器 | Hexo</title><meta name="author" content="John Doe"><meta name="copyright" content="John Doe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="JVM垃圾收集器"><meta name="application-name" content="JVM垃圾收集器"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="JVM垃圾收集器"><meta property="og:url" content="http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="垃圾收集器对象死亡的判断方法引用计数法在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。 缺点：单纯的引用计数就很难解决对象之间相互循环引用的问题。如 objA.instance &amp;#x3D; objB;"><meta property="og:locale" content="en"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="John Doe"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="垃圾收集器对象死亡的判断方法引用计数法在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。 缺点：单纯的引用计数就很难解决对象之间相互循环引用的问题。如 objA.instance &amp;#x3D; objB;"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"Author: John Doe","link":"Link: ","source":"Source: Hexo","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.","copySuccess":"Copy success, copy and reprint please mark the address of this article"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"Traditional Chinese Activated Manually","cht_to_chs":"Simplified Chinese Activated Manually","day_to_night":"Dark Mode Activated Manually","night_to_day":"Light Mode Activated Manually","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Hexo',
+  title: 'JVM垃圾收集器',
+  postAI: '',
+  pageFillDescription: '垃圾收集器, 对象死亡的判断方法, 引用计数法, 可达性分析, 引用的概念, 强引用, 软引用, 弱引用, 虚引用, 引用队列（ReferenceQueue）, 回收方法区, 字符常量池, 运行时常量池, 垃圾收集算法, 标记-清除算法, 标记-复制算法, 标记-整理算法, 分代收集算法, HotSpot实现细节, 根节点枚举, 为什么根节点枚举必须停顿所有用户线程？, 安全点, 安全点的位置：, 抢先式中断, 主动式中断, 内存保护陷阱, 现代JVM工作流程, 安全区域, 记忆集与卡表, 跨代引用, 记忆集, 卡表, 写屏障, 伪共享, 条件检查, 卡表填充, 工作流程, 并发的可达性分析, 三色标记算法（Tri-Color Marking）, 增量更新（Incremental Update）, 原始快照（Snapshot At The BeginningSATB）, 经典垃圾收集器, Serial收集器, ParNew, Parallel Scavenge, Serial Old, Parallel Old, CMS(Concurrnet Mark Sweep), G1（Garbage First）, ZGC（低延迟GC）垃圾收集器对象死亡的判断方法引用计数法在对象中添加一个引用计数器每当有一个地方引用它时计数器值就加一当引用失效时计数器值就减一任何时刻计数器为零的对象就是不可能再被使用的缺点单纯的引用计数就很难解决对象之间相互循环引用的问题如这个成员属性的唯一意义就是占点内存以便能在日志中看清楚是否有回收过假设在这行发生和是否能被回收在加上参数或者可以看到类型触发原因前堆使用量后堆使用量当前堆总容量这两个对象实际上还是被回收了说明用的不是引用计数法判断对象是否存活可达性分析通过一系列称为的根对象作为起始节点集从这些节点开始根据引用关系向下搜索搜索过程所走过的路径称为引用链如果某个对象到间没有任何引用链相连或者用图论的话来说就是从到这个对象不可达时则证明此对象是不可能再被使用的下图的没有能够到达因此这三个对象已经死亡哪些对象可以作为呢虚拟机栈栈帧中的局部变量表中引用的对象本地方法栈方法中引用的对象方法区中类静态属性引用的对象方法区中常量引用的对象所有被同步锁持有的对象引用的对象对象可以被回收就代表一定会被回收吗可以回收这是一个状态当垃圾收集器进行可达性分析后发现某个对象到没有任何引用链就从逻辑上判定该对象已经死亡不再被使用此时对象就进入了可以被回收的状态这是程序逻辑上的确定性一定回收这是一个动作即使对象已经被判定为垃圾垃圾收集器也不一定会立即执行回收动作何时回收是否回收取决于器的具体实现触发条件和工作策略这是执行时机上的不确定性方法如果一个类重写了方法那么它的对象回收过程会变得非常特殊且缓慢第一次时发现它不可达会把它放入一个叫的队列但不会立即回收它由一个低优先级的线程去慢慢执行队列中各个对象的方法执行完后对象仍然处于不可达状态需要等到下一次时才会被真正回收这意味着一个本可回收的对象至少会熬过两次才会被真正释放正因为这种巨大的不确定性和性能风险方法已被官方标记为弃用之后中方法已经被弃用引用的概念无论是通过引用计数法判断对象引用数量还是通过可达性分析法判断对象的引用链是否可达判定对象的存活都与引用有关之前中引用的定义很传统如果类型的数据存储的数值代表的是另一块内存的起始地址就称这块内存代表一个引用以后对引用的概念进行了扩充将引用分为强引用软引用弱引用虚引用四种引用强度逐渐减弱强引用就是中普通的对象而软引用弱引用虚引用在中定义的类分别是强引用以代码为例指在程序代码之中普遍存在的引用赋值无论任何情况下只要强引用关系还存在垃圾收集器就永远不会回收掉被引用的对象用途绝大部分的对象引用软引用它是最弱的一种引用关系一个对象是否有虚引用的存在完全不会对其生存时间构成影响也无法通过虚引用来取得一个对象实例为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知在版之后提供了类来实现虚引用用途实现内存敏感的缓存例如缓存图片数据等大型对象缓存的数据可以一直存在直到需要为新对象腾出空间为止弱引用弱引用也是用来描述那些非必须对象但是它的强度比软引用更弱一些被弱引用关联的对象只能生存到下一次垃圾收集发生为止当垃圾收集器开始工作无论当前内存是否足够都会回收掉只被弱引用关联的对象在版之后提供了类来实现弱引用用途实现规范化映射如它的键是弱引用的一旦键对象没有其他强引用它就可以被回收对应的键值对也会从中自动移除用于监控对象是否已被回收虚引用它是最弱的一种引用关系一个对象是否有虚引用的存在完全不会对其生存时间构成影响也无法通过虚引用来取得一个对象实例为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知在版之后提供了类来实现虚引用完全不会影响对象的生命周期你甚至无法通过方法获取到原始对象该方法总是返回如果一个对象仅被虚引用关联那么它可以在任何时候被回收就像没有引用一样用途用于跟踪对象被垃圾收集的时机当准备回收一个对象时如果发现它还有虚引用就会在回收它之后把这个虚引用加入到与之关联的中程序通过监控这个队列就能知道某个对象何时被回收了引用队列软引用弱引用和虚引用都可以在创建时关联一个当被引用对象被垃圾回收器处理之后这个引用对象本身如实例就会被加入到这个队列中程序可以通过监控这个队列来了解哪些对象已经被回收从而执行一些后续的清理工作例如从缓存映射中移除对应的条目回收方法区字符常量池在及以后版本字符串常量池从永久代移到了堆中因此字符串常量池中的字符串也会被回收假如在字符串常量池中存在字符串如果当前没有任何对象引用该字符串常量的话就说明常量就是废弃常量如果这时发生内存回收的话而且有必要的话就会被系统清理出常量池了在堆中创建一个字符串对象是强引用调用将堆中对象的引用添加到字符串常量池将强引用置为此时对象只剩下字符串常量池的一个引用此时如果程序后续再也没有其他地方使用过这个字面量或值那么常量池中对对象的引用就变成了孤悬的触发会发现这个引用不再被任何间接或直接到达于是将其回收方法方法会返回字符串常量池指向堆中的对象首先会在常量池中创建一个字符串然后在堆中创建一个对象指向堆中的对象地址指向常量池中的会是因为和是两个不同的对象调用方法会是因为将堆中的加入常量池如果不存在并返回常量池中的引用也指向常量池中的所以它们是同一个对象会是仍然指向堆中的对象而指向常量池中的对象运行时常量池运行时常量池在之后被移到元空间中主要回收的是类的类型那么如何判断一个类是无用的类的呢判定一个常量是否是废弃常量比较简单而要判定一个类是否是无用的类的条件则相对苛刻许多类需要同时满足下面个条件才能算是无用的类该类所有的实例都已经被回收也就是堆中不存在该类的任何实例加载该类的已经被回收该类对应的对象没有在任何地方被引用无法在任何地方通过反射访问该类的方法虚拟机可以对满足上述个条件的无用类进行回收这里说的仅仅是可以而并不是和对象一样不使用了就会必然被回收垃圾收集算法标记清除算法它是最基础的收集算法是因为后续的收集算法大多都是以标记清除算法为基础对其缺点进行改进而得到的主要缺点第一个是执行效率不稳定如果堆中包含大量对象而且其中大部分是需要被回收的这时必须进行大量标记和清除的动作导致标记和清除两个过程的执行效率都随对象数量增长而降低第二个是内存空间的碎片化问题标记清除之后会产生大量不连续的内存碎片标记复制算法它可以将内存分为大小相同的两块每次使用其中的一块当这一块的内存使用完后就将还存活的对象复制到另一块去然后再把使用的空间一次清理掉这样就使每次的内存回收都是对内存区间的一半进行回收主要缺点这种复制回收算法的代价是将可用内存缩小为了原来的一半不适用于老年代如果对象很大则性能很差式回收式回收的具体做法是把新生代分为一块较大的空间和两块较小的空间每次分配内存只使用和其中一块发生垃圾搜集时将和中仍然存活的对象一次性复制到另外一块空间上然后直接清理掉和已用过的那块空间虚拟机默认和的大小比例是也即每次新生代中可用内存空间为整个新生代容量的的加上一个的只有一个空间即的新生代是会被浪费的当然的对象可被回收仅仅是普通场景下测得的数据任何人都没有办法百分百保证每次回收都只有不多于的对象存活因此式回收还有一个充当罕见情况的逃生门的安全设计当空间不足以容纳一次之后存活的对象时就需要依赖其他内存区域实际上大多就是老年代进行分配担保同时依赖于动态年龄阈值算法让中占用空间超过一半的对象年龄作为阈值当年龄大于阈值时直接进入老年代标记整理算法根据老年代的特点提出的一种标记算法标记过程仍然与标记清除算法一样但后续步骤不是直接对可回收对象回收而是让所有存活的对象向一端移动然后直接清理掉端边界以外的内存标记清除算法与标记整理算法的本质差异在于前者是一种非移动式的回收算法而后者是移动式的是否移动回收后的存活对象是一项优缺点并存的风险决策主要缺点因为多了整理的步骤因此效率也不高适合老年代这种垃圾回收频率不是很高的场景由于标记整理的整理移动需要需要暂停所有线程因此效率低下通常标记清除算法也是需要停顿用户线程来标记清理可回收对象的问题不在于清除部分清除部分没有线程会重新访问可回收的对象此时不存在并发问题而在于标记部分会导致浮动垃圾线程已经标记完了对象和它引用的对象然后用户线程断开了指向的引用结果对象实际上已经死了但因为已经被标记为存活所以本次不会回收它它成了浮动垃圾只能等到下次才能被清理这是可以接受的线程在遍历对象图时访问了一个对象发现它没有指向任何其他对象比如于是线程继续往前走就在这个时候用户线程执行了建立了一个新的引用关系结果这个新引用的对象因为线程已经完成了对它的父对象的检查所以它不会被标记为存活即使现在有活跃的用户线程正在访问它它也会在后续的清理阶段被错误地回收这会导致程序访问一个不存在的对象引发不可预知的崩溃这是绝对无法接受的分代收集算法当前虚拟机的垃圾收集都采用分代收集算法这种算法没有什么新的思想只是根据对象存活周期的不同将内存分为几块一般将堆分为新生代和老年代这样我们就可以根据各个年代的特点选择合适的垃圾收集算法比如在新生代中每次收集都会有大量对象死去所以可以选择复制算法只需要付出少量对象的复制成本就可以完成每次垃圾收集而老年代的对象存活几率是比较高的而且没有额外的空间对它进行分配担保所以我们必须选择标记清除或标记整理算法进行垃圾收集实现细节根节点枚举根节点枚举是垃圾收集过程中的第一步它的任务是找出所有对象根节点是一组必须存活的对象引用它们是遍历对象图的起点如果一个对象被直接或间接地引用着那它就是存活的否则它就是可回收的垃圾类别具体例子为什么必须是根虚拟机栈中的引用各个线程的方法栈帧中的局部变量参数等这代表了程序正在执行的上下文这些对象必须存活本地方法栈中的引用引用的对象方法正在使用的对象必须存活方法区中静态引用类的静态变量类信息是长期存在的其静态变量自然也不能被回收方法区中常量引用被修饰的常量常量是稳定不变的基础必须存活被锁持有的对象正在被同步锁持有的对象锁机制依赖的对象必须存活以保证同步正确性虚拟机内部引用基本类型对应的对象系统类加载器等运行的基础必须存活为什么根节点枚举必须停顿所有用户线程这是您问题中最关键的部分根节点枚举过程必须在一个能确保一致性的瞬间快照中完成但是这个过程在中非常快因为的数量相对于整个堆中的对象来说是非常少的并且现代有高效的优化手段如使用数据结构直接记录引用位置使得停顿时间极短安全点并不需要在指令流的任意位置都能进行它只需要在一些特定的被称为安全点的位置上暂停线程即可在这些位置上能够完整地掌握线程的执行状态如果没有安全点要进行时它需要向所有线程发出中断信号线程收到信号后必须在接收到信号的当下这条指令执行完后立刻在任意位置暂停线程开始工作这听起来合理但实际上有个致命问题在任意位置暂停时可能无法准确知道当前线程的栈帧和寄存器里哪些是对象引用如果采用来唯一任意时刻的任意指令的根节点枚举那么维护这个的代价过大也不可持续因此指令只能在安全点处才能进行规定了线程只有在执行到安全点时才能被安全地挂起以进行在这些位置上线程的内存状态是确定的可枚举的安全点的位置方法调用循环回边异常抛出抢先式中断先式中断不需要线程的执行代码主动去配合在垃圾收集发生时系统首先把所有用户线程全部中断如果发现有用户线程中断的地方不在安全点上就恢复这条线程执行让它一会再重新中断直到跑到安全点上现在几乎没有虚拟机实现采用抢先式中断来暂停线程响应事件主动式中断主动式中断的思想是当垃圾收集需要中断线程的时候不直接对线程操作仅仅简单地设置一个标志位各个线程执行过程时会不停地主动去轮询这个标志一旦发现中断标志为真时就自己在最近的安全点上主动中断挂起轮询标志的地方和安全点是重合的另外还要加上所有创建对象和其他需要在堆上分配内存的地方这是为了检查是否即将要发生垃圾收集避免没有足够内存分配新对象内存保护陷阱由于轮询操作在代码中会频繁出现这要求它必须足够高效使用内存保护陷阱的方式把轮询操作精简至只有一条汇编指令的程度当需要暂停用户线程时虚拟机把的内存页设置为不可读那线程执行到指令时就会产生一个自陷异常信号然后在预先注册的异常处理器中挂起线程实现等待这样仅通过一条汇编指令便完成安全点轮询和触发线程中断了现代工作流程现代普遍采用主动式中断策略它的流程如下发出请求当需要发生时设置一个全局标志位表示现在需要进入安全点线程轮询每个线程在运行过程中会主动地频繁地去检查这个全局标志位但是它不会在每条指令后都检查那样开销太大检查只发生在即将执行安全点指令之前比如方法调用前循环跳转前线程响应与挂起当线程执行到安全点指令并准备检查时如果发现全局标志位已被设置它就不会继续执行原来的业务逻辑而是立即在这个安全点挂起自己并记录下自己当前精确的执行状态包括下一条要执行的指令地址寄存器值栈帧等等待与确认等待所有线程都成功挂起到最近的安全点上一旦所有线程都挂起就获得了整个堆和所有线程栈的一个一致性的快照执行在这个绝对静止的时刻线程开始工作进行根节点枚举和后续的垃圾回收因为每个线程都停在了安全点可以轻松地使用来找到每个线程栈帧和寄存器中的对象引用而无需猜测恢复执行完成后清除全局标志位所有线程被唤醒从安全点继续执行原来的业务代码安全区域用户在不可执行的线程下如何进行典型的场景便是用户线程处于状态或者状态例如处在或者被阻塞这时候线程无法响应虚拟机的中断请求不能再走到安全的地方去中断挂起自己虚拟机也显然不可能持续等待线程重新被激活分配处理器时间安全区域是指能够确保在某一段代码片段之中引用关系不会发生变化因此在这个区域中任意地方开始垃圾收集都是安全的我们也可以把安全区域看作被扩展拉伸了的安全点当用户线程执行到安全区域里面的代码时首先会标识自己已经进入了安全区域那样当这段时间里虚拟机要发起垃圾收集时就不必去管这些已声明自己在安全区域内的线程了当线程要离开安全区域时它要检查虚拟机是否已经完成了根节点枚举或者垃圾收集过程中其他需要暂停用户线程的阶段如果完成了那线程就当作没事发生过继续执行否则它就必须一直等待直到收到可以离开安全区域的信号为止当一个线程执行到安全区域时它会标识自己已经进入了安全区域需要发起时它完全不需要关心已经处于安全区域内的线程当这些线程要离开安全区域时它必须检查是否已经完成如果尚未完成它必须等待直到完全结束后才能离开记忆集与卡表跨代引用假设发生了一次只针对年轻代的但是老年代中的对象可能引用了年轻代的对象那么这些被引用的对象是不能回收的因此采用了记忆集来记录这种引用关系记忆集记忆集是一种抽象数据结构用于记录从非收集区域指向收集区域的指针的集合即上述假设中从老年代指向年轻代的引用精度记忆集只是一种抽象概念它可以通过多种数据结构实现实现不同的记录精度字长精度记录精确的机器字长地址该字包含跨代指针对象精度记录包含跨代引用的整个对象该对象里有字段含有跨代指针卡精度这是最常用的也就是下面要讲的卡表该区域内的对象里有字段含有跨代指针卡表字节数组的每一个元素都对应着其标识的内存区域中一块特定大小的内存块这个内存块被称作卡页一般来说卡页大小都是以的次幂的字节数通过上面代码可以看出中使用的卡页是的次幂即字节地址右移位相当于用地址除以那如果卡表标识内存区域的起始地址是的话数组的第号元素分别对应了地址范围为的卡页内存块一个卡页的内存中通常包含不止一个对象只要卡页内有一个或更多对象的字段存在着跨代指针那就将对应卡表的数组元素的值标识为称为这个元素变脏没有则标识为在垃圾收集发生时只要筛选出卡表中变脏的元素就能轻易得出哪些卡页内存块中包含跨代指针把它们加入中一并扫描写屏障在创建卡表将整个堆内存划分成很多个连续的大小固定的卡页比如每个卡页是字节这些卡页的集合就是卡表通常是一个字节数组然后在当程序执行过程中只要有更新对象字段的操作例如并且这个操作有可能产生跨代引用比如让一个老年代对象引用了一个年轻代对象就会在写操作之后执行一个写屏障写屏障在程序执行特定操作通常是对象引用写入时自动执行的额外代码它与中的切面编程类似一旦对象增加引用就会自动触发写屏障意味着在程序运行中如果有一个老年代的对象引用了年轻代的对象就会触发写后屏障写后屏障查询老年代位于哪个卡页然后将卡表中的该卡页条目置为脏卡伪共享伪共享是计算机体系结构中的一个概念与缓存有关缓存行从主内存中读取数据时不是按字节读取而是按一块固定大小的数据块来读取这个块称为缓存行常见的大小是字节核心问题如果两个无关的变量例如变量和变量恰好位于同一个字节的缓存行上那么线程在核心上运行只想修改变量线程在核心上运行只想修改变量根据缓存一致性协议如当一个核心修改了缓存行中的任何数据都会导致其他核心中整个缓存行失效需要重新从内存或缓存中加载尽管线程和线程修改的是不同的变量但它们却因为共享同一个缓存行而互相干扰导致缓存频繁失效性能急剧下降这种现象就是伪共享因此如果一个缓存行为而一个卡表元素为意味着可以存元素个数分页大小的卡页大小如果不同线程的更新刚好位于这一个卡页内就会频繁出现缓存失效的问题解决方法条件检查和卡表填充条件检查更新卡表前需要先检查脏标记是否已经为脏条件写屏障伪代码先检查条件满足才标记但是如果两个线程同时去对一个卡表位置写脏此时会发生检查操作本身就需要读取缓存行两个线程都要先执行这需要将包含该卡表条目的缓存行加载到它们各自的核心缓存中即使检查失败写操作也可能发生如果两个线程都看到该卡表条目是干净它们都会执行接下来的写操作写操作会导致缓存行失效当一个线程例如核心成功写入后根据协议该缓存行在另一个线程核心的缓存中会立即失效变为已修改状态核心需要重新加载失效的缓存行这会导致缓存未命中必须从更慢的缓存或主内存中重新加载数据从而造成延迟虽然条件检查不能避免伪共享但是依然带来两个好处减少缓存污染如果一个卡表条目已经被标记为脏了条件屏障会跳过后续的写入操作这避免了多个线程反复地对同一个已经是脏状态的缓存行进行写入虽然第一次写入已经造成了伪共享但后续的写入可以避免这仍然能减少总线的流量和缓存同步的压力提升应用线程速度写屏障是嵌入在应用程序的每一次对象字段写操作之后的额外开销如果卡表已经是脏的跳过写入操作可以节省掉一次内存存储的开销让应用线程的执行速度更快一些卡表填充通过增加无用的填充字节人为地将可能会被不同线程并发修改的卡表元素隔离到不同的缓存行假设缓存行是字节我们可以这样设计卡表不是存储一个缓存行而是存储填充字节填充字节填充字节这样每个卡表元素都独占一个缓存行一个线程修改永远不会影响另一个线程修改因为它们在不同的缓存行上通过条件检查和卡表填充相互组合来完成卡表更新工作流程写操作拦截程序运行中一个老年代对象的字段被修改指向了一个年轻代对象写屏障被触发它发现位于老年代而在年轻代这是一个跨代引用写屏障查询的地址计算出它属于哪个卡页然后将卡表中对应该卡页的条目标记为脏卡触发年轻代区满了需要触发在根节点枚举阶段器除了从传统的栈静态变量等开始遍历还会加入一个额外的根集合脏卡对应的内存区域扫描脏卡器并不扫描整个老年代而是只扫描那些被标记为脏的卡页它会遍历这些脏卡页中的每一个对象比如然后把这些对象当作额外的然后从这些根出发去遍历它们引用的对象比如从找到如果被引用那么它就会被标记为存活不会被回收清理卡表在结束后可能会清理卡表中的脏标记位为下一轮记录做准备并发的可达性分析所有标记算法都必须依靠可达性分析算法来判断对象是否存活而可达性分析又依赖于一致性快照意味着在标记时必须而这一时间与堆的大小成正比为了减少这一停顿提出了三色标记算法三色标记算法除之外的所有对象都被标记为三种颜色白色表示对象尚未被垃圾收集器访问过显然在可达性分析刚刚开始的阶段所有的对象都是白色的若在分析结束的阶段仍然是白色的对象即代表不可达黑色表示对象已经被垃圾收集器访问过且这个对象的所有引用都已经扫描过黑色的对象代表已经扫描过它是安全存活的如果有其他对象引用指向了黑色对象无须重新扫描一遍黑色对象不可能直接不经过灰色对象指向某个白色对象灰色表示对象已经被垃圾收集器访问过但这个对象上至少存在一个引用还没有被扫描过三色标记法会带来两个问题浮动垃圾和对象消失浮动垃圾当三色标记和用户线程并行时有黑色节点新指向白色节点由于黑色不会重新扫描意味着白色节点在本次中存活出现浮动垃圾可以容忍下次时有机会清理对象消失赋值器插入了一条或多条从黑色对象到白色对象的新引用赋值器删除了全部从灰色对象到该白色对象的直接或间接引用如下图所示就会导致原本应该存活的节点被标记为白色导致了对象被错误回收为此我们有两种解决方法分别为增量更新和原始快照增量更新增量更新要破坏的是第一个条件当黑色对象插入新的指向白色对象的引用关系时就将这个新插入的引用记录下来等并发扫描结束之后再将这些记录过的引用关系中的黑色对象为根重新扫描一次这可以简化理解为黑色对象一旦新插入了指向白色对象的引用之后它就变回灰色对象了原始快照原始快照要破坏的是第二个条件当灰色对象要删除指向白色对象的引用关系时就将这个要删除的引用记录下来在并发扫描结束之后再将这些记录过的引用关系中的灰色对象为根重新扫描一次这也可以简化理解为无论引用关系删除与否都会按照刚刚开始扫描那一刻的对象图快照来进行搜索这两种方案都是通过写屏障来实现的在虚拟机中增量更新和原始快照这两种解决方案都有实际应用譬如是基于增量更新来做并发标记的则是用原始快照来实现经典垃圾收集器如果两个收集器之间存在连线就说明它们可以搭配使用上图中收集器所处的区域则表示它是属于新生代收集器抑或是老年代收集器收集器顾名思义就是串行收集器不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作更重要的是强调在它进行垃圾收集时必须暂停其他所有工作线程直到它收集结束新生代采用标记复制算法老年代采用标记整理算法虚拟机的设计者们当然知道带来的不良用户体验所以在后续的垃圾收集器设计中停顿时间在不断缩短仍然还有停顿寻找最优秀的垃圾收集器的过程仍然在继续但是收集器有没有优于其他垃圾收集器的地方呢当然有它简单而高效与其他收集器的单线程相比收集器由于没有线程交互的开销自然可以获得很高的单线程收集效率收集器对于运行在模式下的虚拟机来说是个不错的选择收集器其实就是收集器的多线程版本除了使用多线程进行垃圾收集外其余行为控制参数收集算法回收策略等等和收集器完全一样新生代采用标记复制算法老年代采用标记整理算法它是许多运行在模式下的虚拟机的首要选择除了收集器外只有它能与收集器真正意义上的并发收集器后面会介绍到配合工作并行和并发概念补充并行指多条垃圾收集线程并行工作但此时用户线程仍然处于等待状态并发指用户线程与垃圾收集线程同时执行但不一定是并行可能会交替执行用户程序在继续运行而垃圾收集器运行在另一个上收集器的特点是它的关注点与其他收集器不同等收集器的关注点是尽可能地缩短垃圾收集时用户线程的停顿时间而收集器的目标则是达到一个可控制的吞吐量所谓吞吐量就是处理器用于运行用户代码的时间与处理器总消耗时间的比值即吞吐量用户代码运行时间用户代码运行时间收集时间收集器关注点是吞吐量高效率的利用等垃圾收集器的关注点更多的是用户线程的停顿时间提高用户体验所谓吞吐量就是中用于运行用户代码的时间与总消耗时间的比值收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量如果对于收集器运作不太了解手工优化存在困难的时候使用收集器配合自适应调节策略把内存管理优化交给虚拟机去完成也是一个不错的选择新生代采用标记复制算法老年代采用标记整理算法收集器的老年代版本它同样是一个单线程收集器它主要有两大用途一种用途是在以及以前的版本中与收集器搭配使用另一种用途是作为收集器的后备方案收集器的老年代版本使用多线程和标记整理算法在注重吞吐量以及资源的场合都可以优先考虑收集器和收集器从名字中的这两个词可以看出收集器是一种标记清除算法实现的它的运作过程相比于前面几种垃圾收集器来说更加复杂一些整个过程分为四个步骤初始标记短暂停顿标记直接与相连的对象根对象并发标记同时开启和用户线程用一个闭包结构去记录可达对象但在这个阶段结束这个闭包结构并不能保证包含当前所有的可达对象因为用户线程可能会不断的更新引用域所以线程无法保证可达性分析的实时性所以这个算法里会跟踪记录这些发生引用更新的地方重新标记重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录这个阶段的停顿时间一般会比初始标记阶段的时间稍长远远比并发标记阶段时间短并发清除开启用户线程同时线程开始对未标记的区域做清扫优点并发收集低停顿缺点对资源敏感无法处理浮动垃圾导致它使用的回收算法标记清除算法会导致收集结束时会有大量空间碎片产生可能原因及方案原因触发太晚方案将调小达到百分比进行垃圾回收原因空间碎片太多方案开启空间碎片整理并将空间碎片整理周期设置在合理范围空间碎片整理原因垃圾产生速度超过清理速度晋升阈值过小空间过小导致溢出区过小导致晋升速率提高存在大对象垃圾回收器在中已经被标记为过时并在中被移除特点并行与并发能充分利用多核环境下的硬件优势使用多个或者核心来缩短停顿时间部分其他收集器原本需要停顿线程执行的动作收集器仍然可以通过并发的方式让程序继续执行分代收集虽然可以不需要其他收集器配合就能独立管理整个堆但是还是保留了分代的概念空间整合与的标记清除算法不同从整体所有之和来看是基于标记整理算法实现的收集器从局部上两个之间来看是基于标记复制算法实现的可预测的停顿这是相对于的另一个大优势降低停顿时间是和共同的关注点但除了追求低停顿外还能建立可预测的停顿时间模型能让使用者明确指定在一个长度为毫秒的时间片段内消耗在垃圾收集上的时间不得超过毫秒工作流程初始标记短暂停顿标记从可直接引用的对象即标记所有直接可达的活跃对象并发标记与应用并发运行标记所有可达对象这一阶段可能持续较长时间取决于堆的大小和对象的数量最终标记短暂停顿处理并发标记阶段结束后残留的少量未处理的引用变更筛选回收根据标记结果选择回收价值高的区域复制存活对象到新区域回收旧区域内存这一阶段包含一个或多个停顿具体取决于回收的复杂度收集器在后台维护了一个优先列表每次根据允许的收集时间优先选择回收价值最大的这也就是它的名字的由来这种使用划分内存空间以及有优先级的区域回收方式保证了收集器在有限时间内可以尽可能高的收集效率把内存化整为零从开始垃圾收集器成为了默认的垃圾收集器低延迟与和类似也采用标记复制算法不过对该算法做了重大改进可以将暂停时间控制在几毫秒以内且暂停时间不受堆内存大小的影响出现的情况会更少但代价是牺牲了一些吞吐量最大支持的堆内存在中引入处于试验阶段经过多个版本的迭代不断的完善和修复问题在已经可以正式使用了不过默认的垃圾回收器依然是你可以通过下面的参数启用在中引入了分代暂停时间可以缩短到毫秒以内你可以通过下面的参数启用分代',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-09-10 19:20:02',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">Hexo</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> Newest Comments</span></div><div class="aside-list"><span>loading...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 1.05rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 1.05rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 1.05rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.05rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>Archives</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">October 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">September 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">August 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">28</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/" itemprop="url">Java</a><i class="anzhiyufont anzhiyu-icon-angle-right post-meta-separator"></i><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/JVM/" itemprop="url">JVM</a></span><span class="article-meta tags"></span></div></div><h1 class="post-title" itemprop="name headline">JVM垃圾收集器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-08-12T17:55:16.000Z" title="Created 2025-08-13 01:55:16">2025-08-13</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-09-10T11:20:02.145Z" title="Updated 2025-09-10 19:20:02">2025-09-10</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为长沙"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>长沙</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/"><header><a class="post-meta-categories" href="/categories/Java/" itemprop="url">Java</a><a class="post-meta-categories" href="/categories/Java/JVM/" itemprop="url">JVM</a><h1 id="CrawlerTitle" itemprop="name headline">JVM垃圾收集器</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">John Doe</span><time itemprop="dateCreated datePublished" datetime="2025-08-12T17:55:16.000Z" title="Created 2025-08-13 01:55:16">2025-08-13</time><time itemprop="dateCreated datePublished" datetime="2025-09-10T11:20:02.145Z" title="Updated 2025-09-10 19:20:02">2025-09-10</time></header><h1 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h1><h2 id="对象死亡的判断方法"><a href="#对象死亡的判断方法" class="headerlink" title="对象死亡的判断方法"></a>对象死亡的判断方法</h2><h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。</p>
+<p><strong>缺点</strong>：单纯的引用计数就很难解决对象之间相互循环引用的问题。如 objA.instance &#x3D; objB; objB.instance &#x3D; objA;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReferenceCountingGC</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        testGC();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">Object</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">_1MB</span> <span class="operator">=</span> <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 这个成员属性的唯一意义就是占点内存，以便能在GC日志中看清楚是否有回收过</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">byte</span>[] bigSize = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">2</span> * _1MB];</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testGC</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">ReferenceCountingGC</span> <span class="variable">objA</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReferenceCountingGC</span>();</span><br><span class="line">        <span class="type">ReferenceCountingGC</span> <span class="variable">objB</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReferenceCountingGC</span>();</span><br><span class="line">        objA.instance = objB;</span><br><span class="line">        objB.instance = objA;</span><br><span class="line">        objA = <span class="literal">null</span>;</span><br><span class="line">        objB = <span class="literal">null</span>;</span><br><span class="line"><span class="comment">// 假设在这行发生GC，objA和objB是否能被回收？</span></span><br><span class="line">        System.gc();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在VM加上参数<code>-Xlog:gc*</code>或者<code>-XX:+PrintGCDetails</code>可以看到</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[0.099s][info   ][gc,heap        ] GC(0) Eden regions: 2-&gt;0(1)</span><br><span class="line">[0.099s][info   ][gc,heap        ] GC(0) Survivor regions: 0-&gt;0(0)</span><br><span class="line">[0.099s][info   ][gc,heap        ] GC(0) Old regions: 0-&gt;2</span><br><span class="line">[0.099s][info   ][gc,heap        ] GC(0) Archive regions: 0-&gt;0</span><br><span class="line">[0.099s][info   ][gc,heap        ] GC(0) Humongous regions: 4-&gt;0</span><br><span class="line">[0.099s][info   ][gc,metaspace   ] GC(0) Metaspace: 480K(640K)-&gt;480K(640K) NonClass: 451K(512K)-&gt;451K(512K) Class: 29K(128K)-&gt;29K(128K)</span><br><span class="line">[0.099s][info   ][gc             ] GC(0) Pause Full (System.gc()) 12M-&gt;0M(14M) 3.277ms</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Pause <span class="title function_">Full</span> <span class="params">(System.gc()</span>) 12M-&gt;0M(14M)</span><br><span class="line">[GC类型] ([触发原因]) [GC前堆使用量] -&gt; [GC后堆使用量]([当前堆总容量])</span><br></pre></td></tr></table></figure>
+
+<p>这两个对象实际上还是被回收了，说明JVM用的不是引用计数法判断对象是否存活。</p>
+<h3 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h3><p>通过一系列称为“GC Roots”的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为“引用链”（Reference Chain），如果某个对象到GC Roots间没有任何引用链相连，或者用图论的话来说就是从GC Roots到这个对象不可达时，则证明此对象是不可能再被使用的。</p>
+<p>下图的Object5，Object6，Object7没有GC Roots能够到达，因此这三个对象已经死亡。</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509031554343.png" alt="image-20250903155357181" style="zoom:50%;" />
+
+<p><strong>哪些对象可以作为 GC Roots 呢？</strong></p>
+<ul>
+<li>虚拟机栈(栈帧中的局部变量表)中引用的对象</li>
+<li>本地方法栈(Native 方法)中引用的对象</li>
+<li>方法区中类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>所有被同步锁持有的对象</li>
+<li>JNI（Java Native Interface）引用的对象</li>
+</ul>
+<p><strong>对象可以被回收，就代表一定会被回收吗</strong></p>
+<ul>
+<li><strong>可以回收 (Eligible for Collection)</strong>：这是一个<strong>状态</strong>。当垃圾收集器进行可达性分析后，发现某个对象到GC Roots没有任何引用链，就从逻辑上判定该对象已经“死亡”，不再被使用。此时，对象就进入了“可以被回收”的状态。<strong>这是程序逻辑上的确定性。</strong></li>
+<li><strong>一定回收 (Will be Collected)</strong>：这是一个<strong>动作</strong>。即使对象已经被判定为垃圾，垃圾收集器<strong>也不一定会立即</strong>执行回收动作。何时回收、是否回收，取决于GC器的具体实现、触发条件和工作策略。<strong>这是执行时机上的不确定性。</strong></li>
+</ul>
+<p> <strong>finalize() 方法</strong></p>
+<p>如果一个类重写了 <code>finalize()</code> 方法，那么它的对象回收过程会变得非常特殊且缓慢：</p>
+<ol>
+<li>第一次GC时，JVM发现它不可达，会把它放入一个叫 <code>F-Queue</code> 的队列，但<strong>不会立即回收它</strong>。</li>
+<li>由一个低优先级的 <code>Finalizer</code> 线程去慢慢执行队列中各个对象的 <code>finalize()</code> 方法。</li>
+<li>执行完后，对象<strong>仍然处于不可达状态</strong>， then 需要等到<strong>下一次GC</strong>时才会被真正回收。<br>这意味着一个本可回收的对象，至少会​<strong>​熬过两次GC​</strong>​才会被真正释放。正因为这种巨大的不确定性和性能风险，<code>finalize()</code> 方法已被官方标记为弃用。</li>
+</ol>
+<blockquote>
+<p>JDK9之后，JEP421中，finalize()方法已经被弃用</p>
+</blockquote>
+<h2 id="引用的概念"><a href="#引用的概念" class="headerlink" title="引用的概念"></a>引用的概念</h2><p>无论是通过引用计数法判断对象引用数量，还是通过可达性分析法判断对象的引用链是否可达，判定对象的存活都与“引用”有关。</p>
+<p>JDK1.2 之前，Java 中引用的定义很传统：如果 reference 类型的数据存储的数值代表的是另一块内存的起始地址，就称这块内存代表一个引用。</p>
+<p>JDK1.2 以后，Java 对引用的概念进行了扩充，将引用分为强引用、软引用、弱引用、虚引用四种（引用强度逐渐减弱），强引用就是 Java 中普通的对象，而软引用、弱引用、虚引用在 JDK 中定义的类分别是 <code>SoftReference</code>、<code>WeakReference</code>、<code>PhantomReference</code>。</p>
+<h3 id="强引用"><a href="#强引用" class="headerlink" title="强引用"></a>强引用</h3><p>以代码<code>Object o = new Obejct();</code>为例，指在程序代码之中普遍存在的引用赋值。无论任何情况下，只要强引用关系还存在，垃圾收集器就永远不会回收掉被引用的对象。</p>
+<p><strong>用途</strong>：绝大部分的对象引用。</p>
+<h3 id="软引用"><a href="#软引用" class="headerlink" title="软引用"></a>软引用</h3><p>它是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知。在JDK 1.2版之后提供了<code>PhantomReference</code>类来实现虚引用。</p>
+<p><strong>用途</strong>：<strong>实现内存敏感的缓存</strong>。例如缓存图片、数据等大型对象。缓存的数据可以一直存在，直到需要为新对象腾出空间为止。</p>
+<h3 id="弱引用"><a href="#弱引用" class="headerlink" title="弱引用"></a>弱引用</h3><p>弱引用也是用来描述那些非必须对象，但是它的强度比软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生为止。当垃圾收集器开始工作，无论当前内存是否足够，都会回收掉只被弱引用关联的对象。在JDK 1.2版之后提供了<code>WeakReference</code>类来实现弱引用。</p>
+<p><strong>用途</strong>：</p>
+<ol>
+<li><strong>实现规范化映射（Canonicalizing Mappings）</strong>，如 <code>WeakHashMap</code>。它的键是弱引用的，一旦键对象没有其他强引用，它就可以被GC回收，对应的键值对也会从Map中自动移除。</li>
+<li>用于监控对象是否已被回收。</li>
+</ol>
+<h3 id="虚引用"><a href="#虚引用" class="headerlink" title="虚引用"></a>虚引用</h3><p>它是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知。在JDK 1.2版之后提供了<code>PhantomReference</code>类来实现虚引用。</p>
+<p><strong>完全不会</strong>影响对象的生命周期。你甚至无法通过 <code>PhantomReference.get()</code> 方法获取到原始对象（该方法总是返回 <code>null</code>）。<strong>如果一个对象仅被虚引用关联，那么它可以在任何时候被GC回收，就像没有引用一样。</strong></p>
+<p><strong>用途</strong>：<strong>用于跟踪对象被垃圾收集的时机</strong>。当GC准备回收一个对象时，如果发现它还有虚引用，就会在回收它<strong>之后</strong>，把这个虚引用加入到与之关联的 <code>ReferenceQueue</code> 中。程序通过监控这个队列，就能知道某个对象何时被回收了。</p>
+<h3 id="引用队列（ReferenceQueue）"><a href="#引用队列（ReferenceQueue）" class="headerlink" title="引用队列（ReferenceQueue）"></a>引用队列（ReferenceQueue）</h3><ul>
+<li>软引用、弱引用和虚引用都可以在创建时关联一个 <code>ReferenceQueue</code>。</li>
+<li>当被引用对象<strong>被垃圾回收器处理之后</strong>，这个引用对象本身（如 <code>WeakReference</code> 实例）就会被加入到这个队列中。</li>
+<li>程序可以通过监控这个队列，来了解哪些对象已经被回收，从而执行一些后续的清理工作（例如，从缓存映射中移除对应的条目）。</li>
+</ul>
+<h2 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h2><h4 id="字符常量池"><a href="#字符常量池" class="headerlink" title="字符常量池"></a>字符常量池</h4><p><strong>在JDK 7及以后版本，字符串常量池从永久代（PermGen）移到了Java堆（Heap）中</strong>，因此字符串常量池中的字符串也会被回收。</p>
+<p>假如在字符串常量池中存在字符串 “abc”，如果当前没有任何 String 对象引用该字符串常量的话，就说明常量 “abc” 就是废弃常量，如果这时发生内存回收的话而且有必要的话，”abc” 就会被系统清理出常量池了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 在堆中创建一个字符串对象，s1是强引用</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">s1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(<span class="string">&quot;Hello&quot;</span>); </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 2. 调用intern，将堆中&quot;Hello&quot;对象的引用添加到字符串常量池</span></span><br><span class="line">    s1.intern();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3. 将s1强引用置为null，此时&quot;Hello&quot;对象只剩下字符串常量池的一个引用</span></span><br><span class="line">    s1 = <span class="literal">null</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4. 此时，如果程序后续再也没有其他地方使用过&quot;Hello&quot;这个字面量或intern值，</span></span><br><span class="line">    <span class="comment">//    那么常量池中对&quot;Hello&quot;对象的引用就变成了“孤悬”的。</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 5. 触发GC，GC会发现这个引用不再被任何GC Roots间接或直接到达，于是将其回收。</span></span><br><span class="line">    System.gc(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>intern()方法</strong></p>
+<p>intern()方法会返回字符串常量池</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(<span class="string">&quot;Hello&quot;</span>); <span class="comment">// s1 指向堆中的对象，首先会在常量池中创建一个Hello字符串，然后在堆中创建一个对象，s1指向堆中的对象地址</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// s2 指向常量池中的 &quot;Hello&quot;</span></span><br><span class="line"><span class="type">String</span> <span class="variable">s2</span> <span class="operator">=</span> <span class="string">&quot;Hello&quot;</span>; </span><br><span class="line"></span><br><span class="line"><span class="comment">// s1 == s2 会是 false，因为 s1 和 s2 是两个不同的对象</span></span><br><span class="line">System.out.println(s1 == s2); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用 intern() 方法</span></span><br><span class="line"><span class="type">String</span> <span class="variable">s3</span> <span class="operator">=</span> s1.intern();</span><br><span class="line"></span><br><span class="line"><span class="comment">// s3 == s2 会是 true</span></span><br><span class="line"><span class="comment">// 因为 s1.intern() 将堆中的 &quot;Hello&quot; 加入常量池（如果不存在），并返回常量池中 &quot;Hello&quot; 的引用</span></span><br><span class="line"><span class="comment">// s2 也指向常量池中的 &quot;Hello&quot;，所以它们是同一个对象</span></span><br><span class="line">System.out.println(s3 == s2); </span><br><span class="line"></span><br><span class="line"><span class="comment">// s1 == s3 会是 false</span></span><br><span class="line"><span class="comment">// s1 仍然指向堆中的对象，而 s3 指向常量池中的对象</span></span><br><span class="line">System.out.println(s1 == s3);</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h4><p>运行时常量池在JDK8之后被移到元空间中，主要回收的是类的类型，那么如何判断一个类是无用的类的呢？</p>
+<p>判定一个常量是否是“废弃常量”比较简单，而要判定一个类是否是“无用的类”的条件则相对苛刻许多。类需要同时满足下面 3 个条件才能算是 <strong>“无用的类”</strong>：</p>
+<ul>
+<li>该类所有的实例都已经被回收，也就是 Java 堆中不存在该类的任何实例。</li>
+<li>加载该类的 <code>ClassLoader</code> 已经被回收。</li>
+<li>该类对应的 <code>java.lang.Class</code> 对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。</li>
+</ul>
+<p>虚拟机可以对满足上述 3 个条件的无用类进行回收，这里说的仅仅是“可以”，而并不是和对象一样不使用了就会必然被回收</p>
+<hr>
+<h1 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>它是最基础的收集算法，是因为后续的收集算法大多都是以标记-清除算法为基础，对其缺点进行改进而得到的。</p>
+<p><strong>主要缺点</strong>：第一个是执行效率不稳定，如果Java堆中包含大量对象，而且其中大部分是需要被回收的，这时必须进行大量标记和清除的动作，导致标记和清除两个过程的执行效率都随对象数量增长而降低；第二个是内存空间的碎片化问题，标记、清除之后会产生大量不连续的内存碎片。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032115033.png" alt="image-20250903211549956"></p>
+<h2 id="标记-复制算法"><a href="#标记-复制算法" class="headerlink" title="标记-复制算法"></a>标记-复制算法</h2><p>它可以将内存分为大小相同的两块，每次使用其中的一块。当这一块的内存使用完后，就将还存活的对象复制到另一块去，然后再把使用的空间一次清理掉。这样就使每次的内存回收都是对内存区间的一半进行回收。</p>
+<p><strong>主要缺点</strong>：</p>
+<ul>
+<li>这种复制回收算法的代价是将可用内存缩小为了原来的一半</li>
+<li>不适用于老年代，如果对象很大，则性能很差</li>
+</ul>
+<p><strong>Apple式回收</strong>：Appel式回收的具体做法是把新生代分为一块较大的Eden空间和两块较小的Survivor空间，每次分配内存只使用Eden和其中一块Survivor。发生垃圾搜集时，将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上，然后直接清理掉Eden和已用过的那块Survivor空间。HotSpot虚拟机默认Eden和Survivor的大小比例是8∶1，也即每次新生代中可用内存空间为整个新生代容量的90%（Eden的80%加上一个Survivor的10%），只有一个Survivor空间，即10%的新生代是会被“浪费”的。当然，98%的对象可被回收仅仅是“普通场景”下测得的数据，任何人都没有办法百分百保证每次回收都只有不多于10%的对象存活，因此Appel式回收还有一个充当罕见情况的“逃生门”的安全设计，当Survivor空间不足以容纳一次MinorGC之后存活的对象时，就需要依赖其他内存区域（实际上大多就是老年代）进行分配担保（Handle Promotion）。</p>
+<p>同时依赖于动态年龄阈值算法，让Survivor中占用空间超过一半的对象年龄作为阈值，当年龄大于阈值时，直接进入老年代。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032120988.png" alt="image-20250903212005899"></p>
+<h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h2><p>根据老年代的特点提出的一种标记算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象回收，而是让所有存活的对象向一端移动，然后直接清理掉端边界以外的内存。标记-清除算法与标记-整理算法的本质差异在于前者是一种非移动式的回收算法，而后者是移动式的。是否移动回收后的存活对象是一项优缺点并存的风险决策。</p>
+<p><strong>主要缺点</strong>：</p>
+<ul>
+<li><p>因为多了整理的步骤，因此效率也不高，适合老年代这种垃圾回收频率不是很高的场景。</p>
+</li>
+<li><p>由于标记-整理的整理移动[^2]需要STW（Stop-The-World），需要暂停所有线程，因此效率低下。</p>
+</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032121750.png"></p>
+<p>[^2]: 通常标记-清除算法也是需要停顿用户线程来标记、清理可回收对象的。问题不在于清除部分（清除部分没有线程会重新访问可回收的对象，此时不存在并发问题），而在于标记部分，1）会导致浮动垃圾：GC线程已经标记完了对象A和它引用的对象B。然后，用户线程断开了A指向B的引用。<strong>结果</strong>：对象B实际上已经死了，但因为已经被标记为存活，所以本次GC不会回收它。它成了“浮动垃圾”，只能等到下次GC才能被清理。<strong>这是可以接受的</strong>；2）GC线程在遍历对象图时，访问了一个对象O，发现它没有指向任何其他对象（比如 <code>obj.field = null</code>），于是GC线程继续往前走。<strong>就在这个时候</strong>，用户线程执行了 <code>obj.field = anotherObj</code>，建立了一个新的引用关系。<strong>结果</strong>：这个新引用的 <code>anotherObj</code> 对象，因为GC线程已经完成了对它的父对象的检查，所以<strong>它不会被标记为存活</strong>。即使现在有活跃的用户线程正在访问它，它也会在后续的清理阶段被错误地回收！这会导致程序访问一个不存在的对象，引发不可预知的崩溃。<strong>这是绝对无法接受的！</strong></p>
+<h2 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h2><p>当前虚拟机的垃圾收集都采用分代收集算法，这种算法没有什么新的思想，只是根据对象存活周期的不同将内存分为几块。一般将 Java 堆分为新生代和老年代，这样我们就可以根据各个年代的特点选择合适的垃圾收集算法。</p>
+<p>比如在新生代中，每次收集都会有大量对象死去，所以可以选择“复制”算法，只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择“标记-清除”或“标记-整理”算法进行垃圾收集。</p>
+<h2 id="HotSpot实现细节"><a href="#HotSpot实现细节" class="headerlink" title="HotSpot实现细节"></a>HotSpot实现细节</h2><h3 id="根节点枚举"><a href="#根节点枚举" class="headerlink" title="根节点枚举"></a>根节点枚举</h3><p><strong>根节点枚举是垃圾收集过程中的第一步，它的任务是找出所有“GC Roots”对象</strong>。</p>
+<p><strong>GC Roots（根节点）</strong> 是一组<strong>必须存活</strong>的对象引用，它们是遍历对象图的起点。如果一个对象被GC Roots直接或间接地引用着，那它就是存活的；否则，它就是可回收的垃圾。</p>
+<table>
+<thead>
+<tr>
+<th align="left">GC Roots 类别</th>
+<th align="left">具体例子</th>
+<th align="left">为什么必须是根？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>虚拟机栈中的引用</strong></td>
+<td align="left">各个线程的方法栈帧中的局部变量、参数等。</td>
+<td align="left">这代表了程序<strong>正在执行</strong>的上下文，这些对象必须存活。</td>
+</tr>
+<tr>
+<td align="left"><strong>本地方法栈中的引用</strong></td>
+<td align="left">JNI（Java Native Interface）引用的对象。</td>
+<td align="left">native方法正在使用的对象，必须存活。</td>
+</tr>
+<tr>
+<td align="left"><strong>方法区中静态引用</strong></td>
+<td align="left">类的静态变量（<code>static</code> fields）。</td>
+<td align="left">类信息是长期存在的，其静态变量自然也不能被回收。</td>
+</tr>
+<tr>
+<td align="left"><strong>方法区中常量引用</strong></td>
+<td align="left">被 <code>final</code> 修饰的常量。</td>
+<td align="left">常量是稳定不变的基础，必须存活。</td>
+</tr>
+<tr>
+<td align="left"><strong>被锁持有的对象</strong></td>
+<td align="left">正在被同步锁（<code>synchronized</code>）持有的对象。</td>
+<td align="left">锁机制依赖的对象，必须存活以保证同步正确性。</td>
+</tr>
+<tr>
+<td align="left"><strong>Java虚拟机内部引用</strong></td>
+<td align="left">基本类型对应的Class对象、系统类加载器等。</td>
+<td align="left">JVM运行的基础，必须存活。</td>
+</tr>
+</tbody></table>
+<h4 id="为什么根节点枚举必须“停顿所有用户线程”？"><a href="#为什么根节点枚举必须“停顿所有用户线程”？" class="headerlink" title="为什么根节点枚举必须“停顿所有用户线程”？"></a>为什么根节点枚举必须“停顿所有用户线程”？</h4><p>这是您问题中最关键的部分。根节点枚举过程<strong>必须在一个能确保一致性的瞬间快照中完成</strong>。但是这个过程在HotSpot中非常快，因为GC Roots的数量相对于整个堆中的对象来说是非常少的，并且现代JVM有高效的优化手段（如使用OopMap数据结构直接记录引用位置），使得停顿时间极短。</p>
+<h3 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h3><p> JVM 并不需要在指令流的任意位置都能进行 GC，它只需要在一些特定的、被称为“安全点”的位置上暂停线程即可。在这些位置上，JVM 能够完整地掌握线程的执行状态。</p>
+<p>如果没有安全点，JVM 要进行 GC 时，它需要：</p>
+<ol>
+<li>向所有线程发出中断信号。</li>
+<li>线程收到信号后，<strong>必须在接收到信号的当下这条指令执行完后，立刻在任意位置暂停</strong>。</li>
+<li>GC 线程开始工作。</li>
+</ol>
+<p>这听起来合理，但实际上有个致命问题：<strong>在任意位置暂停时，JVM 可能无法准确知道当前线程的栈帧和寄存器里哪些是对象引用（GC Roots）</strong>。</p>
+<p>如果采用OopMap来唯一任意时刻的任意指令的根节点枚举，那么维护这个OopMap的代价过大，也不可持续。因此，指令只能在安全点处才能进行GC。<strong>JVM规定了线程只有在执行到安全点时，才能被安全地挂起以进行 GC。在这些位置上，线程的内存状态是确定的、可枚举的。</strong></p>
+<h5 id="安全点的位置："><a href="#安全点的位置：" class="headerlink" title="安全点的位置："></a>安全点的位置：</h5><ol>
+<li><strong>方法调用（Call Instructions）</strong></li>
+<li><strong>循环回边（Loop Backedges）</strong></li>
+<li><strong>异常抛出（Exception Throwing）</strong></li>
+</ol>
+<h5 id="抢先式中断"><a href="#抢先式中断" class="headerlink" title="抢先式中断"></a>抢先式中断</h5><p>先式中断不需要线程的执行代码主动去配合，在垃圾收集发生时，系统首先把所有用户线程全部中断，如果发现有用户线程中断的地方不在安全点上，就恢复这条线程执行，让它一会再重新中断，直到跑到安全点上。现在几乎没有虚拟机实现采用抢先式中断来暂停线程响应GC事件。</p>
+<h5 id="主动式中断"><a href="#主动式中断" class="headerlink" title="主动式中断"></a>主动式中断</h5><p>主动式中断的思想是当垃圾收集需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志位，各个线程执行过程时会不停地主动去轮询这个标志，一旦发现中断标志为真时就自己在最近的安全点上主动中断挂起。轮询标志的地方和安全点是重合的，另外还要加上所有创建对象和其他需要在Java堆上分配内存的地方，这是为了检查是否即将要发生垃圾收集，避免没有足够内存分配新对象。</p>
+<h5 id="内存保护陷阱"><a href="#内存保护陷阱" class="headerlink" title="内存保护陷阱"></a>内存保护陷阱</h5><p>由于轮询操作在代码中会频繁出现，这要求它必须足够高效。HotSpot使用内存保护陷阱的方式，把轮询操作精简至只有一条汇编指令的程度。当需要暂停用户线程时，虚拟机把<code>0x160100</code>的内存页设置为不可读，那线程执行到test指令时就会产生一个自陷异常信号，然后在预先注册的异常处理器中挂起线程实现等待，这样仅通过一条汇编指令便完成安全点轮询和触发线程中断了。</p>
+<h5 id="现代JVM工作流程"><a href="#现代JVM工作流程" class="headerlink" title="现代JVM工作流程"></a>现代JVM工作流程</h5><p>现代 JVM 普遍采用 <strong>“主动式中断”</strong> 策略。它的流程如下：</p>
+<ol>
+<li><p><strong>JVM 发出 GC 请求</strong>：<br>当需要发生 GC 时，JVM 设置一个全局标志位（<code>SafepointSynchronize::_state</code>），表示现在需要进入安全点。</p>
+</li>
+<li><p><strong>线程轮询（Polling）</strong>：</p>
+</li>
+</ol>
+<ul>
+<li>每个线程在运行过程中，会<strong>主动地、频繁地</strong>去检查这个全局标志位。</li>
+<li>但是，它不会在每条指令后都检查，那样开销太大。检查只发生在<strong>即将执行安全点指令</strong>之前（比如方法调用前、循环跳转前）。</li>
+</ul>
+<ol start="3">
+<li><strong>线程响应与挂起</strong>：</li>
+</ol>
+<ul>
+<li><p>当线程执行到安全点指令并准备检查时，如果发现全局标志位已被设置，它就不会继续执行原来的业务逻辑。</p>
+</li>
+<li><p>而是<strong>立即在这个安全点挂起自己</strong>，并记录下自己当前精确的执行状态（包括下一条要执行的指令地址、寄存器值、栈帧等）。</p>
+</li>
+</ul>
+<ol start="4">
+<li><strong>JVM 等待与确认</strong>：</li>
+</ol>
+<ul>
+<li>JVM 等待<strong>所有线程</strong>都成功挂起到最近的安全点上。</li>
+<li>一旦所有线程都挂起，JVM 就获得了整个堆和所有线程栈的一个<strong>一致性的快照</strong>。</li>
+</ul>
+<ol start="5">
+<li><strong>执行 GC</strong>：</li>
+</ol>
+<ul>
+<li>在这个绝对静止的时刻，GC 线程开始工作，进行<strong>根节点枚举</strong>和后续的垃圾回收。</li>
+<li>因为每个线程都停在了安全点，JVM 可以轻松地使用 <strong>OopMap</strong> 来找到每个线程栈帧和寄存器中的对象引用（GC Roots），而无需猜测。</li>
+</ul>
+<ol start="6">
+<li><strong>恢复执行</strong>：<ul>
+<li>•GC 完成后，JVM 清除全局标志位。</li>
+<li>•所有线程被唤醒，从安全点继续执行原来的业务代码。</li>
+</ul>
+</li>
+</ol>
+<h3 id="安全区域"><a href="#安全区域" class="headerlink" title="安全区域"></a>安全区域</h3><p>用户在不可执行的线程下如何进行GC，典型的场景便是用户线程处于<code>Sleep</code>状态或者<code>Blocked</code>状态(<strong>例如处在<code>Thread.sleep()</code>, <code>Object.wait()</code>，或者被IO阻塞</strong>)，这时候线程无法响应虚拟机的中断请求，不能再走到安全的地方去中断挂起自己，虚拟机也显然不可能持续等待线程重新被激活分配处理器时间。</p>
+<p>安全区域是指能够确保在某一段代码片段之中，引用关系不会发生变化，因此，在这个区域中任意地方开始垃圾收集都是安全的。我们也可以把安全区域看作被扩展拉伸了的安全点。</p>
+<p>当用户线程执行到安全区域里面的代码时，首先会标识自己已经进入了安全区域，那样当这段时间里虚拟机要发起垃圾收集时就不必去管这些已声明自己在安全区域内的线程了。当线程要离开安全区域时，它要检查虚拟机是否已经完成了根节点枚举（或者垃圾收集过程中其他需要暂停用户线程的阶段），如果完成了，那线程就当作没事发生过，继续执行；否则它就必须一直等待，直到收到可以离开安全区域的信号为止。</p>
+<ul>
+<li>当一个线程执行到安全区域时，它会<strong>标识自己已经进入了安全区域</strong>。</li>
+<li>JVM需要发起GC时，它<strong>完全不需要关心</strong>已经处于安全区域内的线程。</li>
+<li>当这些线程<strong>要离开安全区域</strong>时，它必须检查GC是否已经完成。如果GC尚未完成，它必须等待，直到GC完全结束后才能离开。</li>
+</ul>
+<h3 id="记忆集与卡表"><a href="#记忆集与卡表" class="headerlink" title="记忆集与卡表"></a>记忆集与卡表</h3><h4 id="跨代引用"><a href="#跨代引用" class="headerlink" title="跨代引用"></a>跨代引用</h4><p>假设发生了一次只针对<strong>年轻代</strong>的 Minor GC，但是<strong>老年代中的对象可能引用了年轻代的对象</strong>，那么这些被引用的对象是不能回收的。因此JVM采用了记忆集来记录这种引用关系。</p>
+<h4 id="记忆集"><a href="#记忆集" class="headerlink" title="记忆集"></a>记忆集</h4><p><strong>记忆集</strong>是一种抽象数据结构，用于记录从<strong>非收集区域</strong>指向<strong>收集区域</strong>的指针的集合，即上述假设中从老年代指向年轻代的引用。</p>
+<p><strong>精度</strong>：记忆集只是一种抽象概念，它可以通过多种数据结构实现，实现不同的记录精度：</p>
+<ul>
+<li><strong>字长精度</strong>：记录精确的机器字长地址，该字包含跨代指针。</li>
+<li><strong>对象精度</strong>：记录包含跨代引用的整个对象，该对象里有字段含有跨代指针。</li>
+<li><strong>卡精度</strong>：这是最常用的，也就是下面要讲的“卡表”，该区域内的对象里有字段含有跨代指针。</li>
+</ul>
+<h4 id="卡表"><a href="#卡表" class="headerlink" title="卡表"></a>卡表</h4><p>字节数组CARD_TABLE的每一个元素都对应着其标识的内存区域中一块特定大小的内存块，这个内存块被称作“卡页”（Card Page）。一般来说，卡页大小都是以2的N次幂的字节数，通过上面代码可以看出HotSpot中使用的卡页是2的9次幂，即512字节（地址右移9位，相当于用地址除以512）。那如果卡表标识内存区域的起始地址是0x0000的话，数组CARD_TABLE的第0、1、2号元素，分别对应了地址范围为0x0000～0x01FF、0x0200～0x03FF、0x0400～0x05FF的卡页内存块。</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032215563.png" alt="image-20250903221550462" style="zoom:50%;" />
+
+<p>一个卡页的内存中通常包含不止一个对象，只要卡页内有一个（或更多）对象的字段存在着跨代指针，那就将对应卡表的数组元素的值标识为1，称为这个元素变脏（Dirty），没有则标识为0。在垃圾收集发生时，只要筛选出卡表中变脏的元素，就能轻易得出哪些卡页内存块中包含跨代指针，把它们加入GC Roots中一并扫描。</p>
+<h3 id="写屏障"><a href="#写屏障" class="headerlink" title="写屏障"></a>写屏障</h3><p>JVM在创建卡表将整个堆内存（Heap）划分成很多个连续的大小固定的“卡页”（Card Page），比如每个卡页是512字节。这些卡页的集合就是“卡表”，通常是一个字节数组（<code>byte[]</code>）。然后在当程序执行过程中，只要有<strong>更新对象字段</strong>的操作（例如 <code>objA.field = objB</code>），并且这个操作有可能产生跨代引用（比如让一个老年代对象引用了一个年轻代对象），JVM就会在写操作之后，执行一个<strong>写屏障</strong><a href="%E5%8C%BA%E5%88%AB%E4%BA%8E%E4%BD%8E%E5%BB%B6%E8%BF%9F%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E2%80%9C%E8%AF%BB%E5%B1%8F%E9%9A%9C%E2%80%9D%E5%92%8C%E2%80%9C%E8%A7%A3%E5%86%B3%E5%B9%B6%E5%8F%91%E4%B9%B1%E5%BA%8F%E9%97%AE%E9%A2%98%E2%80%9D%E7%9A%84%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C%E3%80%82">^3</a>（Write Barrier）。</p>
+<p>写屏障：<strong>在程序执行特定操作（通常是对象引用写入）时自动执行的额外代码</strong>。它与Spring中的AOP切面编程类似，一旦对象增加引用，就会自动触发写屏障。</p>
+<p>意味着在程序运行中，如果有一个老年代的对象引用了年轻代的对象，就会触发<strong>写后屏障</strong>，写后屏障查询老年代位于哪个卡页，然后将卡表中的该卡页条目置为“脏卡”。</p>
+<h4 id="伪共享"><a href="#伪共享" class="headerlink" title="伪共享"></a>伪共享</h4><p>伪共享是计算机体系结构中的一个概念，与CPU缓存有关。</p>
+<ul>
+<li><strong>CPU缓存行（Cache Line）</strong>：CPU从主内存（RAM）中读取数据时，不是按字节读取，而是按一块固定大小的数据块来读取，这个块称为“缓存行”。常见的大小是64字节。</li>
+<li><strong>核心问题</strong>：如果两个无关的变量（例如 <code>变量A</code> 和 <code>变量B</code>）恰好位于同一个64字节的缓存行上，那么：<ul>
+<li>线程1（在CPU核心1上运行）只想修改 <code>变量A</code>。</li>
+<li>线程2（在CPU核心2上运行）只想修改 <code>变量B</code>。</li>
+<li>根据缓存一致性协议（如MESI），当一个核心修改了缓存行中的任何数据，都会导致其他核心中整个缓存行<strong>失效</strong>，需要重新从内存或L3缓存中加载。</li>
+<li>尽管线程1和线程2修改的是不同的变量，但它们却因为共享同一个缓存行而<strong>互相干扰</strong>，导致缓存频繁失效，性能急剧下降。这种现象就是“伪共享”。</li>
+</ul>
+</li>
+</ul>
+<p>因此如果一个缓存行为64B，而一个卡表元素为1B，意味着可以存64（元素个数）*512Bytes（分页大小）&#x3D;32KB的卡页大小，如果不同线程的更新刚好位于这一个卡页内，就会频繁出现缓存失效的问题。</p>
+<p>解决方法：<strong>条件检查</strong>和<strong>卡表填充</strong></p>
+<h5 id="条件检查"><a href="#条件检查" class="headerlink" title="条件检查"></a>条件检查</h5><p>更新卡表前需要先检查脏标记是否已经为脏。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 条件写屏障伪代码</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">post_write_barrier_conditional</span><span class="params">(Object* field, Object new_val)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (card_table[card_index] != DIRTY) &#123; <span class="comment">// 先检查</span></span><br><span class="line">        card_table[card_index] = DIRTY;    <span class="comment">// 条件满足才标记</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，如果两个线程同时去对一个卡表位置写“脏”，此时会发生：</p>
+<ul>
+<li><strong>“检查”操作本身就需要读取缓存行</strong>。两个线程都要先执行 <code>if (card_table[card_index] != DIRTY)</code>。这需要将包含该卡表条目的缓存行加载到它们各自的CPU核心缓存中。</li>
+<li><strong>即使检查失败，写操作也可能发生</strong>。如果两个线程都看到该卡表条目是0（干净），它们都会执行接下来的写操作 <code>card_table[card_index] = DIRTY</code>。</li>
+<li><strong>“写”操作会导致缓存行失效</strong>。当一个线程（例如CPU核心1）成功写入后，根据MESI协议，该缓存行在另一个线程（CPU核心2）的缓存中会立即失效，变为“已修改”状态。</li>
+<li><strong>核心2需要重新加载失效的缓存行</strong>。这会导致缓存未命中（Cache Miss），必须从更慢的L3缓存或主内存中重新加载数据，从而造成延迟。</li>
+</ul>
+<p>虽然条件检查不能避免伪共享，但是依然带来两个好处：</p>
+<ol>
+<li><strong>减少缓存污染（Reduce Cache Pollution）</strong>：<ul>
+<li>如果一个卡表条目已经被标记为脏了，条件屏障会跳过后续的写入操作。</li>
+<li>这避免了多个线程<strong>反复地对同一个已经是脏状态的缓存行进行写入</strong>。虽然第一次写入已经造成了伪共享，但后续的写入可以避免，这仍然能减少总线的流量和缓存同步的压力。</li>
+</ul>
+</li>
+<li><strong>提升应用线程速度</strong>：<ul>
+<li>写屏障是嵌入在应用程序的每一次对象字段写操作之后的<strong>额外开销</strong>。</li>
+<li>如果卡表已经是脏的，跳过写入操作可以节省掉一次内存存储（Memory Store）的开销，让应用线程的执行速度更快一些。</li>
+</ul>
+</li>
+</ol>
+<h5 id="卡表填充"><a href="#卡表填充" class="headerlink" title="卡表填充"></a>卡表填充</h5><p>通过增加无用的填充字节，人为地将可能会被不同线程并发修改的卡表元素<strong>隔离到不同的缓存行</strong>。</p>
+<p>假设缓存行是64字节。我们可以这样设计卡表：</p>
+<ul>
+<li>不是存储 <code>[B0, B1, B2, B3, ..., B63]</code>（一个缓存行）</li>
+<li>而是存储 <code>[B0, 填充63字节], [B1, 填充63字节], [B2, 填充63字节], ...</code></li>
+<li>这样，每个卡表元素 <code>Bx</code> 都独占一个缓存行。一个线程修改 <code>B0</code> 永远不会影响另一个线程修改 <code>B1</code>，因为它们在不同的缓存行上。</li>
+</ul>
+<blockquote>
+<p>JVM通过条件检查和卡表填充相互组合来完成卡表更新。</p>
+</blockquote>
+<h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><ol>
+<li><strong>写操作拦截</strong>：<ul>
+<li>程序运行中，一个老年代对象 <code>OldA</code> 的字段被修改，指向了一个年轻代对象 <code>YoungB</code>：<code>OldA.field = YoungB</code>。</li>
+<li><strong>写屏障</strong> 被触发，它发现 <code>OldA</code> 位于老年代，而 <code>YoungB</code> 在年轻代，这是一个<strong>跨代引用</strong>。</li>
+<li>写屏障查询 <code>OldA</code> 的地址，计算出它属于哪个“卡页”。</li>
+<li>然后将卡表中对应该卡页的条目标记为 <code>1</code>（脏卡）。</li>
+</ul>
+</li>
+<li><strong>Minor GC 触发</strong>：<ul>
+<li>年轻代Eden区满了，需要触发Minor GC。</li>
+<li>在<strong>根节点枚举</strong>阶段，GC器除了从传统的GC Roots（栈、静态变量等）开始遍历，还会加入一个额外的根集合：<strong>脏卡对应的内存区域</strong>。</li>
+</ul>
+</li>
+<li><strong>扫描脏卡</strong>：<ul>
+<li>GC器并不扫描整个老年代，而是<strong>只扫描那些被标记为“脏”的卡页</strong>。</li>
+<li>它会遍历这些脏卡页中的每一个对象（比如 <code>OldA</code>），然后把这些对象<strong>当作额外的GC Roots</strong>。</li>
+<li>然后从这些“根”出发，去遍历它们引用的对象（比如从 <code>OldA</code> 找到 <code>YoungB</code>）。如果 <code>YoungB</code> 被 <code>OldA</code> 引用，那么它就会被标记为存活，不会被回收。</li>
+</ul>
+</li>
+<li><strong>清理卡表</strong>：<ul>
+<li>在GC结束后，JVM可能会清理卡表中的脏标记位，为下一轮记录做准备。</li>
+</ul>
+</li>
+</ol>
+<h3 id="并发的可达性分析"><a href="#并发的可达性分析" class="headerlink" title="并发的可达性分析"></a>并发的可达性分析</h3><p>所有标记算法都必须依靠可达性分析算法来判断对象是否存活，而可达性分析又依赖于一致性快照，意味着在标记时，必须STW（Stop The World），而这一STW时间与堆的大小成正比，为了减少这一停顿，提出了三色标记算法。</p>
+<h4 id="三色标记算法（Tri-Color-Marking）"><a href="#三色标记算法（Tri-Color-Marking）" class="headerlink" title="三色标记算法（Tri-Color Marking）"></a>三色标记算法（Tri-Color Marking）</h4><p>除GC Root之外的所有对象都被标记为三种颜色：</p>
+<ul>
+<li>白色：表示对象尚未被垃圾收集器访问过。显然在可达性分析刚刚开始的阶段，所有的对象都是白色的，若在分析结束的阶段，仍然是白色的对象，即代表不可达。</li>
+<li>黑色：表示对象已经被垃圾收集器访问过，且这个对象的所有引用都已经扫描过。黑色的对象代表已经扫描过，它是安全存活的，如果有其他对象引用指向了黑色对象，无须重新扫描一遍。黑色对象不可能直接（不经过灰色对象）指向某个白色对象。</li>
+<li>灰色：表示对象已经被垃圾收集器访问过，但这个对象上至少存在一个引用还没有被扫描过。</li>
+</ul>
+<p>三色标记法会带来两个问题：<strong>浮动垃圾</strong>和<strong>对象消失</strong>。</p>
+<ul>
+<li>浮动垃圾：当三色标记和用户线程并行时，有黑色节点新指向白色节点，由于黑色不会重新扫描，意味着白色节点在本次GC中存活，出现浮动垃圾（可以容忍，下次GC时有机会清理）。</li>
+<li><strong>对象消失</strong>：1）赋值器插入了一条或多条从黑色对象到白色对象的新引用；2）赋值器删除了全部从灰色对象到该白色对象的直接或间接引用。如下图所示。就会导致原本应该存活的节点被标记为白色，导致了对象被错误回收。为此我们有两种解决方法，分别为增量更新和原始快照。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032242356.png" alt="image-20250903224238272"></p>
+<h4 id="增量更新（Incremental-Update）"><a href="#增量更新（Incremental-Update）" class="headerlink" title="增量更新（Incremental Update）"></a>增量更新（Incremental Update）</h4><p>增量更新要破坏的是第一个条件，当黑色对象插入新的指向白色对象的引用关系时，就将这个新插入的引用记录下来，等并发扫描结束之后，再将这些记录过的引用关系中的黑色对象为根，重新扫描一次。这可以简化理解为，黑色对象一旦新插入了指向白色对象的引用之后，它就变回灰色对象了。</p>
+<h4 id="原始快照（Snapshot-At-The-Beginning，SATB）"><a href="#原始快照（Snapshot-At-The-Beginning，SATB）" class="headerlink" title="原始快照（Snapshot At The Beginning，SATB）"></a>原始快照（Snapshot At The Beginning，SATB）</h4><p>原始快照要破坏的是第二个条件，当灰色对象要删除指向白色对象的引用关系时，就将这个要删除的引用记录下来，在并发扫描结束之后，再将这些记录过的引用关系中的灰色对象为根，重新扫描一次。这也可以简化理解为，无论引用关系删除与否，都会按照刚刚开始扫描那一刻的对象图快照来进行搜索。</p>
+<blockquote>
+<p>这两种方案都是通过写屏障来实现的，在HotSpot虚拟机中，增量更新和原始快照这两种解决方案都有实际应用，譬如，CM S是基于增量更新来做并发标记的，G1、Shenandoah则是用原始快照来实现。</p>
+</blockquote>
+<h2 id="经典垃圾收集器"><a href="#经典垃圾收集器" class="headerlink" title="经典垃圾收集器"></a>经典垃圾收集器</h2><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032257582.png" alt="image-20250903225723505" style="zoom:50%;" />
+
+<p>如果两个收集器之间存在连线，就说明它们可以搭配使用。上图中收集器所处的区域，则表示它是属于新生代收集器抑或是老年代收集器。</p>
+<h3 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h3><p>顾名思义Serial就是串行收集器，不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，必须暂停其他所有工作线程，直到它收集结束。</p>
+<p><strong>新生代采用标记-复制算法，老年代采用标记-整理算法。</strong></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032259994.png" alt="image-20250903225921881"></p>
+<p>虚拟机的设计者们当然知道 Stop The World 带来的不良用户体验，所以在后续的垃圾收集器设计中停顿时间在不断缩短（仍然还有停顿，寻找最优秀的垃圾收集器的过程仍然在继续）。</p>
+<p>但是 Serial 收集器有没有优于其他垃圾收集器的地方呢？当然有，它<strong>简单而高效（与其他收集器的单线程相比）</strong>。Serial 收集器由于没有线程交互的开销，自然可以获得很高的单线程收集效率。Serial 收集器对于运行在 Client 模式下的虚拟机来说是个不错的选择。</p>
+<h3 id="ParNew"><a href="#ParNew" class="headerlink" title="ParNew"></a>ParNew</h3><p>ParNew 收集器其实就是 Serial 收集器的多线程版本，除了使用多线程进行垃圾收集外，其余行为（控制参数、收集算法、回收策略等等）和 Serial 收集器完全一样。</p>
+<p><strong>新生代采用标记-复制算法，老年代采用标记-整理算法。</strong></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032308380.png" alt="image-20250903230830314"></p>
+<p>它是许多运行在 Server 模式下的虚拟机的首要选择，除了 Serial 收集器外，只有它能与 CMS 收集器（真正意义上的并发收集器，后面会介绍到）配合工作。</p>
+<p><strong>并行和并发概念补充：</strong></p>
+<ul>
+<li><strong>并行（Parallel）</strong>：指多条垃圾收集线程并行工作，但此时用户线程仍然处于等待状态。</li>
+<li><strong>并发（Concurrent）</strong>：指用户线程与垃圾收集线程同时执行（但不一定是并行，可能会交替执行），用户程序在继续运行，而垃圾收集器运行在另一个 CPU 上。</li>
+</ul>
+<h3 id="Parallel-Scavenge"><a href="#Parallel-Scavenge" class="headerlink" title="Parallel Scavenge"></a>Parallel Scavenge</h3><p>Parallel Scavenge收集器的特点是它的关注点与其他收集器不同，CM S等收集器的关注点是尽可能地缩短垃圾收集时用户线程的停顿时间，而Parallel Scavenge收集器的目标则是达到一个可控制的吞吐量（Throughput）。所谓吞吐量就是处理器用于运行用户代码的时间与处理器总消耗时间的比值，即：<br>$$<br>吞吐量&#x3D;\frac{用户代码运行时间}{用户代码运行时间+GC收集时间}<br>$$<br>Parallel Scavenge 收集器关注点是吞吐量（高效率的利用 CPU）。CMS 等垃圾收集器的关注点更多的是用户线程的停顿时间（提高用户体验）。所谓吞吐量就是 CPU 中用于运行用户代码的时间与 CPU 总消耗时间的比值。 Parallel Scavenge 收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量，如果对于收集器运作不太了解，手工优化存在困难的时候，使用 Parallel Scavenge 收集器配合自适应调节策略，把内存管理优化交给虚拟机去完成也是一个不错的选择。</p>
+<p><strong>新生代采用标记-复制算法，老年代采用标记-整理算法。</strong></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032307033.png" alt="image-20250903230744969"></p>
+<h3 id="Serial-Old"><a href="#Serial-Old" class="headerlink" title="Serial Old"></a>Serial Old</h3><p><strong>Serial 收集器的老年代版本</strong>，它同样是一个单线程收集器。它主要有两大用途：一种用途是在 JDK1.5 以及以前的版本中与 Parallel Scavenge 收集器搭配使用，另一种用途是作为 CMS 收集器的后备方案。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032310437.png" alt="image-20250903231032386"></p>
+<h3 id="Parallel-Old"><a href="#Parallel-Old" class="headerlink" title="Parallel Old"></a>Parallel Old</h3><p><strong>Parallel Scavenge 收集器的老年代版本</strong>。使用多线程和“标记-整理”算法。在注重吞吐量以及 CPU 资源的场合，都可以优先考虑 Parallel Scavenge 收集器和 Parallel Old 收集器。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032311399.png" alt="image-20250903231110322"></p>
+<h3 id="CMS-Concurrnet-Mark-Sweep"><a href="#CMS-Concurrnet-Mark-Sweep" class="headerlink" title="CMS(Concurrnet Mark Sweep)"></a>CMS(Concurrnet Mark Sweep)</h3><p>从名字中的<strong>Mark Sweep</strong>这两个词可以看出，CMS 收集器是一种 <strong>“标记-清除”算法</strong>实现的，它的运作过程相比于前面几种垃圾收集器来说更加复杂一些。整个过程分为四个步骤：</p>
+<p><strong>初始标记：</strong> 短暂停顿，标记直接与 root 相连的对象（根对象）；</p>
+<p><strong>并发标记：</strong> 同时开启 GC 和用户线程，用一个闭包结构去记录可达对象。但在这个阶段结束，这个闭包结构并不能保证包含当前所有的可达对象。因为用户线程可能会不断的更新引用域，所以 GC 线程无法保证可达性分析的实时性。所以这个算法里会跟踪记录这些发生引用更新的地方。</p>
+<p><strong>重新标记：</strong> 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短</p>
+<p><strong>并发清除：</strong> 开启用户线程，同时 GC 线程开始对未标记的区域做清扫。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032316773.png" alt="image-20250903231656704"></p>
+<p>优点：</p>
+<ul>
+<li>并发收集</li>
+<li>低停顿</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><strong>对 CPU 资源敏感；</strong></li>
+<li><strong>无法处理浮动垃圾，导致<code>Concurrent ModeFailure</code>；</strong></li>
+<li><strong>它使用的回收算法-“标记-清除”算法会导致收集结束时会有大量空间碎片产生。</strong></li>
+</ul>
+<p><code>Concurrent ModeFailure</code>可能原因及方案 ：</p>
+<ul>
+<li><strong>原因1：CMS触发太晚</strong> </li>
+<li>方案：将-XX:CMSInitiatingOccupancyFraction&#x3D;N调小 (达到百分比进行垃圾回收)；</li>
+<li><strong>原因2：空间碎片太多</strong></li>
+<li>方案：开启空间碎片整理，并将空间碎片整理周期设置在合理范围；-XX:+UseCMSCompactAtFullCollection （空间碎片整理） -XX:CMSFullGCsBeforeCompaction&#x3D;n</li>
+<li>**原因3：**垃圾产生速度超过清理速度 晋升阈值过小；Survivor空间过小，导致溢出；Eden区过小，导致晋升速率提高；存在大对象；</li>
+</ul>
+<blockquote>
+<p><strong>CMS 垃圾回收器在 Java 9 中已经被标记为过时(deprecated)，并在 Java 14 中被移除。</strong></p>
+</blockquote>
+<h3 id="G1（Garbage-First）"><a href="#G1（Garbage-First）" class="headerlink" title="G1（Garbage First）"></a>G1（Garbage First）</h3><p>特点：</p>
+<p><strong>并行与并发</strong>：G1 能充分利用 CPU、多核环境下的硬件优势，使用多个 CPU（CPU 或者 CPU 核心）来缩短 Stop-The-World 停顿时间。部分其他收集器原本需要停顿 Java 线程执行的 GC 动作，G1 收集器仍然可以通过并发的方式让 java 程序继续执行。</p>
+<p><strong>分代收集</strong>：虽然 G1 可以不需要其他收集器配合就能独立管理整个 GC 堆，但是还是保留了分代的概念。</p>
+<p><strong>空间整合</strong>：与 CMS 的“标记-清除”算法不同，G1 从整体（所有Region之和）来看是基于“标记-整理”算法实现的收集器；从局部上（两个Region之间）来看是基于“标记-复制”算法实现的。</p>
+<p><strong>可预测的停顿</strong>：这是 G1 相对于 CMS 的另一个大优势，降低停顿时间是 G1 和 CMS 共同的关注点，但 G1 除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为 M 毫秒的时间片段内，消耗在垃圾收集上的时间不得超过 N 毫秒。</p>
+<p>工作流程：</p>
+<p><strong>初始标记</strong>： 短暂停顿（Stop-The-World，STW），标记从 GC Roots 可直接引用的对象，即标记所有直接可达的活跃对象</p>
+<p><strong>并发标记</strong>：与应用并发运行，标记所有可达对象。 这一阶段可能持续较长时间，取决于堆的大小和对象的数量。</p>
+<p><strong>最终标记</strong>： 短暂停顿（STW），处理并发标记阶段结束后残留的少量未处理的引用变更。</p>
+<p><strong>筛选回收</strong>：根据标记结果，选择回收价值高的区域，复制存活对象到新区域，回收旧区域内存。这一阶段包含一个或多个停顿（STW），具体取决于回收的复杂度。<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509032328634.png" alt="image-20250903232802562"></p>
+<p><strong>G1 收集器在后台维护了一个优先列表，每次根据允许的收集时间，优先选择回收价值最大的 Region(这也就是它的名字 Garbage-First 的由来)</strong> 。这种使用 Region 划分内存空间以及有优先级的区域回收方式，保证了 G1 收集器在有限时间内可以尽可能高的收集效率（把内存化整为零）。</p>
+<p>**从 JDK9 开始，G1 垃圾收集器成为了默认的垃圾收集器</p>
+<h3 id="ZGC（低延迟GC）"><a href="#ZGC（低延迟GC）" class="headerlink" title="ZGC（低延迟GC）"></a>ZGC（低延迟GC）</h3><p>与 CMS、ParNew 和 G1 类似，ZGC 也采用标记-复制算法，不过 ZGC 对该算法做了重大改进。</p>
+<p>ZGC 可以将暂停时间控制在几毫秒以内，且暂停时间不受堆内存大小的影响，出现 Stop The World 的情况会更少，但代价是牺牲了一些吞吐量。ZGC 最大支持 16TB 的堆内存。</p>
+<p>ZGC 在 Java11 中引入，处于试验阶段。经过多个版本的迭代，不断的完善和修复问题，ZGC 在 Java15 已经可以正式使用了。</p>
+<p>不过，默认的垃圾回收器依然是 G1。你可以通过下面的参数启用 ZGC：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:+UseZGC className</span><br></pre></td></tr></table></figure>
+
+<p>在 Java21 中，引入了分代 ZGC，暂停时间可以缩短到 1 毫秒以内。</p>
+<p>你可以通过下面的参数启用分代 ZGC：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:+UseZGC -XX:+ZGenerational className</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">John Doe</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/')">JVM垃圾收集器</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=JVM垃圾收集器&amp;url=http://example.com/2025/08/13/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/08/13/%E7%AE%97%E6%B3%95/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">基础图里，路径算法</div></div></a></div><div class="next-post pull-right"><a href="/2025/08/18/math/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">math</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">垃圾收集器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E6%AD%BB%E4%BA%A1%E7%9A%84%E5%88%A4%E6%96%AD%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">对象死亡的判断方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E6%B3%95"><span class="toc-number">1.1.1.</span> <span class="toc-text">引用计数法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">可达性分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.2.</span> <span class="toc-text">引用的概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%BC%95%E7%94%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">强引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E5%BC%95%E7%94%A8"><span class="toc-number">1.2.2.</span> <span class="toc-text">软引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E5%BC%95%E7%94%A8"><span class="toc-number">1.2.3.</span> <span class="toc-text">弱引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E5%BC%95%E7%94%A8"><span class="toc-number">1.2.4.</span> <span class="toc-text">虚引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E9%98%9F%E5%88%97%EF%BC%88ReferenceQueue%EF%BC%89"><span class="toc-number">1.2.5.</span> <span class="toc-text">引用队列（ReferenceQueue）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E6%94%B6%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="toc-number">1.3.</span> <span class="toc-text">回收方法区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="toc-number">1.3.0.1.</span> <span class="toc-text">字符常量池</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="toc-number">1.3.0.2.</span> <span class="toc-text">运行时常量池</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">垃圾收集算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4%E7%AE%97%E6%B3%95"><span class="toc-number">2.1.</span> <span class="toc-text">标记-清除算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0-%E5%A4%8D%E5%88%B6%E7%AE%97%E6%B3%95"><span class="toc-number">2.2.</span> <span class="toc-text">标记-复制算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0-%E6%95%B4%E7%90%86%E7%AE%97%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">标记-整理算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E4%BB%A3%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95"><span class="toc-number">2.4.</span> <span class="toc-text">分代收集算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HotSpot%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">2.5.</span> <span class="toc-text">HotSpot实现细节</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E8%8A%82%E7%82%B9%E6%9E%9A%E4%B8%BE"><span class="toc-number">2.5.1.</span> <span class="toc-text">根节点枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%A0%B9%E8%8A%82%E7%82%B9%E6%9E%9A%E4%B8%BE%E5%BF%85%E9%A1%BB%E2%80%9C%E5%81%9C%E9%A1%BF%E6%89%80%E6%9C%89%E7%94%A8%E6%88%B7%E7%BA%BF%E7%A8%8B%E2%80%9D%EF%BC%9F"><span class="toc-number">2.5.1.1.</span> <span class="toc-text">为什么根节点枚举必须“停顿所有用户线程”？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E7%82%B9"><span class="toc-number">2.5.2.</span> <span class="toc-text">安全点</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E7%82%B9%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%9A"><span class="toc-number">2.5.2.0.1.</span> <span class="toc-text">安全点的位置：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8A%A2%E5%85%88%E5%BC%8F%E4%B8%AD%E6%96%AD"><span class="toc-number">2.5.2.0.2.</span> <span class="toc-text">抢先式中断</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BB%E5%8A%A8%E5%BC%8F%E4%B8%AD%E6%96%AD"><span class="toc-number">2.5.2.0.3.</span> <span class="toc-text">主动式中断</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4%E9%99%B7%E9%98%B1"><span class="toc-number">2.5.2.0.4.</span> <span class="toc-text">内存保护陷阱</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%8E%B0%E4%BB%A3JVM%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.2.0.5.</span> <span class="toc-text">现代JVM工作流程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%8C%BA%E5%9F%9F"><span class="toc-number">2.5.3.</span> <span class="toc-text">安全区域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E9%9B%86%E4%B8%8E%E5%8D%A1%E8%A1%A8"><span class="toc-number">2.5.4.</span> <span class="toc-text">记忆集与卡表</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%A8%E4%BB%A3%E5%BC%95%E7%94%A8"><span class="toc-number">2.5.4.1.</span> <span class="toc-text">跨代引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E9%9B%86"><span class="toc-number">2.5.4.2.</span> <span class="toc-text">记忆集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%A1%E8%A1%A8"><span class="toc-number">2.5.4.3.</span> <span class="toc-text">卡表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="toc-number">2.5.5.</span> <span class="toc-text">写屏障</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%AA%E5%85%B1%E4%BA%AB"><span class="toc-number">2.5.5.1.</span> <span class="toc-text">伪共享</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%A3%80%E6%9F%A5"><span class="toc-number">2.5.5.1.1.</span> <span class="toc-text">条件检查</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8D%A1%E8%A1%A8%E5%A1%AB%E5%85%85"><span class="toc-number">2.5.5.1.2.</span> <span class="toc-text">卡表填充</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.5.2.</span> <span class="toc-text">工作流程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E7%9A%84%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">2.5.6.</span> <span class="toc-text">并发的可达性分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%EF%BC%88Tri-Color-Marking%EF%BC%89"><span class="toc-number">2.5.6.1.</span> <span class="toc-text">三色标记算法（Tri-Color Marking）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E9%87%8F%E6%9B%B4%E6%96%B0%EF%BC%88Incremental-Update%EF%BC%89"><span class="toc-number">2.5.6.2.</span> <span class="toc-text">增量更新（Incremental Update）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E5%A7%8B%E5%BF%AB%E7%85%A7%EF%BC%88Snapshot-At-The-Beginning%EF%BC%8CSATB%EF%BC%89"><span class="toc-number">2.5.6.3.</span> <span class="toc-text">原始快照（Snapshot At The Beginning，SATB）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%8F%E5%85%B8%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8"><span class="toc-number">2.6.</span> <span class="toc-text">经典垃圾收集器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Serial%E6%94%B6%E9%9B%86%E5%99%A8"><span class="toc-number">2.6.1.</span> <span class="toc-text">Serial收集器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ParNew"><span class="toc-number">2.6.2.</span> <span class="toc-text">ParNew</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Parallel-Scavenge"><span class="toc-number">2.6.3.</span> <span class="toc-text">Parallel Scavenge</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Serial-Old"><span class="toc-number">2.6.4.</span> <span class="toc-text">Serial Old</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Parallel-Old"><span class="toc-number">2.6.5.</span> <span class="toc-text">Parallel Old</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CMS-Concurrnet-Mark-Sweep"><span class="toc-number">2.6.6.</span> <span class="toc-text">CMS(Concurrnet Mark Sweep)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#G1%EF%BC%88Garbage-First%EF%BC%89"><span class="toc-number">2.6.7.</span> <span class="toc-text">G1（Garbage First）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZGC%EF%BC%88%E4%BD%8E%E5%BB%B6%E8%BF%9FGC%EF%BC%89"><span class="toc-number">2.6.8.</span> <span class="toc-text">ZGC（低延迟GC）</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/22/Guava/" title="Guava包">Guava包</a><time datetime="2025-12-21T19:29:29.000Z" title="Created 2025-12-22 03:29:29">2025-12-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/15/encrypt/" title="encrypt">encrypt</a><time datetime="2025-12-14T19:09:50.000Z" title="Created 2025-12-15 03:09:50">2025-12-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/20/%E4%B8%AA%E4%BA%BA%E4%BB%8B%E7%BB%8D/" title="No title">No title</a><time datetime="2025-10-20T02:59:08.663Z" title="Created 2025-10-20 10:59:08">2025-10-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/15/%E7%BD%91%E7%BB%9C/Untitled%201/" title="No title">No title</a><time datetime="2025-10-15T07:38:09.890Z" title="Created 2025-10-15 15:38:09">2025-10-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/14/linux%E5%86%85%E6%A0%B8/" title="No title">No title</a><time datetime="2025-10-14T01:43:05.786Z" title="Created 2025-10-14 09:43:05">2025-10-14</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="John Doe" target="_blank">John Doe</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">Articles</div><div class="length-num">36</div></a><a href="/tags/" title="tag"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/" title="category"><div class="headline">Categories</div><div class="length-num">21</div></a></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="Display Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>Display Mode</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 0.88rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 0.88rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 0.88rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 0.88rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">繁</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 John Doe 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

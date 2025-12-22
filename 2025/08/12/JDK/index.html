@@ -1,0 +1,474 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>JDK各个版本特性总结 | Hexo</title><meta name="author" content="John Doe"><meta name="copyright" content="John Doe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="JDK各个版本特性总结"><meta name="application-name" content="JDK各个版本特性总结"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="JDK各个版本特性总结"><meta property="og:url" content="http://example.com/2025/08/12/JDK/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="JDK8Lambda表达式StreamAPI默认方法Optional类JDK11局部类型推断Var1.初始化定义局部变量1234var list &amp;#x3D; new ArrayList&amp;lt;String&amp;gt;();    &amp;#x2F;&amp;#x2F; infers ArrayList&amp;lt;String&amp;gt;var stre"><meta property="og:locale" content="en"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="John Doe"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="JDK8Lambda表达式StreamAPI默认方法Optional类JDK11局部类型推断Var1.初始化定义局部变量1234var list &amp;#x3D; new ArrayList&amp;lt;String&amp;gt;();    &amp;#x2F;&amp;#x2F; infers ArrayList&amp;lt;String&amp;gt;var stre"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/08/12/JDK/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"Author: John Doe","link":"Link: ","source":"Source: Hexo","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.","copySuccess":"Copy success, copy and reprint please mark the address of this article"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"Traditional Chinese Activated Manually","cht_to_chs":"Simplified Chinese Activated Manually","day_to_night":"Dark Mode Activated Manually","night_to_day":"Light Mode Activated Manually","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Hexo',
+  title: 'JDK各个版本特性总结',
+  postAI: '',
+  pageFillDescription: 'JDK8, Lambda表达式, StreamAPI, 默认方法, Optional类, JDK11, 局部类型推断Var, 1.初始化定义局部变量, 2.增强for循环, 3.传统for循环的index定义, 4.try包裹的变量, 5.lambda中隐含的var推断, 字符串API增强, 标准化HttpClient, 模块化, JDK14, Switch表达式, JDK15, 文本块, JDK16, record类, 定义标准构造函数, 隐式构造函数参数, 定义非标准构造函数, 显式声明公共访问器, record特性, Instance of 匹配, JDK17, Spring和SpringBoot, Sealed Class 密封类, JDK21, Record Patterns, Switch 匹配, JDK22, 未命名变量表达式默认方法类局部类型推断初始化定义局部变量增强循环传统循环的定义包裹的变量中隐含的推断可以不用明确表达出等价于其中可以省略等价于要注意不能使用混合语法禁止和字符串增强新增了等方法方便对字符串进行处理标准化标准化了新的的模块化表达式文本块将多行文本中的换行符和转义符去除使其变得更易于阅读一个普通的从使用单行文本和文本块的区别空字符串如下文本块必须以和换行符开始以结尾文本结尾是否换行代表最后一行是否有换行符结尾没有换行符结尾有换行符默认情况下会去掉公共缩进空格也就是说所有行最小的缩进会被当作基准去掉所有的缩进为最小的缩进如果想要加前导空格需要将比结尾的缩进更多的空格才能保留下来输出但是这样会带来末尾强制加上了如果不想要换行符可以使用续航符输出类可以定义类会自动生成构造函数方法类是语法糖等价于会自动生成的成员变量以及和成员变量同名的取值方法和定义标准构造函数虽然会自动生成一个构造函数但是也可以定义一个构造函数隐式构造函数参数由于构造函数中的参数签名是同名的因此可以使用隐式的参数构造定义非标准构造函数相比起显式声明标准构造函数我们也可以声明非标准构造函数其传入的可以是自定义的参数但是其必须调用标准的构造函数在这种情况下两种构造函数都是合法的相当于构造函数重载合法合法显式声明公共访问器类会自动生成一个和成员变量同名的访问器方法我们可以显式地声明他以代替自动生成的方法可以声明静态变量静态初始化块静态方法这些是类级别的不影响的不可变特性其行为和普通类中定义是一样的不能声明额外的实例变量和实例初始化代码块这会破坏不可变特性不允许新的实例字段实例初始化块也不允许可以声明额外的实例方法嵌套类嵌套普通实例方法嵌套自动是的使用嵌套的实例方法不能声明方法方法可能会修改内部状态编译错误特性当前章节尚未完成内容正在施工中参考匹配可以直接在中进行类型转换原先需要可以省略要注意其局部变量有范围限制局部变量可以超过的范围在的表达式中使用时要注意前后顺序无法在表达式中使用和和默认采用最低密封类让父类显式声明可以继承其的子类限制继承类型声明的继承是受限制的列出允许的子类子类必须显式声明继承策略不能再被继承继续限制下一层继承解封允许任何类再继承匹配未命名变量',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-11-07 10:56:20',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">Hexo</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> Newest Comments</span></div><div class="aside-list"><span>loading...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 1.05rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 1.05rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 1.05rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.05rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>Archives</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">October 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">September 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">August 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">28</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/java/" itemprop="url">java</a></span><span class="article-meta tags"></span></div></div><h1 class="post-title" itemprop="name headline">JDK各个版本特性总结</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-08-11T17:55:16.000Z" title="Created 2025-08-12 01:55:16">2025-08-12</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-11-07T02:56:20.543Z" title="Updated 2025-11-07 10:56:20">2025-11-07</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为长沙"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>长沙</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/08/12/JDK/"><header><a class="post-meta-categories" href="/categories/java/" itemprop="url">java</a><h1 id="CrawlerTitle" itemprop="name headline">JDK各个版本特性总结</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">John Doe</span><time itemprop="dateCreated datePublished" datetime="2025-08-11T17:55:16.000Z" title="Created 2025-08-12 01:55:16">2025-08-12</time><time itemprop="dateCreated datePublished" datetime="2025-11-07T02:56:20.543Z" title="Updated 2025-11-07 10:56:20">2025-11-07</time></header><h1 id="JDK8"><a href="#JDK8" class="headerlink" title="JDK8"></a>JDK8</h1><h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><h2 id="StreamAPI"><a href="#StreamAPI" class="headerlink" title="StreamAPI"></a>StreamAPI</h2><h2 id="默认方法"><a href="#默认方法" class="headerlink" title="默认方法"></a>默认方法</h2><h2 id="Optional类"><a href="#Optional类" class="headerlink" title="Optional类"></a>Optional类</h2><h1 id="JDK11"><a href="#JDK11" class="headerlink" title="JDK11"></a>JDK11</h1><h2 id="局部类型推断Var"><a href="#局部类型推断Var" class="headerlink" title="局部类型推断Var"></a>局部类型推断Var</h2><h3 id="1-初始化定义局部变量"><a href="#1-初始化定义局部变量" class="headerlink" title="1.初始化定义局部变量"></a>1.初始化定义局部变量</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">var</span> <span class="variable">list</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();    <span class="comment">// infers ArrayList&lt;String&gt;</span></span><br><span class="line"><span class="type">var</span> <span class="variable">stream</span> <span class="operator">=</span> list.stream();            <span class="comment">// infers Stream&lt;String&gt;</span></span><br><span class="line"><span class="type">var</span> <span class="variable">path</span> <span class="operator">=</span> Paths.get(fileName);        <span class="comment">// infers Path</span></span><br><span class="line"><span class="type">var</span> <span class="variable">bytes</span> <span class="operator">=</span> Files.readAllBytes(path);  <span class="comment">// infers bytes[]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-增强for循环"><a href="#2-增强for循环" class="headerlink" title="2.增强for循环"></a>2.增强for循环</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; myList = Arrays.asList(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> element : myList) &#123;...&#125;  <span class="comment">// infers String</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-传统for循环的index定义"><a href="#3-传统for循环的index定义" class="headerlink" title="3.传统for循环的index定义"></a>3.传统for循环的index定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">var</span> <span class="variable">counter</span> <span class="operator">=</span> <span class="number">0</span>; counter &lt; <span class="number">10</span>; counter++)  &#123;...&#125;   <span class="comment">// infers int</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-try包裹的变量"><a href="#4-try包裹的变量" class="headerlink" title="4.try包裹的变量"></a>4.try包裹的变量</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">try (var input = </span><br><span class="line">     new FileInputStream(&quot;validation.txt&quot;)) &#123;...&#125;   // infers FileInputStream</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-lambda中隐含的var推断"><a href="#5-lambda中隐含的var推断" class="headerlink" title="5.lambda中隐含的var推断"></a>5.lambda中隐含的var推断</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (Integer a, Integer b) -&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<p>可以不用明确表达出<code>Integer</code>，等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (<span class="keyword">var</span> a, <span class="keyword">var</span> b) -&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>var</code>可以省略，等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (a, b) -&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>要注意不能使用混合语法：</p>
+</blockquote>
+<p>禁止：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(Integer a, <span class="keyword">var</span> b) -&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<p>和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">var</span> a, b) -&gt; a + b;</span><br></pre></td></tr></table></figure>
+
+<h2 id="字符串API增强"><a href="#字符串API增强" class="headerlink" title="字符串API增强"></a>字符串API增强</h2><p>新增了<code>isBlank()</code>、<code>strip()</code>、<code>repeat()</code>等方法，方便对字符串进行处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> <span class="string">&quot;  Hello  &quot;</span>;</span><br><span class="line">System.out.println(str.isBlank()); <span class="comment">//false</span></span><br><span class="line">System.out.println(str.strip()); <span class="comment">// Hello</span></span><br><span class="line">System.out.println(str.repeat(<span class="number">3</span>)); <span class="comment">//  Hello    Hello    Hello  </span></span><br></pre></td></tr></table></figure>
+
+<h2 id="标准化HttpClient"><a href="#标准化HttpClient" class="headerlink" title="标准化HttpClient"></a>标准化HttpClient</h2><p>标准化了新的HttpClient的API</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.newHttpClient();</span><br><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">        .uri(URI.create(<span class="string">&quot;https://example.com&quot;</span>))</span><br><span class="line">        .build();</span><br><span class="line">HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span><br><span class="line">System.out.println(response.body());</span><br></pre></td></tr></table></figure>
+
+<h2 id="模块化"><a href="#模块化" class="headerlink" title="模块化"></a>模块化</h2><h1 id="JDK14"><a href="#JDK14" class="headerlink" title="JDK14"></a>JDK14</h1><h2 id="Switch表达式"><a href="#Switch表达式" class="headerlink" title="Switch表达式"></a>Switch表达式</h2><h1 id="JDK15"><a href="#JDK15" class="headerlink" title="JDK15"></a>JDK15</h1><h2 id="文本块"><a href="#文本块" class="headerlink" title="文本块"></a>文本块</h2><p>将多行文本中的<code>换行符</code>和<code>转义符</code>去除，使其变得更易于阅读。</p>
+<p>一个普通的SQL从使用单行文本和文本块的区别：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Using <span class="string">&quot;one-dimensional&quot;</span> string literals</span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> <span class="string">&quot;SELECT \&quot;EMP_ID\&quot;, \&quot;LAST_NAME\&quot; FROM \&quot;EMPLOYEE_TB\&quot;\n&quot;</span> +</span><br><span class="line">               <span class="string">&quot;WHERE \&quot;CITY\&quot; = &#x27;INDIANAPOLIS&#x27;\n&quot;</span> +</span><br><span class="line">               <span class="string">&quot;ORDER BY \&quot;EMP_ID\&quot;, \&quot;LAST_NAME\&quot;;\n&quot;</span>;</span><br><span class="line">Using a <span class="string">&quot;two-dimensional&quot;</span> block of text</span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">               SELECT &quot;EMP_ID&quot;, &quot;LAST_NAME&quot; FROM &quot;EMPLOYEE_TB&quot;</span></span><br><span class="line"><span class="string">               WHERE &quot;CITY&quot; = &#x27;INDIANAPOLIS&#x27;</span></span><br><span class="line"><span class="string">               ORDER BY &quot;EMP_ID&quot;, &quot;LAST_NAME&quot;;</span></span><br><span class="line"><span class="string">               &quot;&quot;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>空字符串如下，文本块必须以<code>&quot;&quot;&quot;</code>和换行符开始。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">empty</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>以<code>&quot;&quot;&quot;</code>结尾，文本结尾是否换行，代表最后一行是否有换行符。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">结尾没有换行符\n</span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">line 1</span></span><br><span class="line"><span class="string">line 2</span></span><br><span class="line"><span class="string">line 3&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">结尾有换行符\n</span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">line 1</span></span><br><span class="line"><span class="string">line 2</span></span><br><span class="line"><span class="string">line 3</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，Java <strong>会去掉公共缩进空格</strong>。也就是说，所有行最小的缩进会被当作“基准”去掉。所有的缩进为最小的缩进，如果想要加前导空格，需要将比结尾 <code>&quot;&quot;&quot;</code> 的缩进更多的空格，才能保留下来：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        hello</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span>;</span><br><span class="line"><span class="comment">// 输出：        hello\n</span></span><br></pre></td></tr></table></figure>
+
+<p>但是这样会带来hello末尾强制加上了<code>\n</code>，如果不想要换行符，可以使用续航符<code>\</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        hello\</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span>;</span><br><span class="line"><span class="comment">//输出：：        hello</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="JDK16"><a href="#JDK16" class="headerlink" title="JDK16"></a>JDK16</h1><h2 id="record类"><a href="#record类" class="headerlink" title="record类"></a>record类</h2><p>可以定义<code>record</code>类，会自动生成<code>构造函数</code>,<code>equals</code>,<code>hashcode</code>,<code>toString</code>方法，<code>record</code>类是语法糖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>等价于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">double</span> length;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">double</span> width;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.length = length;</span><br><span class="line">        <span class="built_in">this</span>.width = width;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">double</span> <span class="title function_">length</span><span class="params">()</span> &#123; <span class="keyword">return</span> <span class="built_in">this</span>.length; &#125;</span><br><span class="line">    <span class="type">double</span> <span class="title function_">width</span><span class="params">()</span>  &#123; <span class="keyword">return</span> <span class="built_in">this</span>.width; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Implementation of equals() and hashCode(), which specify</span></span><br><span class="line">    <span class="comment">// that two record objects are equal if they</span></span><br><span class="line">    <span class="comment">// are of the same type and contain equal field values.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> equals...</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> hashCode...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// An implementation of toString() that returns a string</span></span><br><span class="line">    <span class="comment">// representation of all the record class&#x27;s fields,</span></span><br><span class="line">    <span class="comment">// including their names.</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;...&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会自动生成<code>private final</code>的成员变量，以及和成员变量同名的取值方法<code>witdth()</code>和<code>length()</code>。</p>
+<h3 id="定义标准构造函数"><a href="#定义标准构造函数" class="headerlink" title="定义标准构造函数"></a>定义标准构造函数</h3><p>虽然record会自动生成一个构造函数，但是也可以定义一个构造函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (length &lt;= <span class="number">0</span> || width &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">java</span>.lang.IllegalArgumentException(</span><br><span class="line">                String.format(<span class="string">&quot;Invalid dimensions: %f, %f&quot;</span>, length, width));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">this</span>.length = length;</span><br><span class="line">        <span class="built_in">this</span>.width = width;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="隐式构造函数参数"><a href="#隐式构造函数参数" class="headerlink" title="隐式构造函数参数"></a>隐式构造函数参数</h3><p>由于构造函数中的参数签名是同名的，因此可以使用隐式的参数构造。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Rectangle &#123;</span><br><span class="line">        <span class="keyword">if</span> (length &lt;= <span class="number">0</span> || width &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">java</span>.lang.IllegalArgumentException(</span><br><span class="line">                String.format(<span class="string">&quot;Invalid dimensions: %f, %f&quot;</span>, length, width));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="定义非标准构造函数"><a href="#定义非标准构造函数" class="headerlink" title="定义非标准构造函数"></a>定义非标准构造函数</h3><p>相比起显式声明标准构造函数，我们也可以声明非标准构造函数，其传入的可以是自定义的参数，但是其必须调用标准的构造函数，在这种情况下，两种构造函数都是合法的，相当于构造函数重载。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">RectanglePair</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">RectanglePair</span><span class="params">(Pair&lt;Double&gt; corner)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(corner.x(), corner.y());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">RectanglePair</span>  <span class="variable">rectanglePair</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RectanglePair</span>(<span class="number">5.0</span>,<span class="number">2.0</span>); <span class="comment">//合法</span></span><br><span class="line"><span class="type">RectanglePair</span>  <span class="variable">rectanglePair2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RectanglePair</span>(<span class="keyword">new</span> <span class="title class_">Pair</span>&lt;&gt;(<span class="number">6.0</span>, <span class="number">3.0</span>)); <span class="comment">//合法</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="显式声明公共访问器"><a href="#显式声明公共访问器" class="headerlink" title="显式声明公共访问器"></a>显式声明公共访问器</h3><p><code>record</code>类会自动生成一个和成员变量同名的访问器方法，我们可以显式地声明他以代替自动生成的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Public accessor method</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">double</span> <span class="title function_">length</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Length is &quot;</span> + length);</span><br><span class="line">        <span class="keyword">return</span> length;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>可以声明</strong>静态变量、静态初始化块、静态方法，这些是类级别的，不影响record的不可变特性，其行为和普通类中定义是一样的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="type">double</span> goldenRatio;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        goldenRatio = (<span class="number">1</span> + Math.sqrt(<span class="number">5</span>)) / <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> Rectangle <span class="title function_">createGoldenRectangle</span><span class="params">(<span class="type">double</span> width)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Rectangle</span>(width, width * goldenRatio);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>不能声明</strong>额外的实例变量和实例初始化代码块，这会破坏<code>record</code>不可变特性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line">    BiFunction&lt;Double, Double, Double&gt; diagonal; <span class="comment">// ❌ 不允许新的实例字段</span></span><br><span class="line"></span><br><span class="line">    &#123; <span class="comment">// ❌ 实例初始化块也不允许</span></span><br><span class="line">        diagonal = (x, y) -&gt; Math.sqrt(x*x + y*y);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>可以声明</strong>额外的实例方法，嵌套类，嵌套record</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">Rectangle</span><span class="params">(<span class="type">double</span> length, <span class="type">double</span> width)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 普通实例方法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">double</span> <span class="title function_">area</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> length * width;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 嵌套 record（自动是 static 的）</span></span><br><span class="line">    <span class="keyword">record</span> <span class="title class_">RotationAngle</span><span class="params">(<span class="type">double</span> angle)</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> RotationAngle &#123;</span><br><span class="line">            angle = Math.toRadians(angle);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用嵌套 record 的实例方法</span></span><br><span class="line">    <span class="keyword">public</span> Rectangle <span class="title function_">getRotatedRectangleBoundingBox</span><span class="params">(<span class="type">double</span> angle)</span> &#123;</span><br><span class="line">        <span class="type">RotationAngle</span> <span class="variable">ra</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RotationAngle</span>(angle);</span><br><span class="line">        <span class="type">double</span> <span class="variable">x</span> <span class="operator">=</span> Math.abs(length * Math.cos(ra.angle())) +</span><br><span class="line">                   Math.abs(width  * Math.sin(ra.angle()));</span><br><span class="line">        <span class="type">double</span> <span class="variable">y</span> <span class="operator">=</span> Math.abs(length * Math.sin(ra.angle())) +</span><br><span class="line">                   Math.abs(width  * Math.cos(ra.angle()));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Rectangle</span>(x, y);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>不能声明</strong>native方法，native方法可能会修改record内部状态。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">record</span> <span class="title class_">BadRecord</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">    <span class="keyword">native</span> <span class="keyword">void</span> <span class="title function_">doSomething</span><span class="params">()</span>; <span class="comment">// ❌ 编译错误</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="record特性"><a href="#record特性" class="headerlink" title="record特性"></a>record特性</h3><blockquote>
+<p><strong>⚠️ TODO</strong></p>
+<p>当前章节尚未完成，内容正在施工中……</p>
+<p>参考 <a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/24/language/records.html#GUID-4D67C7AF-67A2-4B31-8EA7-F1E913F54BE6">Record Classes</a></p>
+</blockquote>
+<h2 id="Instance-of-匹配"><a href="#Instance-of-匹配" class="headerlink" title="Instance of 匹配"></a>Instance of 匹配</h2><p>可以直接在<code>instance of</code>中进行类型转换</p>
+<p>原先需要</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Shape</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">double</span> <span class="title function_">getPerimeter</span><span class="params">(Shape s)</span> <span class="keyword">throws</span> IllegalArgumentException &#123;</span><br><span class="line">        <span class="keyword">if</span> (s <span class="keyword">instanceof</span> Rectangle) &#123;</span><br><span class="line">            <span class="type">Rectangle</span> <span class="variable">r</span> <span class="operator">=</span> (Rectangle) s;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span> * r.length() + <span class="number">2</span> * r.width();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (s <span class="keyword">instanceof</span> Circle) &#123;</span><br><span class="line">            <span class="type">Circle</span> <span class="variable">c</span> <span class="operator">=</span> (Circle) s;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span> * c.radius() * Math.PI;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Unrecognized shape&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以省略<code>Rectangle r = (Rectangle) s</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">double</span> <span class="title function_">getPerimeter</span><span class="params">(Shape shape)</span> <span class="keyword">throws</span> IllegalArgumentException &#123;</span><br><span class="line">    <span class="keyword">if</span> (s <span class="keyword">instanceof</span> Rectangle r) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * r.length() + <span class="number">2</span> * r.width();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (s <span class="keyword">instanceof</span> Circle c) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * c.radius() * Math.PI;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Unrecognized shape&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>要注意其局部变量<code>instance of Object o</code>有范围限制</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">double</span> <span class="title function_">getPerimeter</span><span class="params">(Shape shape)</span> <span class="keyword">throws</span> IllegalArgumentException &#123;</span><br><span class="line">    <span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Rectangle s) &#123;</span><br><span class="line">        <span class="comment">// You can use the pattern variable s (of type Rectangle) here.</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Circle s) &#123;</span><br><span class="line">        <span class="comment">// You can use the pattern variable s of type Circle here</span></span><br><span class="line">        <span class="comment">// but not the pattern variable s of type Rectangle.</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// You cannot use either pattern variable here.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>局部变量可以超过<code>if</code>的范围</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">bigEnoughRect</span><span class="params">(Shape s)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!(s <span class="keyword">instanceof</span> Rectangle r)) &#123;</span><br><span class="line">        <span class="comment">// You cannot use the pattern variable r here because</span></span><br><span class="line">        <span class="comment">// the predicate s instanceof Rectangle is false.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// You can use r here.</span></span><br><span class="line">    <span class="keyword">return</span> r.length() &gt; <span class="number">5</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>if</code>的<code>&amp;&amp;</code>表达式中使用时，要注意前后顺序</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Rectangle r &amp;&amp; r.length() &gt; <span class="number">5</span>) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>无法在<code>||</code>表达式中使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Rectangle r || r.length() &gt; <span class="number">0</span>) &#123; <span class="comment">// error</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="JDK17"><a href="#JDK17" class="headerlink" title="JDK17"></a>JDK17</h1><h2 id="Spring和SpringBoot"><a href="#Spring和SpringBoot" class="headerlink" title="Spring和SpringBoot"></a>Spring和SpringBoot</h2><p>Spring Framework6和SpringBoot 3默认采用最低JDK17。</p>
+<h2 id="Sealed-Class-密封类"><a href="#Sealed-Class-密封类" class="headerlink" title="Sealed Class 密封类"></a>Sealed Class 密封类</h2><p>sealed 让父类显式声明可以继承其的子类，限制继承类型。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public sealed class Shape permits Circle, Rectangle &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public final class Circle extends Shape &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public non-sealed class Rectangle extends Shape &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>sealed</code>：声明 <code>Shape</code> 的继承是受限制的；</p>
+<p><code>permits</code>：列出<strong>允许的子类</strong>；</p>
+<p>子类必须显式声明继承策略：</p>
+<ul>
+<li><code>final</code> → 不能再被继承；</li>
+<li><code>sealed</code> → 继续限制下一层继承；</li>
+<li><code>non-sealed</code> → 解封，允许任何类再继承。</li>
+</ul>
+<h1 id="JDK21"><a href="#JDK21" class="headerlink" title="JDK21"></a>JDK21</h1><h2 id="Record-Patterns"><a href="#Record-Patterns" class="headerlink" title="Record Patterns"></a>Record Patterns</h2><h2 id="Switch-匹配"><a href="#Switch-匹配" class="headerlink" title="Switch 匹配"></a>Switch 匹配</h2><h1 id="JDK22"><a href="#JDK22" class="headerlink" title="JDK22"></a>JDK22</h1><h2 id="未命名变量"><a href="#未命名变量" class="headerlink" title="未命名变量"></a>未命名变量</h2></article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">John Doe</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/08/12/JDK/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/08/12/JDK/')">JDK各个版本特性总结</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/08/12/JDK/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=JDK各个版本特性总结&amp;url=http://example.com/2025/08/12/JDK/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/08/12/java%E5%9F%BA%E7%A1%80/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">java基础</div></div></a></div><div class="next-post pull-right"><a href="/2025/08/12/leetcode/hot100/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Hot100</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK8"><span class="toc-number">1.</span> <span class="toc-text">JDK8</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">Lambda表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StreamAPI"><span class="toc-number">1.2.</span> <span class="toc-text">StreamAPI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">默认方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Optional%E7%B1%BB"><span class="toc-number">1.4.</span> <span class="toc-text">Optional类</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK11"><span class="toc-number">2.</span> <span class="toc-text">JDK11</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%ADVar"><span class="toc-number">2.1.</span> <span class="toc-text">局部类型推断Var</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AE%9A%E4%B9%89%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F"><span class="toc-number">2.1.1.</span> <span class="toc-text">1.初始化定义局部变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF"><span class="toc-number">2.1.2.</span> <span class="toc-text">2.增强for循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BC%A0%E7%BB%9Ffor%E5%BE%AA%E7%8E%AF%E7%9A%84index%E5%AE%9A%E4%B9%89"><span class="toc-number">2.1.3.</span> <span class="toc-text">3.传统for循环的index定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-try%E5%8C%85%E8%A3%B9%E7%9A%84%E5%8F%98%E9%87%8F"><span class="toc-number">2.1.4.</span> <span class="toc-text">4.try包裹的变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-lambda%E4%B8%AD%E9%9A%90%E5%90%AB%E7%9A%84var%E6%8E%A8%E6%96%AD"><span class="toc-number">2.1.5.</span> <span class="toc-text">5.lambda中隐含的var推断</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2API%E5%A2%9E%E5%BC%BA"><span class="toc-number">2.2.</span> <span class="toc-text">字符串API增强</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E5%87%86%E5%8C%96HttpClient"><span class="toc-number">2.3.</span> <span class="toc-text">标准化HttpClient</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="toc-number">2.4.</span> <span class="toc-text">模块化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK14"><span class="toc-number">3.</span> <span class="toc-text">JDK14</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">Switch表达式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK15"><span class="toc-number">4.</span> <span class="toc-text">JDK15</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E5%9D%97"><span class="toc-number">4.1.</span> <span class="toc-text">文本块</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK16"><span class="toc-number">5.</span> <span class="toc-text">JDK16</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#record%E7%B1%BB"><span class="toc-number">5.1.</span> <span class="toc-text">record类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%A0%87%E5%87%86%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="toc-number">5.1.1.</span> <span class="toc-text">定义标准构造函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="toc-number">5.1.2.</span> <span class="toc-text">隐式构造函数参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E9%9D%9E%E6%A0%87%E5%87%86%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="toc-number">5.1.3.</span> <span class="toc-text">定义非标准构造函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%BE%E5%BC%8F%E5%A3%B0%E6%98%8E%E5%85%AC%E5%85%B1%E8%AE%BF%E9%97%AE%E5%99%A8"><span class="toc-number">5.1.4.</span> <span class="toc-text">显式声明公共访问器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#record%E7%89%B9%E6%80%A7"><span class="toc-number">5.1.5.</span> <span class="toc-text">record特性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instance-of-%E5%8C%B9%E9%85%8D"><span class="toc-number">5.2.</span> <span class="toc-text">Instance of 匹配</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK17"><span class="toc-number">6.</span> <span class="toc-text">JDK17</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring%E5%92%8CSpringBoot"><span class="toc-number">6.1.</span> <span class="toc-text">Spring和SpringBoot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sealed-Class-%E5%AF%86%E5%B0%81%E7%B1%BB"><span class="toc-number">6.2.</span> <span class="toc-text">Sealed Class 密封类</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK21"><span class="toc-number">7.</span> <span class="toc-text">JDK21</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Record-Patterns"><span class="toc-number">7.1.</span> <span class="toc-text">Record Patterns</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch-%E5%8C%B9%E9%85%8D"><span class="toc-number">7.2.</span> <span class="toc-text">Switch 匹配</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JDK22"><span class="toc-number">8.</span> <span class="toc-text">JDK22</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AA%E5%91%BD%E5%90%8D%E5%8F%98%E9%87%8F"><span class="toc-number">8.1.</span> <span class="toc-text">未命名变量</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/22/Guava/" title="Guava包">Guava包</a><time datetime="2025-12-21T19:29:29.000Z" title="Created 2025-12-22 03:29:29">2025-12-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/15/encrypt/" title="encrypt">encrypt</a><time datetime="2025-12-14T19:09:50.000Z" title="Created 2025-12-15 03:09:50">2025-12-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/20/%E4%B8%AA%E4%BA%BA%E4%BB%8B%E7%BB%8D/" title="No title">No title</a><time datetime="2025-10-20T02:59:08.663Z" title="Created 2025-10-20 10:59:08">2025-10-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/15/%E7%BD%91%E7%BB%9C/Untitled%201/" title="No title">No title</a><time datetime="2025-10-15T07:38:09.890Z" title="Created 2025-10-15 15:38:09">2025-10-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/14/linux%E5%86%85%E6%A0%B8/" title="No title">No title</a><time datetime="2025-10-14T01:43:05.786Z" title="Created 2025-10-14 09:43:05">2025-10-14</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="John Doe" target="_blank">John Doe</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">Articles</div><div class="length-num">36</div></a><a href="/tags/" title="tag"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/" title="category"><div class="headline">Categories</div><div class="length-num">21</div></a></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="Display Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>Display Mode</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 0.88rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 0.88rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 0.88rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 0.88rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">繁</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 John Doe 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

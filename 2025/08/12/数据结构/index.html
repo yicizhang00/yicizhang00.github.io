@@ -1,0 +1,760 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>数据结构 | Hexo</title><meta name="author" content="John Doe"><meta name="copyright" content="John Doe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="数据结构"><meta name="application-name" content="数据结构"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="数据结构"><meta property="og:url" content="http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="数据结构1.基本数据类型Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)    数据类"><meta property="og:locale" content="en"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="John Doe"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="数据结构1.基本数据类型Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)    数据类"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"Author: John Doe","link":"Link: ","source":"Source: Hexo","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.","copySuccess":"Copy success, copy and reprint please mark the address of this article"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"Traditional Chinese Activated Manually","cht_to_chs":"Simplified Chinese Activated Manually","day_to_night":"Dark Mode Activated Manually","night_to_day":"Light Mode Activated Manually","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Hexo',
+  title: '数据结构',
+  postAI: '',
+  pageFillDescription: '数据结构, 1.基本数据类型, 浮点数精度, float 与 double, 转换, 隐式转换, 强制转换, 数据装箱、拆箱, 基本概念, 运算时自动装箱、拆箱, 缓存机制（IntegerCache）, 常用方法, valueOf(), parseInt(), 2.数组, int[], List, ArrayList, LinkedList, stack, CopyOnWriteArrayList, toCharArray(), 特性, 多维数组, 常用方法, 高级与底层, 协变数组, 链表, 栈, 队列, 哈希表, 哈希实现方法, HashMap, HashTable, WeakHashMap, IdentityHashMap, LinkedHashMap, EnumMap, ConcurrentSkipListMap, 布谷鸟哈希, 核心思想, 工作流程, 优缺点, 罗宾汉哈希, 核心思想, 工作流程（以线性探测为例）, 优缺点, Hopscotch Hashing（跳房子哈希）, 核心思想：邻域概念, 工作流程与关键操作, 优缺点, Extendible Hashing（可扩展哈希）, 核心组件, 工作流程, 优缺点, 进阶数据结构, 堆, 优先队列, 应用场景, TreeMap, Deque 双端队列, TreeSet, 图, 并查集DSU, 高级数据结构, 跳表, 线段树, 前缀树, AVL, 红黑树, 布隆过滤器, Java实现, 第三方库, 有序哈希表LinkedHashMap, WeakHashMap, EnumSet, EnumMap, 地址哈希表IdentityHashMap, ConcurrentHashMap, 时间轮Time Wheel, 位图BitMap, 位集 BitSet数据结构基本数据类型中基本数据类型有种数据类型关键字大小取值范围默认值包装类字节型字节短整型字节整型字节长整型字节单精度浮点字节双精度浮点字节字符型字节布尔型位浮点数精度浮点数采用存储浮点数无法精确表示输出因此进行浮点数比较是否相等时必须使用差值小于某一值与所有单独出现的小数均默认为类型如果要定义类型后面必须加后缀必须加后缀默认转换隐式转换小类型转化为大类型不会丢失精度强制转换大类型强制转为小类型可能存在精度丢失数据装箱拆箱基本概念装箱基本类型包装类型拆箱包装类型基本类型自动装箱等价于自动拆箱等价于运算时自动装箱拆箱的新特性可以直接和类型直接进行运算自动进行和情况结果赋值给基本数据类型过程被拆箱为然后与相加结果赋值给输出情况结果赋值给包装类过程被拆箱相加结果被自动装箱为结果赋值给输出情况直接在表达式中使用如打印作为参数传递过程被拆箱相加输出结果直接运算并打印输出这个过程等价于早期没有自动拆箱装箱时的手动操作手动拆箱手动拆箱等效操作输出缓存机制当对某些特定范围的整型数据进行自动装箱时它不会每次都创建一个新的对象而是会从一个预先创建好的缓存数组中直接获取对应的包装类对象例如对于来说其缓存范围在通常情况下这个范围内的数据使用频率较高意味着在创建该范围内的对象时其使用的对象将会重用同一缓存内的对象同一对象值相等不同对象值相等而当因为指向缓存中的同一个对象进行操作这里会发生什么仍然是仍然是是新的对象对于一个类型的值进行运算其会先拆箱接着装箱等价于拆箱装箱类型是的一旦创建值就不能改变想要改变必须先拆箱后装箱是一个类而是基本数据类型因此可以等于而不行运算会比较中的地址而则有其不同的重写方法通常情况下会比较对象所含的值常用方法参数为基本数据类型返回包装类对象参数为字符串类没有以为参数的该方法返回包装类对象参数为字符串返回基本数据类型数组数组是用于存储固定大小相同类型元素的线性数据结构其继承于类型拥有和等方法并且保存在的堆中数组的声明方式如下声明数组然后全部初始化为对应值整数浮点引用类型风格风格由于数组一旦声明长度就不可变其以连续空间的形式存储在堆中因此在随机访问时可以通过下标偏移量加首地址的方式计算出目标地址随机访问的时间复杂度为继承了继承了所有集合类如的根接口定义了添加删除遍历等基本操作的父接口意味着所有都可以使用循环进行迭代接口数组实现随机访问快链表实现插入删除快线程安全已过时所有方法都用修饰性能差栈实现继承同样有性能问题推荐使用实现线程安全写时复制的底层结构是动态数组不是线程安全的在多线程环境下需要同步如何创建一个线程安全的使用加锁如何创建一个动态扩容数组的底层就是一个默认初始容量为当添加元素导致容量不足时它会创建一个新的更大数组通常是原容量的倍太小扩容频繁太大浪费空间倍是经验值然后使用内部是将旧数组的数据拷贝到新数组中的底层结构是双向链表同样不是线程安全的在多线程环境下需要同步可以作为和的底层结构作为队列使用入队出队作为双端队列特性底层结构动态数组双向链表随机访问头部插入尾部插入均摊中间插入内存占用较小连续内存较大每个元素含两个指针缓存友好是在取值的时候可以预取否如何选择和根据具体场景如果需要频繁随机访问选择如果需要频繁在头部插入删除选择大多数情况下是更好的选择因为缓存友好实际性能往往优于基于实现同样有性能问题推荐使用作为栈写时复制写的时候加锁并复制到新数组复制新数组替换引用适用场景读多写少读操作不需要锁直接访问数组写操作性能较差需要复制整个数组特性快速失败结构修改抛出在被创建时会记录下集合的当前修改次数当你通过修改了的结构后这个修改次数会增加当迭代器调用方法时它会检查当前集合的修改次数是否与它在创建时记录下来的修改次数一致一旦不一致就会抛出快速失败子列表视图原变为并非一个新的对象而是对原对象的一个局部引用多维数组支持多维数组但实际上是数组的数组例如是一个一维数组其中的每个元素又是一个数组这意味着多维数组可以是不规则的每行的长度可以不同如何创建一个不规则的多维数组声明并创建外部数组指定有行分别创建每一行的内部数组指定不同的列数第一行有列第二行有列第三行有列中的多维数组的地址分配更接近于下图在中的大小是固定的其在堆上连续分配而中的地址和的地址并非连续常用方法排序双轴快排由大到小排序二分查找数组必须已排序填充值比较两个数组的内容是否相等深层次比较元素将数组转换为字符串表示形式便于打印调试返回一个固定大小的列表由原数组生成不能进行增删操作否则会抛高级与底层协变数组它允许你用一个子类型数组的引用赋值给一个父类型数组的变量编译和运行都可以编译通过但运行时会抛出这种运行时错误是协变数组最大的缺陷为了解决这个问题语言的设计者在泛型中引入了不可变的概念泛型是不可变的编译错误其提供了编译时的类型安全保障避免了运行时的类型转换错误链表栈队列哈希表使用一个函数将映射到存储位置的数据结构哈希实现方法哈希表如何解决哈希冲突链地址法每个哈希桶存储一个链表或其他结构所有哈希到同一位置的元素都插入该链表插入和查找时只需遍历链表即可哈希表数组开放地址法当发生冲突时按照一定探查方式如线性探查二次探查双重哈希寻找下一个空位将元素插入空位查找时同样按探查顺序查找示例插入发生冲突放冲突尝试找到空位放入再哈希法发生冲突时使用另一个哈希函数或者更大的表重新计算位置直到找到空位扩容与重哈希当哈希表负载因子过高时扩容并重新分配所有元素减少冲突概率双重哈希法一个位置被占用时不再简单地线性探测而是通过另一个哈希函数决定跳步大小实现的在之前采用链表解决冲突而之后当链表长度超过阈值通常为通过将每个桶存储一个链表转为红黑树具体来说当一个哈希桶中的链表长度达到即时并且此时哈希表的总容量也达到了即这个链表就会被转换为一棵红黑树改进实现在改进之前字符串冲突的备选是采用为每一个新增一个字段此改进实现了任何接口的键类型的性能提升字符串的字段被移除该改进已经在以及中实现但是在和中并不实现为什么要满足容量大于因为如果哈希表容量太小频繁发生哈希冲突的原因很可能不是哈希函数不好而是哈希表本身太小在这种情况下更好的解决办法是进行扩容而不是转换为红黑树当哈希表容量小于时即使链表长度达到了也会优先选择扩容通过重新计算哈希值来分散元素这样可以避免不必要的树化减少性能开销为什么链表长度为泊松分布描述稀有事件在固定时间或者空间内发生的概率适用于事件独立事件发生的平均速率已知并固定事件发生的概率极低在哈希表中设容量为插入个键每个键落入个桶内单个键冲突概率为基于身份哈希的无冲突设计采用而非的弱引用与垃圾回收的核心特点是键是弱引用这意味着当一个键对象没有其他强引用指向它时它随时可能被垃圾回收器回收内部有一个队列维护被的键当一个弱引用键被后其会被添加到这个队列中在每次时会检查并清理这个队列所有被的键从中删除因此带来了红黑树的维护开销红黑树在删除节点时会带来节点的旋转和重新着色行为无法预测导致红黑树的结构也不可预测会带来巨大的性能开销采用而不是方法判断是否相同底层实现为表双向链表缓存设计的设计的并非严格设计而是近似的设计因为严格的在每次访问一个键时需要将其移动到链表头部同时对于内存和开销都有巨大压力布谷鸟哈希核心思想一个键在哈希表中有两个或多个可能的存放位置由两个不同的哈希函数决定就像一只布谷鸟蛋可以放在两个不同的巢中核心机制踢出当要插入一个新键时如果它的两个位置都被占了它不是去找下一个空位像线性探测那样而是随机选择其中一个位置将占据该位置的老键踢出去然后为这个被踢出的老键寻找它的另一个备选位置这个过程可能会递归地进行形成一连串的踢出操作工作流程假设一个键有两个候选位置和插入计算和如果两个位置有一个是空的直接放入如果两个位置都满了随机选择一个比如将占据该位置的老键踢出将放入现在为被踢出的寻找它的另一个家即如果是空的放入如果也被占了重复上述踢出过程直到所有键都安定下来或者达到最大重试次数此时需要扩容或重新构建哈希表查找极其高效只需检查两个确定的位置和时间复杂度是严格的没有链式遍历或长序列的探测删除同样检查两个位置如果找到则删除优缺点优点超快查询最坏情况下也只有两次内存访问非常适合延迟敏感的应用高负载因子通过优化可以实现超过的空间利用率而传统线性探测在时性能就已很差缺点插入不稳定插入操作可能在最坏情况下耗时很长因为连续的踢出循环可能插入失败即使表没满也可能因为循环踢出而无法插入需要扩容罗宾汉哈希核心思想在开放寻址法如线性探测的框架下它通过比较键的探测距离来实现公平核心概念探测距离一个键的探测距离是指它从自己的初始哈希位置由哈希函数计算得出需要移动多少步探测多少次才找到现在这个位置核心机制劫富济贫当一个新的键要插入时如果目标位置已被占用它会比较自己当前的探测距离此时为和该位置上老键的探测距离如果新键的探测距离大于老键的探测距离说明新键更贫瘠它就有权抢走这个位置老键被踢出然后像新键一样继续为自己寻找新位置否则新键继续向后探测这个过程保证了所有键的贫富差距不会太大即没有哪个键会离它的理想位置特别远工作流程以线性探测为例插入键计算初始位置设置新键的探测距离如果为空直接插入如果被键占据获取的探测距离比较和如果新的比老的更惨将踢出将放入然后被踢出的以为起点继续向后探测寻找新家否则的加继续探测下一个位置查找与删除与标准线性探测类似但可以利用探测距离的信息进行优化例如如果当前探测距离已经大于正在查找的键的探测距离说明它不可能在更远的位置可提前结束优缺点优点降低最坏情况显著减少了长探测序列的发生使所有操作的时间方差变小性能更可预测更高的平均负载因子比传统开放寻址法能承受更高的负载缺点实现更复杂需要为每个槽存储键的探测距离信息删除操作更麻烦需要像线性探测一样使用墓碑标记跳房子哈希是一种基于线性探测的开放寻址法它的核心目标是将每个键的探测序列长度控制在一个非常小的常数范围内从而获得稳定可预测的查询性能核心思想邻域概念它为每个哈希槽位定义了一个逻辑上的邻域这个邻域包含了从开始向后连续的个槽位例如包含槽位到核心规则一个哈希值为的键最终必须被存储在它的初始槽位的邻域内这保证了查找该键最多只需要检查个槽位实现了的严格查询时间工作流程与关键操作插入当试图将一个键插入到它的初始位置时如果该位置已被占用插入过程不是简单地线性向后探测而是包含一个关键的重排过程顺序探测从开始线性地向后查找直到找到一个空槽检查距离计算这个空槽到初始位置的距离如果这个距离小于邻域大小即空槽在邻域内那么直接将放入该空槽即可重排如果空槽太远距离就需要进行跳房子式的重排算法会从空槽开始向前扫描最多扫描个槽位寻找一个键这个键需要满足一个条件如果把它移动到后面的空槽它仍然在自己的初始槽位的邻域内找到这样的后将移动到空槽中此时原来的位置就变成了新的空槽这个操作相当于让空槽向前跳了一步重复这个过程直到空槽被搬运到初始位置的邻域内然后将放入这个空槽查找仅在初始槽位的邻域个槽位内进行线性查找因为规则保证了键一定在这个范围内删除找到并删除键然后标记为空优缺点优点极佳的缓存局部性由于键被限制在一个小邻域内查找时内存访问集中效率高稳定的高性能查询和插入在最坏情况下都是因为只与常数有关缺点插入可能失败即使表中有空位但如果无法通过重排将空槽移入邻域插入仍然会失败需要扩容实现稍复杂重排逻辑比简单的线性探测复杂可扩展哈希是为磁盘等外部存储设计的哈希方法其核心目标是在数据量增长时最小化磁盘次数它通过一种目录机制来实现动态的平滑的扩容核心组件目录一个在内存中维护的数组每个目录项是一个指针指向一个页桶目录的大小是其中称为全局深度页桶实际存储键值对的数据块通常对应一个磁盘页每个页有一个局部深度满足工作流程哈希计算对键计算哈希值然后取这个哈希值的后位全局深度位作为目录索引例如就取后位目录有项查找根据后位找到目录项然后访问该目录项指向的页在页内进行线性查找只需一次磁盘插入与分裂核心找到键对应的页如果页内还有空间直接插入如果页已满则需要页分裂增加该页的局部深度例如从增加到创建一个新页将原页中的所有键重新哈希根据它们哈希值的第位新增加的这一位进行分配位为的留在原页位为的移到新页更新目录因为全局深度可能等于或大于新的局部深度算法需要确保所有索引位后位与原页相同的目录项都指向原页所有索引位后位与新页相同的目录项都指向新页情况一只需更新部分目录指针这是最常见的情况扩容非常高效情况二这意味着目录需要翻倍目录扩容将加目录大小翻倍然后重新设置所有目录项的指针优缺点优点高效扩容扩容时通常只需要分裂一个满的页而不是重建整个表成本低一次磁盘访问在任何情况下查找一个键都只需要一次磁盘因为目录在内存中能直接定位到正确的页缺点目录可能很大当数据量非常大时目录本身可能变得很大虽然它在内存中但仍是一种开销空间可能浪费如果数据分布不均多个目录项可能指向同一个页造成目录空间浪费进阶数据结构堆优先队列普通队列按照先进先出的方式出入队优先队列则是按照元素的优先级出队而不是进入的先后顺序中实现了的方法默认为最小堆最小的先出可以传入自定义的比较器最大的先出应用场景任务调度高优先级任务先执行最短路径算法每次取当前距离最小的点编码每次合并权值最小的两棵树问题找出最大的个元素双端队列图并查集高级数据结构跳表线段树前缀树红黑树布隆过滤器布隆过滤器是一种空间效率极高的概率型数据结构用于判断一个元素是否在集合中它通过多个哈希函数将元素映射到位数组的不同位置插入时将对应位设为查询时只要有一个位为则一定不在集合中否则可能在集合中存在误判优点占用空间小插入和查询速度快适合大数据场景下的快速去重和存在性判断缺点存在一定的误判率假阳性无法删除元素标准实现不支持元素的遍历应用场景数据库缓存过滤如缓存穿透防护网络黑名单检测大规模去重如爬虫判重时间复杂度插入操作查询操作是哈希函数的数量布隆过滤器的原理是用个哈希函数将元素映射到位数组的个位置插入时需要对元素进行次哈希并设置个位查询时需要对元素进行次哈希并检查个位因此时间复杂度与哈希函数数量成线性关系通常是常数所以实际操作接近实现第三方库预期元素数量误报率有序哈希表地址哈希表时间轮位图是一段把二进制位当做来操作的一组位操作接口例如要存储列位集是对位图的一种抽象封装在里是一个类内部本质上就是用存储位但对外暴露了更友好的如等强调的是集合语义把每个看作集合元素的中的采用实现其索引是型即最大值在约为亿最常用的方法是',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-10-20 15:28:15',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">Hexo</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> Newest Comments</span></div><div class="aside-list"><span>loading...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 1.05rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 1.05rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 1.05rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.05rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>Archives</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">October 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">September 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">August 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">28</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url">数据结构</a><i class="anzhiyufont anzhiyu-icon-angle-right post-meta-separator"></i><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/java/" itemprop="url">java</a></span><span class="article-meta tags"></span></div></div><h1 class="post-title" itemprop="name headline">数据结构</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-08-11T17:55:16.000Z" title="Created 2025-08-12 01:55:16">2025-08-12</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-10-20T07:28:15.455Z" title="Updated 2025-10-20 15:28:15">2025-10-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为长沙"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>长沙</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><header><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url">数据结构</a><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/java/" itemprop="url">java</a><h1 id="CrawlerTitle" itemprop="name headline">数据结构</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">John Doe</span><time itemprop="dateCreated datePublished" datetime="2025-08-11T17:55:16.000Z" title="Created 2025-08-12 01:55:16">2025-08-12</time><time itemprop="dateCreated datePublished" datetime="2025-10-20T07:28:15.455Z" title="Updated 2025-10-20 15:28:15">2025-10-20</time></header><h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><h2 id="1-基本数据类型"><a href="#1-基本数据类型" class="headerlink" title="1.基本数据类型"></a>1.基本数据类型</h2><p>Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)</p>
+<table>
+<thead>
+<tr>
+<th align="left">数据类型</th>
+<th align="left">关键字</th>
+<th align="left">大小</th>
+<th align="left">取值范围</th>
+<th align="left">默认值</th>
+<th align="left">包装类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">字节型</td>
+<td align="left">byte</td>
+<td align="left">1字节</td>
+<td align="left">-128 ~ 127</td>
+<td align="left">0</td>
+<td align="left">Byte</td>
+</tr>
+<tr>
+<td align="left">短整型</td>
+<td align="left">short</td>
+<td align="left">2字节</td>
+<td align="left">-32768 ~ 32767</td>
+<td align="left">0</td>
+<td align="left">Short</td>
+</tr>
+<tr>
+<td align="left">整型</td>
+<td align="left">int</td>
+<td align="left">4字节</td>
+<td align="left">-2³¹ ~ 2³¹-1</td>
+<td align="left">0</td>
+<td align="left">Integer</td>
+</tr>
+<tr>
+<td align="left">长整型</td>
+<td align="left">long</td>
+<td align="left">8字节</td>
+<td align="left">-2⁶³ ~ 2⁶³-1</td>
+<td align="left">0L</td>
+<td align="left">Long</td>
+</tr>
+<tr>
+<td align="left">单精度浮点</td>
+<td align="left">float</td>
+<td align="left">4字节</td>
+<td align="left">±3.4^38</td>
+<td align="left">0.0f</td>
+<td align="left">Float</td>
+</tr>
+<tr>
+<td align="left">双精度浮点</td>
+<td align="left">double</td>
+<td align="left">8字节</td>
+<td align="left">±1.7^308</td>
+<td align="left">0.0d</td>
+<td align="left">Double</td>
+</tr>
+<tr>
+<td align="left">字符型</td>
+<td align="left">char</td>
+<td align="left">2字节</td>
+<td align="left">‘\u0000’ ~ ‘\uffff’(UTF-8)</td>
+<td align="left">‘\u0000’</td>
+<td align="left">Character</td>
+</tr>
+<tr>
+<td align="left">布尔型</td>
+<td align="left">boolean</td>
+<td align="left">1位</td>
+<td align="left">true&#x2F;false</td>
+<td align="left">false</td>
+<td align="left">Boolean</td>
+</tr>
+</tbody></table>
+<h3 id="浮点数精度"><a href="#浮点数精度" class="headerlink" title="浮点数精度"></a>浮点数精度</h3><p>浮点数采用IEEE754存储，浮点数无法精确表示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="number">0.1</span> + <span class="number">0.2</span>); <span class="comment">// 输出：0.30000000000000004</span></span><br></pre></td></tr></table></figure>
+
+<p>因此进行浮点数比较是否相等时必须使用差值小于某一值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(a - b &lt; <span class="number">1e-9</span>) <span class="keyword">return</span> <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="float-与-double"><a href="#float-与-double" class="headerlink" title="float 与 double"></a>float 与 double</h3><p>所有单独出现的小数均默认为double类型，如果要定义float类型，后面必须加f后缀。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> <span class="variable">f</span> <span class="operator">=</span> <span class="number">3.14f</span>;        <span class="comment">// 必须加f后缀</span></span><br><span class="line"><span class="type">double</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">3.14</span>;        <span class="comment">// 默认double</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="转换"><a href="#转换" class="headerlink" title="转换"></a>转换</h3><h4 id="隐式转换"><a href="#隐式转换" class="headerlink" title="隐式转换"></a>隐式转换</h4><p>小类型转化为大类型不会丢失精度。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">byte → short → int → long → float → double</span><br><span class="line">         ↓</span><br><span class="line">        char</span><br></pre></td></tr></table></figure>
+
+<h4 id="强制转换"><a href="#强制转换" class="headerlink" title="强制转换"></a>强制转换</h4><p>大类型强制转为小类型，可能存在精度丢失。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">3.14f</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> (<span class="type">int</span>) a;</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据装箱、拆箱"><a href="#数据装箱、拆箱" class="headerlink" title="数据装箱、拆箱"></a>数据装箱、拆箱</h3><h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><p><strong>装箱</strong>：基本类型 → 包装类型</p>
+<p><strong>拆箱</strong>：包装类型 → 基本类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自动装箱</span></span><br><span class="line"><span class="type">Integer</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">10</span>;         <span class="comment">// 等价于 Integer.valueOf(10)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 自动拆箱</span></span><br><span class="line"><span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> i;              <span class="comment">// 等价于 i.intValue()</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="运算时自动装箱、拆箱"><a href="#运算时自动装箱、拆箱" class="headerlink" title="运算时自动装箱、拆箱"></a>运算时自动装箱、拆箱</h4><p>JDK1.5+的新特性：int 可以直接和Integer类型直接进行运算，自动进行<code>intValue()</code>和<code>valueOf()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">primitiveInt</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">wrapperInteger</span> <span class="operator">=</span> <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 情况1：结果赋值给基本数据类型 int</span></span><br><span class="line"><span class="comment">// 过程：wrapperInteger 被拆箱为 int，然后与 primitiveInt 相加</span></span><br><span class="line"><span class="type">int</span> <span class="variable">resultToPrimitive</span> <span class="operator">=</span> primitiveInt + wrapperInteger;</span><br><span class="line">System.out.println(<span class="string">&quot;结果赋值给 int: &quot;</span> + resultToPrimitive); <span class="comment">// 输出：30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 情况2：结果赋值给包装类 Integer</span></span><br><span class="line"><span class="comment">// 过程：wrapperInteger 被拆箱 -&gt; 相加 -&gt; 结果 30 被自动装箱为 Integer</span></span><br><span class="line"><span class="type">Integer</span> <span class="variable">resultToWrapper</span> <span class="operator">=</span> primitiveInt + wrapperInteger;</span><br><span class="line">System.out.println(<span class="string">&quot;结果赋值给 Integer: &quot;</span> + resultToWrapper); <span class="comment">// 输出：30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 情况3：直接在表达式中使用（如打印、作为参数传递）</span></span><br><span class="line"><span class="comment">// 过程：wrapperInteger 被拆箱 -&gt; 相加 -&gt; 输出 int 结果</span></span><br><span class="line">System.out.println(<span class="string">&quot;直接运算并打印: &quot;</span> + (primitiveInt + wrapperInteger)); <span class="comment">// 输出：30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个过程等价于早期没有自动拆箱/装箱时的手动操作：</span></span><br><span class="line"><span class="type">int</span> <span class="variable">manualResult</span> <span class="operator">=</span> primitiveInt + wrapperInteger.intValue(); <span class="comment">// 手动拆箱</span></span><br><span class="line">System.out.println(<span class="string">&quot;手动拆箱等效操作: &quot;</span> + manualResult); <span class="comment">// 输出：30</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="缓存机制（IntegerCache）"><a href="#缓存机制（IntegerCache）" class="headerlink" title="缓存机制（IntegerCache）"></a>缓存机制（IntegerCache）</h4><p>当Java对某些<strong>特定范围</strong>的整型数据进行自动装箱时，它不会每次都创建一个新的对象，而是会从一个预先创建好的<strong>缓存数组</strong>中直接获取对应的包装类对象。</p>
+<p>例如：对于Integer来说，其缓存范围在-128~127(通常情况下这个范围内的数据使用频率较高)，意味着在创建该范围内的对象时，其使用的对象将会重用同一缓存内的对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line">System.out.println(a == b);      <span class="comment">// true (同一对象)</span></span><br><span class="line">System.out.println(a.equals(b)); <span class="comment">// true (值相等)</span></span><br><span class="line"></span><br><span class="line"><span class="type">Integer</span> <span class="variable">c</span> <span class="operator">=</span> <span class="number">128</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">128</span>;</span><br><span class="line">System.out.println(c == d);      <span class="comment">// false (不同对象)</span></span><br><span class="line">System.out.println(c.equals(d)); <span class="comment">// true (值相等)</span></span><br></pre></td></tr></table></figure>
+
+<p>而当</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line">System.out.println(a == b); <span class="comment">// true - 因为指向缓存中的同一个对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 进行 i1 + 1 操作</span></span><br><span class="line"><span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> a + <span class="number">1</span>;      <span class="comment">// 这里会发生什么？</span></span><br><span class="line">System.out.println(a);       <span class="comment">// 仍然是 127</span></span><br><span class="line">System.out.println(b);       <span class="comment">// 仍然是 127</span></span><br><span class="line">System.out.println(result == b); <span class="comment">// false - result 是新的 Integer 对象</span></span><br></pre></td></tr></table></figure>
+
+<p>对于一个Integer类型的值进行运算，其会先拆箱接着装箱</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> i1 + <span class="number">1</span>;</span><br><span class="line"><span class="comment">// 等价于：</span></span><br><span class="line"><span class="comment">// int temp = i1.intValue() + 1;  // 拆箱，temp = 128</span></span><br><span class="line"><span class="comment">// Integer result = Integer.valueOf(temp); // 装箱</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Integer类型是<code>immutable</code>的，一旦创建值就不能改变，想要改变必须先拆箱后装箱。</p>
+</li>
+<li><p>Integer是一个类，而int是基本数据类型，因此Integer可以等于<code>null</code>，而int不行。</p>
+</li>
+<li><p><code> =</code> 运算会比较JVM中的地址，而<code>equals()</code>则有其不同的重写方法，通常情况下会比较对象所含的值。</p>
+</li>
+</ul>
+<h3 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h3><h4 id="valueOf-NaN"><a href="#valueOf-NaN" class="headerlink" title="valueOf()"></a>valueOf()</h4><p> 参数为基本数据类型，返回包装类对象； </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> Integer.valueOf(<span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+
+<p>参数为String字符串（Character类没有以String为  参数的该方法）,返回包装类对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> Integer.valueOf(<span class="string">&quot;100&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="parseInt"><a href="#parseInt" class="headerlink" title="parseInt()"></a>parseInt()</h4><p>参数为字符串，返回基本数据类型；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> Integer.parseInt(<span class="string">&quot;100&quot;</span>;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-数组"><a href="#2-数组" class="headerlink" title="2.数组"></a>2.数组</h2><h3 id="int"><a href="#int" class="headerlink" title="int[]"></a>int[]</h3><p>数组是用于存储<strong>固定大小</strong>、<strong>相同类型</strong>元素的线性数据结构。其继承于Object类型，拥有<code>Objet.toString()</code>,<code>Object.equals()</code>,和<code>Obejct.hashCode()</code>等方法，并且保存在<strong>JVM的堆</strong>中。</p>
+<p>数组的声明方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] a = <span class="keyword">new</span> <span class="title class_">int</span>[];<span class="comment">//声明数组，然后全部初始化为对应值。整数：0，浮点：0.0，boolean：false，引用类型：null</span></span><br><span class="line"><span class="type">int</span>[] a = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;;<span class="comment">//java风格</span></span><br><span class="line"><span class="type">int</span> a[] = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;;<span class="comment">//c风格</span></span><br></pre></td></tr></table></figure>
+
+<p>由于数组一旦声明长度就不可变，其以连续空间的形式存储在堆中，因此在随机访问时，可以通过下标×偏移量加首地址的方式计算出目标地址，随机访问的时间复杂度为<code>O(1)</code>。</p>
+<h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><p>List<E> 继承了Collection<E>， Collection<E> 继承了Iterable<E>。</p>
+<ul>
+<li><code>Collection&lt;E&gt;</code>: 所有集合类（如 Set, List, Queue）的根接口，定义了添加、删除、遍历等基本操作。</li>
+<li><code>Iterable&lt;E&gt;</code>: <code>Collection</code>的父接口，意味着所有 <code>List</code>都可以使用 <strong>for-each 循环</strong>进行迭代。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List (接口)</span><br><span class="line">├── ArrayList (数组实现，随机访问快)</span><br><span class="line">├── LinkedList (链表实现，插入删除快)</span><br><span class="line">├── Vector (线程安全，已过时，所有方法都用Synchronized修饰，性能差)</span><br><span class="line">│   └── Stack (栈实现，继承Vector，同样有性能问题，推荐使用ArrayDueue实现)</span><br><span class="line">└── CopyOnWriteArrayList (线程安全，写时复制)</span><br></pre></td></tr></table></figure>
+
+<h4 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h4><p>ArrayList的底层结构是动态数组，ArrayList <strong>不是线程安全的</strong>，在多线程环境下需要同步。</p>
+<p>如何创建一个线程安全的List：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; syncList = Collections.synchronizedList(<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;());<span class="comment">//使用synchronizedList加锁</span></span><br><span class="line">List&lt;String&gt; safeList = <span class="keyword">new</span> <span class="title class_">CopyOnWriteArrayList</span>&lt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+☆如何创建一个动态扩容数组：ArrayList的底层就是一个 Object[] elementData。默认初始容量为10，当添加元素导致容量不足时，它会创建一个新的更大数组（通常是原容量的1.5 倍，太小扩容频繁，太大浪费空间，1.5倍是经验值），然后使用 Arrays.copyOf()（内部是 System.arraycopy()）将旧数组的数据拷贝到新数组中。
+</div>
+
+<h4 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h4><p>LinkedList的底层结构是双向链表，同样<strong>不是线程安全的</strong>，在多线程环境下需要同步。</p>
+<p>LinkedList可以作为Queue和Dueue的底层结构。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 作为队列使用</span></span><br><span class="line">Queue&lt;String&gt; queue = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;&gt;();</span><br><span class="line">queue.offer(<span class="string">&quot;a&quot;</span>); <span class="comment">// 入队</span></span><br><span class="line">queue.poll();     <span class="comment">// 出队</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 作为双端队列</span></span><br><span class="line">Deque&lt;String&gt; deque = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;&gt;();</span><br><span class="line">deque.offerFirst(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">deque.offerLast(<span class="string">&quot;b&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">ArrayList</th>
+<th align="left">LinkedList</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>底层结构</strong></td>
+<td align="left">动态数组</td>
+<td align="left">双向链表</td>
+</tr>
+<tr>
+<td align="left"><strong>随机访问</strong></td>
+<td align="left">O(1)</td>
+<td align="left">O(n)</td>
+</tr>
+<tr>
+<td align="left"><strong>头部插入</strong></td>
+<td align="left">O(n)</td>
+<td align="left">O(1)</td>
+</tr>
+<tr>
+<td align="left"><strong>尾部插入</strong></td>
+<td align="left">均摊O(1)</td>
+<td align="left">O(1)</td>
+</tr>
+<tr>
+<td align="left"><strong>中间插入</strong></td>
+<td align="left">O(n)</td>
+<td align="left">O(n)</td>
+</tr>
+<tr>
+<td align="left"><strong>内存占用</strong></td>
+<td align="left">较小（连续内存）</td>
+<td align="left">较大（每个元素含两个指针）</td>
+</tr>
+<tr>
+<td align="left"><strong>缓存友好</strong></td>
+<td align="left">是(CPU在取值的时候可以预取)</td>
+<td align="left">否</td>
+</tr>
+</tbody></table>
+<p><strong>如何选择 ArrayList 和 LinkedList？</strong></p>
+<blockquote>
+<p>根据具体场景：如果需要频繁随机访问，选择ArrayList；如果需要频繁在头部插入删除，选择LinkedList。大多数情况下ArrayList是更好的选择，因为CPU缓存友好，实际性能往往优于LinkedList。</p>
+</blockquote>
+<h4 id="stack"><a href="#stack" class="headerlink" title="stack"></a>stack</h4><p>基于vector实现，同样有性能问题，推荐使用ArrayDueue作为栈。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Deque&lt;Integer&gt; stack = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;&gt;();</span><br><span class="line">stack.push(<span class="number">1</span>);</span><br><span class="line">stack.pop();</span><br></pre></td></tr></table></figure>
+
+<h4 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h4><p>写时复制（COW）</p>
+<p>写的时候加锁并复制到新数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">add</span><span class="params">(E e)</span> &#123;</span><br><span class="line">    <span class="keyword">synchronized</span>(lock) &#123;</span><br><span class="line">        Object[] es = getArray();</span><br><span class="line">        <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> es.length;</span><br><span class="line">        es = Arrays.copyOf(es, len + <span class="number">1</span>); <span class="comment">// 复制新数组</span></span><br><span class="line">        es[len] = e;</span><br><span class="line">        setArray(es); <span class="comment">// 替换引用</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>适用场景？</strong></p>
+<p>读多写少（读操作不需要锁，直接访问数组）</p>
+<p>写操作性能较差（需要复制整个数组）</p>
+<h4 id="toCharArray"><a href="#toCharArray" class="headerlink" title="toCharArray()"></a>toCharArray()</h4><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p><strong>快速失败</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">list.add(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">Iterator&lt;String&gt; it = list.iterator();</span><br><span class="line">list.add(<span class="string">&quot;b&quot;</span>); <span class="comment">// 结构修改</span></span><br><span class="line">it.next();     <span class="comment">// 抛出ConcurrentModificationException</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Iterator</code> 在被创建时，会记录下集合的当前<strong>修改次数（modCount）</strong>。当你通过 <code>list.add(&quot;b&quot;)</code> 修改了 <code>list</code> 的结构后，这个修改次数会增加。当迭代器调用 <code>it.next()</code> 方法时，它会<strong>检查</strong>当前集合的修改次数是否与它在创建时记录下来的修改次数一致。一旦不一致，就会抛出ConcurrentModificationException，快速失败</p>
+<p><strong>子列表视图</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>));</span><br><span class="line">List&lt;Integer&gt; subList = list.subList(<span class="number">1</span>, <span class="number">4</span>); <span class="comment">// [2, 3, 4]</span></span><br><span class="line">subList.set(<span class="number">0</span>, <span class="number">99</span>); <span class="comment">// 原list变为[1, 99, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+
+<p><code>subList</code>并非一个新的对象，而是对原对象的一个局部引用</p>
+<h4 id="多维数组"><a href="#多维数组" class="headerlink" title="多维数组"></a><strong>多维数组</strong></h4><p> Java<strong>支持多维数组</strong>，但实际上是<strong>数组的数组</strong>。例如，<code>int[][]</code>是一个一维数组，其中的每个元素又是一个 <code>int[]</code>数组。这意味着多维数组可以是不规则的（每行的长度可以不同）。</p>
+<p>如何创建一个不规则的多维数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 声明并创建外部数组（指定有3行）</span></span><br><span class="line"><span class="type">int</span>[][] jaggedArray = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">3</span>][];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 分别创建每一行的内部数组（指定不同的列数）</span></span><br><span class="line">jaggedArray[<span class="number">0</span>] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">3</span>]; <span class="comment">// 第一行有3列</span></span><br><span class="line">jaggedArray[<span class="number">1</span>] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">2</span>]; <span class="comment">// 第二行有2列</span></span><br><span class="line">jaggedArray[<span class="number">2</span>] = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">4</span>]; <span class="comment">// 第三行有4列</span></span><br></pre></td></tr></table></figure>
+
+<p>Java中的多维数组的地址分配更接近于下图：</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202508260240314.png" alt="image-20250826024059174" style="zoom:33%;" />
+
+<blockquote>
+<p>在C中int[][] 的大小是固定的，其在堆上连续分配，而JVM中int[0]的地址和int[1]的地址并非连续。</p>
+</blockquote>
+<h4 id="常用方法-1"><a href="#常用方法-1" class="headerlink" title="常用方法"></a>常用方法</h4><p><code>Arrays.sort(arr)</code>: 排序（双轴快排）。</p>
+<p><code>Arrays.sort(arr, Comparator.reverseOrder())</code>：由大到小排序。</p>
+<p><code>Arrays.binarySearch(arr, key)</code>: 二分查找（<strong>数组必须已排序</strong>）。</p>
+<p><code>Arrays.fill(arr, value)</code>: 填充值。</p>
+<p><code>Arrays.equals(arr1, arr2)</code>: 比较两个数组的<strong>内容</strong>是否相等（深层次比较元素）。</p>
+<p><code>Arrays.toString(arr)</code>: 将数组转换为字符串表示形式，便于打印调试。</p>
+<p><code>Arrays.asList(T... a)</code>: 返回一个固定大小的列表（<code>List</code>），由原数组生成。<strong>不能进行增删操作</strong>，否则会抛 <code>UnsupportedOperationException</code>。</p>
+<h4 id="高级与底层"><a href="#高级与底层" class="headerlink" title="高级与底层"></a>高级与底层</h4><h5 id="协变数组"><a href="#协变数组" class="headerlink" title="协变数组"></a>协变数组</h5><p>它允许你用一个<strong>子类型数组的引用</strong>赋值给一个<strong>父类型数组的变量</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Object[] objectArray = <span class="keyword">new</span> <span class="title class_">String</span>[<span class="number">10</span>]; <span class="comment">// 编译和运行都可以</span></span><br><span class="line">objectArray[<span class="number">0</span>] = <span class="string">&quot;Hello&quot;</span>; <span class="comment">// OK</span></span><br><span class="line">objectArray[<span class="number">1</span>] = <span class="number">1</span>;       <span class="comment">// 编译通过，但运行时会抛出 ArrayStoreException</span></span><br></pre></td></tr></table></figure>
+
+<p>这种<strong>运行时错误</strong>是协变数组最大的缺陷。为了解决这个问题，Java语言的设计者在泛型（Generics）中引入了**不可变（Invariant）**的概念。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 泛型是不可变的</span></span><br><span class="line"><span class="comment">// List&lt;Animal&gt; animals = new ArrayList&lt;Dog&gt;(); // 编译错误！</span></span><br></pre></td></tr></table></figure>
+
+<p>其提供了<strong>编译时</strong>的类型安全保障，避免了运行时的类型转换错误。</p>
+<h2 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h2><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p>使用一个Hash函数，将Key映射到存储位置Index的数据结构</p>
+<h3 id="哈希实现方法"><a href="#哈希实现方法" class="headerlink" title="哈希实现方法"></a>哈希实现方法</h3><p>☆哈希表如何解决哈希冲突：</p>
+<p>1.链地址法：每个哈希桶存储一个链表（或其他结构），所有哈希到同一位置的元素都插入该链表。插入和查找时只需遍历链表即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">哈希表（数组）</span><br><span class="line">   ↓</span><br><span class="line"> [0] → (key1, val1) → (key5, val5)</span><br><span class="line"> [1] → (key2, val2)</span><br><span class="line"> [2] → null</span><br><span class="line"> [3] → (key3, val3) → (key4, val4)</span><br></pre></td></tr></table></figure>
+
+<p>2.开放地址法：当发生冲突时，按照一定探查方式（如线性探查、二次探查、双重哈希）寻找下一个空位，将元素插入空位。查找时同样按探查顺序查找。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">示例：插入 key1, key2 发生冲突</span><br><span class="line">→ key1 放 index=3</span><br><span class="line">→ key2 冲突，尝试 4、5... 找到空位放入</span><br></pre></td></tr></table></figure>
+
+<p>3.再哈希法：发生冲突时，使用另一个哈希函数或者更大的表重新计算位置，直到找到空位。</p>
+<ul>
+<li>扩容与重哈希：当哈希表负载因子过高时，扩容并重新分配所有元素，减少冲突概率。</li>
+<li>双重哈希法：一个位置被占用时，不再简单地线性探测，而是通过另一个哈希函数决定跳步大小</li>
+</ul>
+<p>$$<br>index &#x3D; (hash_1(key) + i * hash_2(key))%M<br>$$</p>
+<p><strong>Java实现</strong><br>Java的HashMap在JEP 180之前采用链表解决冲突，而之后当链表长度超过阈值（通常为8）通过将每个桶存储一个链表转为红黑树。</p>
+<p>具体来说，当一个哈希桶中的链表长度达到 8（即 TREEIFY_THRESHOLD）时，并且此时哈希表的总容量（capacity）也达到了 64（即 MIN_TREEIFY_CAPACITY），这个链表就会被转换为一棵红黑树。</p>
+<p><strong>改进实现</strong><br>在改进之前，字符串冲突的备选是采用hash32，为每一个String新增一个字段，此改进实现了任何Comparable接口的键类型的性能提升，字符串的hash32字段被移除。</p>
+<p>该改进已经在<code>java.util.concurrent.ConcurrentHashMap</code>,<code>HashMap</code>以及<code>LinkedHashMap</code>中实现。但是在<code>HashTable</code>,<code>WeakHashMap</code>和<code>IdentityHashMap</code>中并不实现。</p>
+<p><strong>为什么要满足容量大于 64？</strong><br>因为如果哈希表容量太小，频繁发生哈希冲突的原因很可能不是哈希函数不好，而是哈希表本身太小。在这种情况下，更好的解决办法是进行扩容（resize），而不是转换为红黑树。</p>
+<p>当哈希表容量小于 64 时，即使链表长度达到了 8，<code>HashMap</code> 也会优先选择扩容，通过重新计算哈希值来分散元素。这样可以避免不必要的树化，减少性能开销。</p>
+<p><strong>为什么链表长度为8</strong><br>泊松分布描述稀有事件在固定时间或者空间内发生的概率，适用于：</p>
+<ul>
+<li>事件独立</li>
+<li>事件发生的平均速率已知并固定</li>
+<li>事件发生的概率极低<br>在哈希表中，设容量为m，插入n个键，每个键落入m个桶内，单个键冲突概率为$( \frac{1}{m})$</li>
+</ul>
+<p><strong>IdentityHashMap基于身份哈希的无冲突设计</strong><br>IdentityHsahMap采用”&#x3D;&#x3D;”而非”equals()”</p>
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+
+</div>
+
+<h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><h3 id="WeakHashMap"><a href="#WeakHashMap" class="headerlink" title="WeakHashMap"></a>WeakHashMap</h3><p><strong>WeakHashMap的弱引用与垃圾回收</strong><br><code>WeakHashMap</code> 的核心特点是键（key）是弱引用。这意味着当一个键对象没有其他强引用指向它时，它随时可能被垃圾回收器（Garbage Collector, GC）回收。</p>
+<p>WeakHashMap内部有一个ReferenceQueue队列维护被GC的键，当一个弱引用键被GC后，其会被添加到这个队列中，在每次put,get,remove时，会检查并清理这个队列，所有被GC的键从WeakHashMap中删除。因此带来了：<br>1） 红黑树的维护开销：红黑树在删除节点时会带来节点的旋转和重新着色。<br>2） GC行为无法预测：导致红黑树的结构也不可预测，会带来巨大的性能开销。</p>
+<h3 id="IdentityHashMap"><a href="#IdentityHashMap" class="headerlink" title="IdentityHashMap"></a>IdentityHashMap</h3><p>IdentityHashMap采用”&#x3D;&#x3D;”而不是”equals()”方法判断key是否相同</p>
+<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>底层实现为Hash表＋双向链表</p>
+<p><strong>LRU缓存设计</strong></p>
+<p><strong>Redis的LRU设计</strong><br>redis的LRU并非严格LRU设计，而是近似的LRU设计，因为严格的LRU在每次访问一个键时需要将其移动到链表头部，同时对于内存和开销都有巨大压力：</p>
+<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><h3 id="ConcurrentSkipListMap"><a href="#ConcurrentSkipListMap" class="headerlink" title="ConcurrentSkipListMap"></a>ConcurrentSkipListMap</h3><h3 id="布谷鸟哈希"><a href="#布谷鸟哈希" class="headerlink" title="布谷鸟哈希"></a>布谷鸟哈希</h3><h4 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h4><p>一个键（key）在哈希表中有<strong>两个（或多个）可能的存放位置</strong>，由两个不同的哈希函数决定。就像一只布谷鸟蛋可以放在两个不同的巢中。</p>
+<ul>
+<li><strong>核心机制</strong>：<strong>“踢出”</strong>。当要插入一个新键时，如果它的两个位置都被占了，它不是去找下一个空位（像线性探测那样），而是<strong>随机选择其中一个位置，将占据该位置的老键踢出去</strong>，然后为这个被踢出的老键寻找它的另一个备选位置。这个过程可能会递归地进行，形成一连串的“踢出”操作。</li>
+</ul>
+<h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><p>假设一个键 <code>X</code>有两个候选位置：<code>h1(X)</code>和 <code>h2(X)</code>。</p>
+<ol>
+<li><strong>插入</strong>：计算 <code>h1(X)</code>和 <code>h2(X)</code>。如果两个位置有一个是空的，直接放入。如果两个位置都满了，随机选择一个（比如 <code>h1(X)</code>），将占据该位置的老键 <code>Y</code>踢出，将 <code>X</code>放入。现在，为被踢出的 <code>Y</code>寻找它的另一个家（即 <code>h2(Y)</code>）。如果 <code>h2(Y)</code>是空的，放入。如果 <code>h2(Y)</code>也被占了，重复上述“踢出”过程，直到所有键都安定下来，或者达到最大重试次数（此时需要扩容或重新构建哈希表）。</li>
+<li><strong>查找</strong>：极其高效。只需检查两个确定的位置 <code>h1(X)</code>和 <code>h2(X)</code>。时间复杂度是严格的 <strong>O(1)</strong>，没有链式遍历或长序列的探测。</li>
+<li><strong>删除</strong>：同样，检查两个位置，如果找到则删除。</li>
+</ol>
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>超快查询</strong>：最坏情况下也只有两次内存访问，非常适合延迟敏感的应用。<strong>高负载因子</strong>：通过优化可以实现超过 90% 的空间利用率，而传统线性探测在 80% 时性能就已很差。</li>
+<li><strong>缺点</strong>：<strong>插入不稳定</strong>：插入操作可能在最坏情况下耗时很长（因为连续的踢出循环）。<strong>可能插入失败</strong>：即使表没满，也可能因为循环踢出而无法插入，需要扩容。</li>
+</ul>
+<h3 id="罗宾汉哈希"><a href="#罗宾汉哈希" class="headerlink" title="罗宾汉哈希"></a>罗宾汉哈希</h3><h4 id="核心思想-1"><a href="#核心思想-1" class="headerlink" title="核心思想"></a>核心思想</h4><p>在<strong>开放寻址法</strong>（如线性探测）的框架下，它通过比较键的“探测距离”来实现公平。</p>
+<ul>
+<li><strong>核心概念：探测距离</strong>：一个键的探测距离是指它从自己的初始哈希位置（由哈希函数计算得出）需要移动多少步（探测多少次）才找到现在这个位置。</li>
+<li><strong>核心机制</strong>：<strong>“劫富济贫”</strong>。当一个新的键要插入时，如果目标位置已被占用，它会比较自己当前的探测距离（此时为0）和该位置上老键的探测距离。如果<strong>新键的探测距离大于</strong>老键的探测距离（说明新键“更贫瘠”），它就有权“抢走”这个位置。老键被踢出，然后像新键一样继续为自己寻找新位置。否则，新键继续向后探测。</li>
+</ul>
+<p>这个过程保证了所有键的“贫富差距”不会太大——即<strong>没有哪个键会离它的理想位置特别远</strong>。</p>
+<h4 id="工作流程（以线性探测为例）"><a href="#工作流程（以线性探测为例）" class="headerlink" title="工作流程（以线性探测为例）"></a>工作流程（以线性探测为例）</h4><ol>
+<li><strong>插入键 <code>X</code></strong>：计算初始位置 <code>pos = h(X)</code>，设置新键 <code>X</code>的探测距离 <code>Dnew = 0</code>。如果 <code>pos</code>为空，直接插入。如果 <code>pos</code>被键 <code>Y</code>占据，获取 <code>Y</code>的探测距离 <code>Dold</code>。比较 <code>Dnew</code>和 <code>Dold</code>：如果 <code>Dnew &gt; Dold</code>（“新”的比“老”的更惨）：将 <code>Y</code>踢出，将 <code>X</code>放入 <code>pos</code>。然后被踢出的 <code>Y</code>以 <code>Dold</code>为起点，继续向后探测寻找新家。否则（<code>Dnew &lt;= Dold</code>）：<code>X</code>的 <code>Dnew</code>加1，继续探测下一个位置。</li>
+<li><strong>查找与删除</strong>：与标准线性探测类似，但可以利用探测距离的信息进行优化（例如，如果当前探测距离已经大于正在查找的键的探测距离，说明它不可能在更远的位置，可提前结束）。</li>
+</ol>
+<h4 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>降低最坏情况</strong>：显著减少了长探测序列的发生，使所有操作的时间方差变小，性能更可预测。<strong>更高的平均负载因子</strong>：比传统开放寻址法能承受更高的负载。</li>
+<li><strong>缺点</strong>：<strong>实现更复杂</strong>：需要为每个槽存储键的探测距离信息。<strong>删除操作更麻烦</strong>：需要像线性探测一样使用“墓碑”标记。</li>
+</ul>
+<h3 id="Hopscotch-Hashing（跳房子哈希）"><a href="#Hopscotch-Hashing（跳房子哈希）" class="headerlink" title="Hopscotch Hashing（跳房子哈希）"></a>Hopscotch Hashing（跳房子哈希）</h3><p>Hopscotch Hashing 是一种基于<strong>线性探测</strong>的开放寻址法，它的核心目标是<strong>将每个键的探测序列长度控制在一个非常小的常数范围内</strong>，从而获得稳定、可预测的查询性能。</p>
+<h4 id="核心思想：邻域概念"><a href="#核心思想：邻域概念" class="headerlink" title="核心思想：邻域概念"></a>核心思想：邻域概念</h4><p>它为每个哈希槽位 <code>i</code>定义了一个逻辑上的<strong>邻域</strong>。这个邻域包含了从 <code>i</code>开始向后连续的 <code>H</code>个槽位（例如 <code>H=32</code>，包含槽位 <code>i</code>到 <code>i+31</code>）。</p>
+<ul>
+<li><strong>核心规则</strong>：一个哈希值为 <code>h(k)</code>的键 <code>k</code>，最终必须被存储在它的<strong>初始槽位 <code>h(k)</code>的邻域内</strong>。</li>
+<li>这保证了查找该键最多只需要检查 <code>H</code>个槽位，实现了 <strong>O(1)</strong> 的严格查询时间。</li>
+</ul>
+<h4 id="工作流程与关键操作"><a href="#工作流程与关键操作" class="headerlink" title="工作流程与关键操作"></a>工作流程与关键操作</h4><ol>
+<li><strong>插入</strong>当试图将一个键 <code>X</code>插入到它的初始位置 <code>pos = h(X)</code>时，如果该位置已被占用，插入过程不是简单地线性向后探测，而是包含一个关键的<strong>重排过程</strong>：<ul>
+<li><strong>a) 顺序探测</strong>：从 <code>pos</code>开始，线性地向后查找，直到找到一个空槽。</li>
+<li><strong>b) 检查距离</strong>：计算这个空槽到初始位置 <code>pos</code>的距离。如果这个距离小于邻域大小 <code>H</code>（即空槽在邻域内），那么直接将 <code>X</code>放入该空槽即可。</li>
+<li><strong>c) 重排</strong>：如果空槽太远（距离 &gt;&#x3D; <code>H</code>），就需要进行“跳房子”式的重排。算法会从空槽开始<strong>向前扫描</strong>（最多扫描 <code>H-1</code>个槽位），寻找一个键 <code>Y</code>。这个键 <code>Y</code>需要满足一个条件：<strong>如果把它移动到后面的空槽，它仍然在自己的初始槽位的邻域内</strong>。找到这样的 <code>Y</code>后，将 <code>Y</code>移动到空槽中，此时 <code>Y</code>原来的位置就变成了新的空槽。这个操作相当于让空槽向前“跳”了一步。重复这个过程，直到空槽被“搬运”到初始位置 <code>pos</code>的邻域内，然后将 <code>X</code>放入这个空槽。</li>
+</ul>
+</li>
+<li><strong>查找</strong>仅在初始槽位 <code>h(X)</code>的邻域（<code>H</code>个槽位）内进行线性查找。因为规则保证了键一定在这个范围内。</li>
+<li><strong>删除</strong>找到并删除键，然后标记为“空”。</li>
+</ol>
+<h4 id="优缺点-2"><a href="#优缺点-2" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>极佳的缓存局部性</strong>：由于键被限制在一个小邻域内，查找时内存访问集中，效率高。<strong>稳定的高性能</strong>：查询和插入在最坏情况下都是 <strong>O(1)</strong>，因为只与常数 <code>H</code>有关。</li>
+<li><strong>缺点</strong>：<strong>插入可能失败</strong>：即使表中有空位，但如果无法通过重排将空槽移入邻域，插入仍然会失败，需要扩容。<strong>实现稍复杂</strong>：重排逻辑比简单的线性探测复杂。</li>
+</ul>
+<h3 id="Extendible-Hashing（可扩展哈希）"><a href="#Extendible-Hashing（可扩展哈希）" class="headerlink" title="Extendible Hashing（可扩展哈希）"></a>Extendible Hashing（可扩展哈希）</h3><p>Extendible Hashing 是为<strong>磁盘等外部存储</strong>设计的哈希方法，其核心目标是<strong>在数据量增长时最小化磁盘I&#x2F;O次数</strong>。它通过一种“目录”机制来实现动态的、平滑的扩容。</p>
+<h4 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h4><ol>
+<li><strong>目录</strong>：一个在内存中维护的数组，每个目录项是一个指针，指向一个<strong>页（桶）</strong>。目录的大小是 2^G，其中 <code>G</code>称为<strong>全局深度</strong>。</li>
+<li><strong>页（桶）</strong>：实际存储键值对的数据块（通常对应一个磁盘页）。每个页有一个<strong>局部深度</strong> <code>L</code>，满足 <code>L &lt;= G</code>。</li>
+</ol>
+<h4 id="工作流程-1"><a href="#工作流程-1" class="headerlink" title="工作流程"></a>工作流程</h4><ol>
+<li><strong>哈希计算</strong>：对键 <code>k</code>计算哈希值 <code>h(k)</code>，然后取这个哈希值的<strong>后 <code>G</code>位</strong>（全局深度位）作为目录索引。例如，<code>G=3</code>，就取后3位，目录有8项。</li>
+<li><strong>查找</strong>：根据后 <code>G</code>位找到目录项，然后访问该目录项指向的页，在页内进行线性查找。<strong>只需一次磁盘I&#x2F;O</strong>。</li>
+<li><strong>插入与分裂（核心）</strong>：找到键对应的页。如果页内还有空间，直接插入。如果页已满，则需要<strong>页分裂</strong>：a. 增加该页的<strong>局部深度</strong> <code>L</code>（例如从1增加到2）。b. 创建一个新页。c. 将原页中的所有键重新哈希，根据它们哈希值的<strong>第 <code>L</code>位</strong>（新增加的这一位）进行分配。位为0的留在原页，位为1的移到新页。d. 更新目录：因为全局深度 <code>G</code>可能等于或大于新的局部深度 <code>L</code>。算法需要确保所有索引位<strong>后 <code>L</code>位</strong>与原页相同的目录项都指向原页，所有索引位<strong>后 <code>L</code>位</strong>与新页相同的目录项都指向新页。<strong>情况一：<code>L &lt;= G</code></strong>。只需更新部分目录指针。这是最常见的情况，扩容非常高效。<strong>情况二：<code>L &gt; G</code></strong>。这意味着目录需要翻倍（<strong>目录扩容</strong>）。将 <code>G</code>加1，目录大小翻倍，然后重新设置所有目录项的指针。</li>
+</ol>
+<h4 id="优缺点-3"><a href="#优缺点-3" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>高效扩容</strong>：扩容时通常只需要分裂一个满的页，而不是重建整个表，成本低。<strong>一次磁盘访问</strong>：在任何情况下，查找一个键都只需要一次磁盘I&#x2F;O（因为目录在内存中，能直接定位到正确的页）。</li>
+<li><strong>缺点</strong>：<strong>目录可能很大</strong>：当数据量非常大时，目录本身可能变得很大，虽然它在内存中，但仍是一种开销。<strong>空间可能浪费</strong>：如果数据分布不均，多个目录项可能指向同一个页，造成目录空间浪费。</li>
+</ul>
+<h1 id="进阶数据结构"><a href="#进阶数据结构" class="headerlink" title="进阶数据结构"></a>进阶数据结构</h1><h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><h2 id="优先队列"><a href="#优先队列" class="headerlink" title="优先队列"></a>优先队列</h2><p>普通队列按照<strong>先进先出</strong>的方式出入队。</p>
+<p>优先队列则是 <strong>按照元素的优先级出队</strong>，而不是进入的先后顺序。</p>
+<p>Java中实现了<code>PriorityQueue&lt;E&gt;</code>的方法，默认为最小堆。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestPQ</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq = <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>&lt;&gt;();</span><br><span class="line">        pq.offer(<span class="number">5</span>);</span><br><span class="line">        pq.offer(<span class="number">1</span>);</span><br><span class="line">        pq.offer(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(pq.poll()); <span class="comment">// 1 （最小的先出）</span></span><br><span class="line">        System.out.println(pq.poll()); <span class="comment">// 3</span></span><br><span class="line">        System.out.println(pq.poll()); <span class="comment">// 5</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以传入自定义的比较器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PriorityQueue&lt;Integer&gt; maxHeap = <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>&lt;&gt;(Comparator.reverseOrder());</span><br><span class="line">maxHeap.offer(<span class="number">5</span>);</span><br><span class="line">maxHeap.offer(<span class="number">1</span>);</span><br><span class="line">maxHeap.offer(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(maxHeap.poll()); <span class="comment">// 5 （最大的先出）</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ul>
+<li><strong>任务调度</strong>：高优先级任务先执行。</li>
+<li><strong>Dijkstra 最短路径算法</strong>：每次取“当前距离最小的点”。</li>
+<li><strong>Huffman 编码</strong>：每次合并权值最小的两棵树。</li>
+<li><strong>Top-K 问题</strong>：找出最大的 K 个元素。</li>
+</ul>
+<h2 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h2><h2 id="Deque-双端队列"><a href="#Deque-双端队列" class="headerlink" title="Deque 双端队列"></a>Deque 双端队列</h2><h2 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h2><h2 id="图"><a href="#图" class="headerlink" title="图"></a>图</h2><h2 id="并查集DSU"><a href="#并查集DSU" class="headerlink" title="并查集DSU"></a>并查集DSU</h2><h1 id="高级数据结构"><a href="#高级数据结构" class="headerlink" title="高级数据结构"></a>高级数据结构</h1><h2 id="跳表"><a href="#跳表" class="headerlink" title="跳表"></a>跳表</h2><h2 id="线段树"><a href="#线段树" class="headerlink" title="线段树"></a>线段树</h2><h2 id="前缀树"><a href="#前缀树" class="headerlink" title="前缀树"></a>前缀树</h2><h2 id="AVL"><a href="#AVL" class="headerlink" title="AVL"></a>AVL</h2><h2 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h2><h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><p>布隆过滤器是一种空间效率极高的概率型数据结构，用于判断一个元素是否在集合中。它通过多个哈希函数将元素映射到位数组的不同位置，插入时将对应位设为1，查询时只要有一个位为0则一定不在集合中，否则可能在集合中（存在误判）。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>占用空间小，插入和查询速度快。</li>
+<li>适合大数据场景下的快速去重和存在性判断。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>存在一定的误判率（假阳性），无法删除元素（标准实现）。</li>
+<li>不支持元素的遍历。</li>
+</ul>
+<p><strong>应用场景：</strong></p>
+<ul>
+<li>数据库缓存过滤（如Redis缓存穿透防护）</li>
+<li>网络黑名单检测</li>
+<li>大规模去重（如爬虫URL判重）</li>
+</ul>
+<p><strong>时间复杂度：</strong></p>
+<ul>
+<li>插入操作(Add): O(K)</li>
+<li>查询操作(Check): O(K)<br>k是哈希函数的数量</li>
+</ul>
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+☆★布隆过滤器的原理是用 k 个哈希函数将元素映射到位数组的 k 个位置。插入时，需要对元素进行 k 次哈希并设置 k 个位；查询时，需要对元素进行 k 次哈希并检查 k 个位。因此，时间复杂度与哈希函数数量 k 成线性关系，通常 k 是常数，所以实际操作接近 O(1)。
+</div>
+
+<h3 id="Java实现"><a href="#Java实现" class="headerlink" title="Java实现"></a>Java实现</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleBloomFilter</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> size;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span>[] bits;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span>[] seeds = &#123;<span class="number">7</span>, <span class="number">11</span>, <span class="number">13</span>, <span class="number">31</span>, <span class="number">37</span>, <span class="number">61</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">SimpleBloomFilter</span><span class="params">(<span class="type">int</span> capacity)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.size = capacity;</span><br><span class="line">        <span class="built_in">this</span>.bits = <span class="keyword">new</span> <span class="title class_">boolean</span>[size];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="title function_">hash</span><span class="params">(String value, <span class="type">int</span> seed)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; value.length(); i++) &#123;</span><br><span class="line">            result = seed * result + value.charAt(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (size - <span class="number">1</span>) &amp; result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(String value)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> seed : seeds) &#123;</span><br><span class="line">            bits[hash(value, seed)] = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">contains</span><span class="params">(String value)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> seed : seeds) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!bits[hash(value, seed)]) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="第三方库"><a href="#第三方库" class="headerlink" title="第三方库"></a>第三方库</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BloomFilter&lt;String&gt; bloomFilter = BloomFilter.create(</span><br><span class="line">    Funnels.stringFunnel(Charset.defaultCharset()), </span><br><span class="line">    <span class="number">1000</span>, <span class="comment">// 预期元素数量</span></span><br><span class="line">    <span class="number">0.01</span>  <span class="comment">// 误报率</span></span><br><span class="line">);</span><br><span class="line">bloomFilter.put(<span class="string">&quot;item1&quot;</span>);</span><br><span class="line">System.out.println(bloomFilter.mightContain(<span class="string">&quot;item1&quot;</span>)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="有序哈希表LinkedHashMap"><a href="#有序哈希表LinkedHashMap" class="headerlink" title="有序哈希表LinkedHashMap"></a>有序哈希表LinkedHashMap</h2><h2 id="WeakHashMap-1"><a href="#WeakHashMap-1" class="headerlink" title="WeakHashMap"></a>WeakHashMap</h2><h2 id="EnumSet"><a href="#EnumSet" class="headerlink" title="EnumSet"></a>EnumSet</h2><h2 id="EnumMap-1"><a href="#EnumMap-1" class="headerlink" title="EnumMap"></a>EnumMap</h2><h2 id="地址哈希表IdentityHashMap"><a href="#地址哈希表IdentityHashMap" class="headerlink" title="地址哈希表IdentityHashMap"></a>地址哈希表IdentityHashMap</h2><h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><h2 id="时间轮Time-Wheel"><a href="#时间轮Time-Wheel" class="headerlink" title="时间轮Time Wheel"></a>时间轮Time Wheel</h2><h2 id="位图BitMap"><a href="#位图BitMap" class="headerlink" title="位图BitMap"></a>位图BitMap</h2><p>BitMap是一段把二进制位当做String来操作的一组位操作接口。例如要存储列</p>
+<table>
+<thead>
+<tr>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+</tr>
+</thead>
+</table>
+<h3 id="位集-BitSet"><a href="#位集-BitSet" class="headerlink" title="位集 BitSet"></a>位集 BitSet</h3><ul>
+<li><p>是对位图的一种<strong>抽象&#x2F;封装</strong>。</p>
+</li>
+<li><p>在 Java 里，<code>java.util.BitSet</code> 是一个类，内部本质上就是用 <code>long[]</code> 存储位，但对外暴露了更友好的 API（如 <code>set()</code>, <code>get()</code>, <code>clear()</code>, <code>and()</code>, <code>or()</code> 等）。</p>
+</li>
+<li><p>强调的是「集合语义」——把每个 bit 看作集合元素的 membership。</p>
+</li>
+</ul>
+<p>java中的BitSet采用<code>Long[]</code>实现，其索引是int型，即最大值在2^31-1，约为21亿。</p>
+<p>BitMap最常用的方法是</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">John Doe</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/')">数据结构</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=数据结构&amp;url=http://example.com/2025/08/12/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/08/12/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">JVM类加载</div></div></a></div><div class="next-post pull-right"><a href="/2025/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">分布式数据结构</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.基本数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%B2%BE%E5%BA%A6"><span class="toc-number">1.1.1.</span> <span class="toc-text">浮点数精度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#float-%E4%B8%8E-double"><span class="toc-number">1.1.2.</span> <span class="toc-text">float 与 double</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.1.3.</span> <span class="toc-text">转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">隐式转换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">强制转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%A3%85%E7%AE%B1%E3%80%81%E6%8B%86%E7%AE%B1"><span class="toc-number">1.1.4.</span> <span class="toc-text">数据装箱、拆箱</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E6%97%B6%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E3%80%81%E6%8B%86%E7%AE%B1"><span class="toc-number">1.1.4.2.</span> <span class="toc-text">运算时自动装箱、拆箱</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6%EF%BC%88IntegerCache%EF%BC%89"><span class="toc-number">1.1.4.3.</span> <span class="toc-text">缓存机制（IntegerCache）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.5.</span> <span class="toc-text">常用方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#valueOf-NaN"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">valueOf()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#parseInt"><span class="toc-number">1.1.5.2.</span> <span class="toc-text">parseInt()</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.</span> <span class="toc-text">2.数组</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#int"><span class="toc-number">1.2.1.</span> <span class="toc-text">int[]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#List"><span class="toc-number">1.2.2.</span> <span class="toc-text">List</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ArrayList"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">ArrayList</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LinkedList"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">LinkedList</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#stack"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">stack</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CopyOnWriteArrayList"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">CopyOnWriteArrayList</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#toCharArray"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">toCharArray()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E6%80%A7"><span class="toc-number">1.2.2.6.</span> <span class="toc-text">特性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.2.7.</span> <span class="toc-text">多维数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95-1"><span class="toc-number">1.2.2.8.</span> <span class="toc-text">常用方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E4%B8%8E%E5%BA%95%E5%B1%82"><span class="toc-number">1.2.2.9.</span> <span class="toc-text">高级与底层</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8D%8F%E5%8F%98%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.2.9.1.</span> <span class="toc-text">协变数组</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%93%BE%E8%A1%A8"><span class="toc-number">1.3.</span> <span class="toc-text">链表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%88"><span class="toc-number">1.4.</span> <span class="toc-text">栈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%9F%E5%88%97"><span class="toc-number">1.5.</span> <span class="toc-text">队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E8%A1%A8"><span class="toc-number">1.6.</span> <span class="toc-text">哈希表</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95"><span class="toc-number">1.6.1.</span> <span class="toc-text">哈希实现方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HashMap"><span class="toc-number">1.6.2.</span> <span class="toc-text">HashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HashTable"><span class="toc-number">1.6.3.</span> <span class="toc-text">HashTable</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#WeakHashMap"><span class="toc-number">1.6.4.</span> <span class="toc-text">WeakHashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IdentityHashMap"><span class="toc-number">1.6.5.</span> <span class="toc-text">IdentityHashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LinkedHashMap"><span class="toc-number">1.6.6.</span> <span class="toc-text">LinkedHashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EnumMap"><span class="toc-number">1.6.7.</span> <span class="toc-text">EnumMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ConcurrentSkipListMap"><span class="toc-number">1.6.8.</span> <span class="toc-text">ConcurrentSkipListMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%83%E8%B0%B7%E9%B8%9F%E5%93%88%E5%B8%8C"><span class="toc-number">1.6.9.</span> <span class="toc-text">布谷鸟哈希</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><span class="toc-number">1.6.9.1.</span> <span class="toc-text">核心思想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.6.9.2.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">1.6.9.3.</span> <span class="toc-text">优缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%97%E5%AE%BE%E6%B1%89%E5%93%88%E5%B8%8C"><span class="toc-number">1.6.10.</span> <span class="toc-text">罗宾汉哈希</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3-1"><span class="toc-number">1.6.10.1.</span> <span class="toc-text">核心思想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BB%A5%E7%BA%BF%E6%80%A7%E6%8E%A2%E6%B5%8B%E4%B8%BA%E4%BE%8B%EF%BC%89"><span class="toc-number">1.6.10.2.</span> <span class="toc-text">工作流程（以线性探测为例）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9-1"><span class="toc-number">1.6.10.3.</span> <span class="toc-text">优缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hopscotch-Hashing%EF%BC%88%E8%B7%B3%E6%88%BF%E5%AD%90%E5%93%88%E5%B8%8C%EF%BC%89"><span class="toc-number">1.6.11.</span> <span class="toc-text">Hopscotch Hashing（跳房子哈希）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%EF%BC%9A%E9%82%BB%E5%9F%9F%E6%A6%82%E5%BF%B5"><span class="toc-number">1.6.11.1.</span> <span class="toc-text">核心思想：邻域概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E4%B8%8E%E5%85%B3%E9%94%AE%E6%93%8D%E4%BD%9C"><span class="toc-number">1.6.11.2.</span> <span class="toc-text">工作流程与关键操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9-2"><span class="toc-number">1.6.11.3.</span> <span class="toc-text">优缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Extendible-Hashing%EF%BC%88%E5%8F%AF%E6%89%A9%E5%B1%95%E5%93%88%E5%B8%8C%EF%BC%89"><span class="toc-number">1.6.12.</span> <span class="toc-text">Extendible Hashing（可扩展哈希）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.6.12.1.</span> <span class="toc-text">核心组件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B-1"><span class="toc-number">1.6.12.2.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9-3"><span class="toc-number">1.6.12.3.</span> <span class="toc-text">优缺点</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">进阶数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A0%86"><span class="toc-number">2.1.</span> <span class="toc-text">堆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97"><span class="toc-number">2.2.</span> <span class="toc-text">优先队列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">2.2.1.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TreeMap"><span class="toc-number">2.3.</span> <span class="toc-text">TreeMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Deque-%E5%8F%8C%E7%AB%AF%E9%98%9F%E5%88%97"><span class="toc-number">2.4.</span> <span class="toc-text">Deque 双端队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TreeSet"><span class="toc-number">2.5.</span> <span class="toc-text">TreeSet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE"><span class="toc-number">2.6.</span> <span class="toc-text">图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E6%9F%A5%E9%9B%86DSU"><span class="toc-number">2.7.</span> <span class="toc-text">并查集DSU</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">高级数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%B3%E8%A1%A8"><span class="toc-number">3.1.</span> <span class="toc-text">跳表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%BF%E6%AE%B5%E6%A0%91"><span class="toc-number">3.2.</span> <span class="toc-text">线段树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E6%A0%91"><span class="toc-number">3.3.</span> <span class="toc-text">前缀树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AVL"><span class="toc-number">3.4.</span> <span class="toc-text">AVL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-number">3.5.</span> <span class="toc-text">红黑树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-number">3.6.</span> <span class="toc-text">布隆过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.6.1.</span> <span class="toc-text">Java实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93"><span class="toc-number">3.6.2.</span> <span class="toc-text">第三方库</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BA%8F%E5%93%88%E5%B8%8C%E8%A1%A8LinkedHashMap"><span class="toc-number">3.7.</span> <span class="toc-text">有序哈希表LinkedHashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WeakHashMap-1"><span class="toc-number">3.8.</span> <span class="toc-text">WeakHashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EnumSet"><span class="toc-number">3.9.</span> <span class="toc-text">EnumSet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EnumMap-1"><span class="toc-number">3.10.</span> <span class="toc-text">EnumMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%B0%E5%9D%80%E5%93%88%E5%B8%8C%E8%A1%A8IdentityHashMap"><span class="toc-number">3.11.</span> <span class="toc-text">地址哈希表IdentityHashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ConcurrentHashMap"><span class="toc-number">3.12.</span> <span class="toc-text">ConcurrentHashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E8%BD%AETime-Wheel"><span class="toc-number">3.13.</span> <span class="toc-text">时间轮Time Wheel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%8D%E5%9B%BEBitMap"><span class="toc-number">3.14.</span> <span class="toc-text">位图BitMap</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8D%E9%9B%86-BitSet"><span class="toc-number">3.14.1.</span> <span class="toc-text">位集 BitSet</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/22/Guava/" title="Guava包">Guava包</a><time datetime="2025-12-21T19:29:29.000Z" title="Created 2025-12-22 03:29:29">2025-12-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/15/encrypt/" title="encrypt">encrypt</a><time datetime="2025-12-14T19:09:50.000Z" title="Created 2025-12-15 03:09:50">2025-12-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/20/%E4%B8%AA%E4%BA%BA%E4%BB%8B%E7%BB%8D/" title="No title">No title</a><time datetime="2025-10-20T02:59:08.663Z" title="Created 2025-10-20 10:59:08">2025-10-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/15/%E7%BD%91%E7%BB%9C/Untitled%201/" title="No title">No title</a><time datetime="2025-10-15T07:38:09.890Z" title="Created 2025-10-15 15:38:09">2025-10-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/14/linux%E5%86%85%E6%A0%B8/" title="No title">No title</a><time datetime="2025-10-14T01:43:05.786Z" title="Created 2025-10-14 09:43:05">2025-10-14</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="John Doe" target="_blank">John Doe</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">Articles</div><div class="length-num">36</div></a><a href="/tags/" title="tag"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/" title="category"><div class="headline">Categories</div><div class="length-num">21</div></a></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="Display Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>Display Mode</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 0.88rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 0.88rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 0.88rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 0.88rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">繁</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 John Doe 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

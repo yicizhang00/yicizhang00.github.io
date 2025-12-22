@@ -1,0 +1,501 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>JavaIO模型 | Hexo</title><meta name="author" content="John Doe"><meta name="copyright" content="John Doe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="JavaIO模型"><meta name="application-name" content="JavaIO模型"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="JavaIO模型"><meta property="og:url" content="http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="同步&amp;#x2F;异步&amp;#x2F;阻塞&amp;#x2F;非阻塞在介绍IO前，首先需要了解同步&amp;#x2F;异步&amp;#x2F;阻塞&amp;#x2F;非阻塞的区别。 同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。 同步 发起调用后，必须主动轮询获取返回结果。 执行流程是 调用方主动等待结果。  异步 发起调"><meta property="og:locale" content="en"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="John Doe"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="同步&amp;#x2F;异步&amp;#x2F;阻塞&amp;#x2F;非阻塞在介绍IO前，首先需要了解同步&amp;#x2F;异步&amp;#x2F;阻塞&amp;#x2F;非阻塞的区别。 同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。 同步 发起调用后，必须主动轮询获取返回结果。 执行流程是 调用方主动等待结果。  异步 发起调"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"Author: John Doe","link":"Link: ","source":"Source: Hexo","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.","copySuccess":"Copy success, copy and reprint please mark the address of this article"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"Traditional Chinese Activated Manually","cht_to_chs":"Simplified Chinese Activated Manually","day_to_night":"Dark Mode Activated Manually","night_to_day":"Light Mode Activated Manually","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Hexo',
+  title: 'JavaIO模型',
+  postAI: '',
+  pageFillDescription: '同步x2F异步x2F阻塞x2F非阻塞, 同步, 异步, 阻塞, 非阻塞, Unix IO模型, 同步阻塞IO, 同步非阻塞IO, IO多路复用, 信号驱动IO, 异步IO, Java IO模型, BIO, BIO缺陷, BIO+多线程, BIO+线程池, NIO, 使用ByteBuffer, 使用直接内存, 传统 IO, NIO Channel, AIO, 传统IO流同步异步阻塞非阻塞在介绍前首先需要了解同步异步阻塞非阻塞的区别同步与异步是事件的调用方式而阻塞与非阻塞是线程的执行方式同步发起调用后必须主动轮询获取返回结果执行流程是调用方主动等待结果异步发起调用后不用等结果立刻返回结果准备好后系统会通过回调事件通知告诉你阻塞调用时如果没结果线程会停在那里不能干别的一直等到有结果才能返回非阻塞调用时如果没结果立刻返回错误码状态不会卡住线程应用程序可以再次尝试或去干别的事类型同步异步阻塞非阻塞特点同步阻塞同步阻塞最传统简单但性能差同步非阻塞同步非阻塞需要轮询多次调用效率低异步阻塞异步阻塞等待通知时线程挂起异步非阻塞异步非阻塞最优事件驱动模型模型模型有种模型同步阻塞调用方式等用户发起系统调用会阻塞当前线程直到有数据到达并拷贝到用户缓冲区特点简单易用但一个线程只能处理一个连接同步非阻塞调用方式把设置为系统调用立即返回如果没有数据立刻返回错误码并且不断调用轮询如果有数据拷贝到用户空间后返回直到数据到了内核空间这一次调用后在等待数据从内核空间拷贝到用户空间这段时间里线程还是阻塞的等数据到了用户空间再把线程叫醒非阻塞一般配合轮询使用如果没有数据返回线程可以先去干别的事但是需要轮询保证下一轮可以继续获取数据没数据继续轮询忙等对方关闭连接读到数据多路复用代表原理把多个注册到一个多路复用器内核帮你监听哪个可读可写再通知你特点一个线程就能管理成千上万个连接常用于高并发服务器典型数量有限通常用链表存储数量无限制但性能随连接数线性下降特有事件驱动性能好没有数据继续下一轮信号驱动调用方式进程给注册一个信号处理函数内核数据就绪时发送信号通知进程再调用读取特点比较少用代码复杂典型场景需要中断通知的特殊应用异步调用方式进程发起后立即返回内核在数据准备好并拷贝到用户缓冲区后通知进程回调事件特点真正的异步应用层不需要关心拷贝过程但在中支持有限很多库用线程池模拟典型场景模型是主要在包中采用流模型实现包提供了我们最熟知的一些功能比如抽象输入输出流等交互方式是同步阻塞的方式也就是说在读取输入流或者写入输出流时在读写动作完成之前线程会一直阻塞在那里它们之间的调用是可靠的线性顺序采用的服务端通常由一个独立的线程负责监听客户端连接服务端一般在循环中调用方法等待客户端的连接请求一旦接收到一个连接请求就可以建立并基于这个进行读写操作此时不能再接收其他客户端连接请求只能等待当前连接的操作执行完成缺陷如果要让通信模型能够同时处理多个客户端请求就必须使用多线程主要原因是涉及的三个主要函数都是同步阻塞的但会造成不必要的线程开销不过可以通过线程池机制改善线程池还可以让线程的创建和回收成本相对较低即使可以用线程池略微优化但是会消耗宝贵的线程资源并且在百万级并发场景下也撑不住如果并发访问量增加会导致线程数急剧膨胀可能会导致线程堆栈溢出创建新线程失败等问题最终导致进程宕机或者僵死不能对外提供服务多线程多线程服务器启动端口阻塞等待客户端连接客户端连接每来一个连接就开一个新线程去处理收到消息回显多线程简单粗暴但线程数不受控适合小规模并发线程池线程池服务器启动端口固定大小的线程池避免无限创建线程客户端连接把任务交给线程池执行收到消息线程池线程数可控性能更稳但依旧受限于阻塞的效率瓶颈即在中引入包中包提供了等新的抽象可以构建多路复用的同步非阻塞程序同时提供了更接近操作系统底层的高性能数据操作方式可读写的双向通道如数据容器带操作前后要调用等方法正确转换读写状态在里所有的无论是还是都必须通过作为中转站并不会直接返回原始字节数组而是把数据写入你提供的同样写数据时你要先把数据放进再由把里的数据送到内核网络所以就是线程和之间的数据暂存区事件复用器线程调用阻塞等待多个的就绪可读可写可接受连接等返回一组非阻塞模式后等不会阻塞若无法完成会返回特定值读写写入字节数可能为注册兴趣集合通过把注册到并可附带比如缓冲区或连接上下文使用与传统不同它是基于块的它以块为基本单位处理数据在中最为重要的两个组件是缓冲区和通道是一块连续的内存块是读写数据的缓冲可以将文件一次性读入内存再做后续处理而传统的方式是边读文件边处理数据表示缓冲数据的源头或者目的地它用于读取缓冲或者写入数据是访问缓冲的接口使用直接内存还提供了一个可以直接访问物理内存的类普通的分配的是堆内存而是直接分配物理内存数据要输出到外部设备必须先从用户空间复制到内核空间再复制到输出设备而则是直接将步骤简化为从内核空间复制到外部设备减少了数据拷贝这里拓展一点由于申请的是非的物理内存所以创建和销毁的代价很高申请的内存并不是直接由负责垃圾回收但在包装类被回收时会通过引用机制来释放该内存块传统通过进行读写单向流只能读或只能写每次调用或都会触发用户空间内核空间的数据复制是阻塞的比如时如果没有数据线程就会挂起是双向的同一个对象既能读也能写底层依赖操作系统的文件描述符与搭配使用可以做到非阻塞支持零拷贝技术避免多次用户态内核态数据复制提高性能即在中引入引入基于回调或完成后回调异步模型让操作更贴近的真正异步在是在早期可能用线程池做模拟现代内核可借助更高效与模型相比异步模型更易写出事件回调风格代码但也要处理并发回调资源竞争传统流',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-09-29 10:47:57',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">Hexo</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> Newest Comments</span></div><div class="aside-list"><span>loading...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 1.05rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 1.05rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 1.05rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.05rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>Archives</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">October 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">September 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">August 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">28</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="article-meta tags"></span></div></div><h1 class="post-title" itemprop="name headline">JavaIO模型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-09-26T19:29:29.000Z" title="Created 2025-09-27 03:29:29">2025-09-27</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-09-29T02:47:57.746Z" title="Updated 2025-09-29 10:47:57">2025-09-29</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为长沙"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>长沙</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/"><header><h1 id="CrawlerTitle" itemprop="name headline">JavaIO模型</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">John Doe</span><time itemprop="dateCreated datePublished" datetime="2025-09-26T19:29:29.000Z" title="Created 2025-09-27 03:29:29">2025-09-27</time><time itemprop="dateCreated datePublished" datetime="2025-09-29T02:47:57.746Z" title="Updated 2025-09-29 10:47:57">2025-09-29</time></header><h1 id="同步-异步-阻塞-非阻塞"><a href="#同步-异步-阻塞-非阻塞" class="headerlink" title="同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞"></a>同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞</h1><p>在介绍IO前，首先需要了解同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞的区别。</p>
+<p>同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。</p>
+<h3 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h3><ul>
+<li>发起调用后，<strong>必须主动轮询</strong>获取返回结果。</li>
+<li>执行流程是 <strong>调用方主动等待结果</strong>。</li>
+</ul>
+<h3 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h3><ul>
+<li>发起调用后，<strong>不用等结果，立刻返回</strong>。</li>
+<li>结果准备好后，系统会通过 <strong>回调&#x2F;事件&#x2F;通知</strong> 告诉你。</li>
+</ul>
+<h3 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h3><ul>
+<li>调用时，如果没结果，<strong>线程会停在那里，不能干别的</strong>。</li>
+<li>一直等到有结果才能返回。</li>
+</ul>
+<h3 id="非阻塞"><a href="#非阻塞" class="headerlink" title="非阻塞"></a>非阻塞</h3><ul>
+<li>调用时，如果没结果，<strong>立刻返回错误码&#x2F;状态</strong>，不会卡住线程。</li>
+<li>应用程序可以 <strong>再次尝试</strong> 或 <strong>去干别的事</strong>。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>同步&#x2F;异步</th>
+<th>阻塞&#x2F;非阻塞</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同步阻塞</td>
+<td>同步</td>
+<td>阻塞</td>
+<td>最传统，简单，但性能差</td>
+</tr>
+<tr>
+<td>同步非阻塞</td>
+<td>同步</td>
+<td>非阻塞</td>
+<td>需要轮询，多次调用，效率低</td>
+</tr>
+<tr>
+<td>异步阻塞</td>
+<td>异步</td>
+<td>阻塞</td>
+<td>等待通知时线程挂起</td>
+</tr>
+<tr>
+<td>异步非阻塞</td>
+<td>异步</td>
+<td>非阻塞</td>
+<td>最优，事件驱动模型</td>
+</tr>
+</tbody></table>
+<h1 id="Unix-IO模型"><a href="#Unix-IO模型" class="headerlink" title="Unix IO模型"></a>Unix IO模型</h1><p>Unix IO 模型有5种模型</p>
+<h2 id="同步阻塞IO"><a href="#同步阻塞IO" class="headerlink" title="同步阻塞IO"></a>同步阻塞IO</h2><p><strong>调用方式</strong>：<code>read()</code> 等用户发起系统调用会 <strong>阻塞</strong>当前线程，直到有数据到达并拷贝到用户缓冲区。</p>
+<p><strong>特点</strong>：简单易用，但一个线程只能处理一个连接。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163321.jpg" alt="img"></p>
+<h2 id="同步非阻塞IO"><a href="#同步非阻塞IO" class="headerlink" title="同步非阻塞IO"></a>同步非阻塞IO</h2><p><strong>调用方式</strong>：把 socket 设置为 <strong>O_NONBLOCK</strong>，系统调用立即返回：</p>
+<ul>
+<li>如果没有数据，立刻返回 <code>EWOULDBLOCK</code> 错误码，并且不断调用<code>read()</code>轮询；</li>
+<li>如果有数据，拷贝到用户空间后返回。</li>
+<li>直到数据到了内核空间，这一次 read 调用后，在等待数据从内核空间拷贝到用户空间这段时间里，线程还是阻塞的，等数据到了用户空间再把线程叫醒。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163344.jpg" alt="img"></p>
+<p>非阻塞IO一般配合轮询使用，如果没有数据返回，线程可以先去干别的事，但是需要轮询保证下一轮可以继续获取数据。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    <span class="type">int</span> n = read(fd, buf, <span class="keyword">sizeof</span>(buf));</span><br><span class="line">    <span class="keyword">if</span> (n &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (errno == EAGAIN) &#123;</span><br><span class="line">            <span class="comment">// 没数据，继续轮询（CPU 忙等）</span></span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            perror(<span class="string">&quot;read error&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 对方关闭连接</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 读到数据</span></span><br><span class="line">        handle(buf, n);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="IO多路复用"><a href="#IO多路复用" class="headerlink" title="IO多路复用"></a>IO多路复用</h2><ul>
+<li><p><strong>代表</strong>：<code>select</code>、<code>poll</code>、<code>epoll</code>（Linux）、<code>kqueue</code>（BSD、macOS）。</p>
+</li>
+<li><p><strong>原理</strong>：把多个 socket 注册到一个多路复用器，内核帮你监听，哪个 socket 可读&#x2F;可写再通知你。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>一个线程就能管理成千上万个连接；</li>
+<li>常用于高并发服务器（Redis、Nginx、Netty）。</li>
+</ul>
+</li>
+<li><p><strong>典型 API</strong>：</p>
+<ul>
+<li><code>select</code>：FD 数量有限（通常 1024）。</li>
+<li><code>poll</code>：用链表存储 FD，数量无限制，但性能随连接数线性下降。</li>
+<li><code>epoll</code>：Linux 特有，事件驱动，性能好。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163408.jpg" alt="img"></p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="type">ssize_t</span> n = read(fd, buf, size);</span><br><span class="line">    <span class="keyword">if</span> (n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        process(buf, n);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (errno == EAGAIN) &#123;</span><br><span class="line">        <span class="comment">// 没有数据，继续下一轮</span></span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="信号驱动IO"><a href="#信号驱动IO" class="headerlink" title="信号驱动IO"></a>信号驱动IO</h2><p><strong>调用方式</strong>：进程给 socket 注册一个信号处理函数，内核数据就绪时，发送 <code>SIGIO</code> 信号通知进程，再调用 <code>recvfrom()</code> 读取。</p>
+<p><strong>特点</strong>：比较少用，代码复杂。</p>
+<p><strong>典型场景</strong>：需要中断通知的特殊应用。</p>
+<h2 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h2><p><strong>调用方式</strong>：进程发起 <code>aio_read()</code> 后立即返回，内核在数据准备好并拷贝到用户缓冲区后，通知进程（回调&#x2F;事件）。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>真正的 <strong>异步</strong>，应用层不需要关心拷贝过程。</li>
+<li>但在 Linux 中 AIO 支持有限，很多库用线程池模拟。</li>
+</ul>
+<p><strong>典型场景</strong>：Windows IOCP，Linux libaio。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163428.jpg" alt="img"></p>
+<h1 id="Java-IO模型"><a href="#Java-IO模型" class="headerlink" title="Java IO模型"></a>Java IO模型</h1><h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>BIO是blocking IO，主要在<code>java.io</code>包中，采用流模型实现。</p>
+<p><code>java.io</code>包提供了我们最熟知的一些 IO 功能，比如 File 抽象、输入输出流等。交互方式是同步、阻塞的方式，也就是说，在读取输入流或者写入输出流时，在读、写动作完成之前，线程会一直阻塞在那里，它们之间的调用是可靠的线性顺序。</p>
+<p>采用 BIO 的服务端，通常由一个独立的 Acceptor 线程负责监听客户端连接。服务端一般在<code>while(true)</code> 循环中调用 <code>accept()</code> 方法等待客户端的连接请求，一旦接收到一个连接请求，就可以建立 Socket，并基于这个 Socket 进行读写操作。此时，不能再接收其他客户端连接请求，只能等待当前连接的操作执行完成。</p>
+<h3 id="BIO缺陷"><a href="#BIO缺陷" class="headerlink" title="BIO缺陷"></a>BIO缺陷</h3><p>如果要让 <strong>BIO 通信模型</strong> 能够同时处理多个客户端请求，就必须使用多线程（主要原因是<code>socket.accept()</code>、<code>socket.read()</code>、<code>socket.write()</code> 涉及的三个主要函数都是同步阻塞的），但会造成不必要的线程开销。不过可以通过 <strong>线程池机制</strong> 改善，线程池还可以让线程的创建和回收成本相对较低。</p>
+<p><strong>即使可以用线程池略微优化，但是会消耗宝贵的线程资源，并且在百万级并发场景下也撑不住</strong>。如果并发访问量增加会导致线程数急剧膨胀可能会导致线程堆栈溢出、创建新线程失败等问题，最终导致进程宕机或者僵死，不能对外提供服务。</p>
+<h3 id="BIO-多线程"><a href="#BIO-多线程" class="headerlink" title="BIO+多线程"></a>BIO+多线程</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BioMultiThreadServer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ServerSocket</span> <span class="variable">serverSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerSocket</span>(<span class="number">8080</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;BIO 多线程服务器启动，端口 8080&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="comment">// 阻塞等待客户端连接</span></span><br><span class="line">            <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line">            System.out.println(<span class="string">&quot;客户端连接：&quot;</span> + socket.getRemoteSocketAddress());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 每来一个连接，就开一个新线程去处理</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">ClientHandler</span>(socket)).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ClientHandler</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> Socket socket;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">ClientHandler</span><span class="params">(Socket socket)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.socket = socket;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(socket.getInputStream()));</span><br><span class="line">                 <span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PrintWriter</span>(socket.getOutputStream(), <span class="literal">true</span>)) &#123;</span><br><span class="line"></span><br><span class="line">                String line;</span><br><span class="line">                <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;收到消息：&quot;</span> + line);</span><br><span class="line">                    writer.println(<span class="string">&quot;Echo: &quot;</span> + line); <span class="comment">// 回显</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    socket.close();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>多线程 BIO</strong>：简单粗暴，但线程数不受控，适合小规模并发。</p>
+<h3 id="BIO-线程池"><a href="#BIO-线程池" class="headerlink" title="BIO+线程池"></a>BIO+线程池</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.*;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BioThreadPoolServer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ServerSocket</span> <span class="variable">serverSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerSocket</span>(<span class="number">8080</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;BIO 线程池服务器启动，端口 8080&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 固定大小的线程池，避免无限创建线程</span></span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">threadPool</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line">            System.out.println(<span class="string">&quot;客户端连接：&quot;</span> + socket.getRemoteSocketAddress());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 把任务交给线程池执行</span></span><br><span class="line">            threadPool.execute(<span class="keyword">new</span> <span class="title class_">ClientHandler</span>(socket));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ClientHandler</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> Socket socket;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">ClientHandler</span><span class="params">(Socket socket)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.socket = socket;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(socket.getInputStream()));</span><br><span class="line">                 <span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PrintWriter</span>(socket.getOutputStream(), <span class="literal">true</span>)) &#123;</span><br><span class="line"></span><br><span class="line">                String line;</span><br><span class="line">                <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;收到消息：&quot;</span> + line);</span><br><span class="line">                    writer.println(<span class="string">&quot;Echo: &quot;</span> + line);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    socket.close();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>线程池 BIO</strong>：线程数可控，性能更稳，但依旧受限于阻塞 IO 的效率瓶颈。</p>
+<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO即Non-blocking IO，在jdk1.4中引入<code>java.nio</code>包中。</p>
+<p><code>java.nio</code> 包提供了 <code>Channel</code>、<code>Selector</code>、<code>Buffer</code> 等新的抽象，可以构建多路复用的、同步非阻塞 IO 程序，同时提供了更接近操作系统底层的高性能数据操作方式。</p>
+<p><strong>Channel</strong>：可读写的双向通道，如 <code>SocketChannel</code>、<code>ServerSocketChannel</code>、<code>FileChannel</code>。</p>
+<p><strong>ByteBuffer</strong>：数据容器，带 <code>position/limit/capacity</code>。操作前后要调用 <code>flip()</code>、<code>clear()</code>、<code>compact()</code> 等方法正确转换读写状态。</p>
+<ul>
+<li><p>在 <strong>Java NIO</strong> 里，所有的 I&#x2F;O（无论是 <code>SocketChannel</code> 还是 <code>FileChannel</code>）都必须通过 <strong>Buffer</strong> 作为中转站。</p>
+</li>
+<li><p><strong>Channel 并不会直接返回原始字节数组</strong>，而是把数据写入你提供的 <code>ByteBuffer</code>；同样，写数据时你要先把数据放进 <code>ByteBuffer</code>，再由 <code>Channel.write()</code> 把 buffer 里的数据送到内核&#x2F;网络。</p>
+</li>
+<li><p>所以，<strong>ByteBuffer 就是线程和 Channel 之间的数据暂存区</strong>。</p>
+</li>
+</ul>
+<p><strong>Selector</strong>：事件复用器，线程调用 <code>select()</code> 阻塞等待多个 Channel 的就绪（可读、可写、可接受连接等），返回一组 <code>SelectionKey</code>。</p>
+<p><strong>非阻塞模式</strong>：<code>channel.configureBlocking(false)</code> 后，<code>read()</code>&#x2F;<code>write()</code> 等不会阻塞，若无法完成会返回特定值（读：0&#x2F;-1，写：写入字节数可能为 0）。</p>
+<p><strong>注册&#x2F;兴趣集合</strong>：通过 <code>channel.register(selector, SelectionKey.OP_READ|OP_WRITE, attachment)</code> 把 channel 注册到 selector，并可附带 <code>attachment</code>（比如缓冲区或连接上下文）。</p>
+<h3 id="使用ByteBuffer"><a href="#使用ByteBuffer" class="headerlink" title="使用ByteBuffer"></a>使用ByteBuffer</h3><p>NIO 与传统 I&#x2F;O 不同，它是基于块（Block）的，它以块为基本单位处理数据。在 NIO 中，最为重要的两个组件是缓冲区（<code>Buffer</code>）和通道（<code>Channel</code>）。</p>
+<p><code>Buffer</code> 是一块连续的内存块，是 NIO 读写数据的缓冲。<code>Buffer</code> 可以将文件一次性读入内存再做后续处理，而传统的方式是边读文件边处理数据。<code>Channel</code> 表示缓冲数据的源头或者目的地，它用于读取缓冲或者写入数据，是访问缓冲的接口。</p>
+<h3 id="使用直接内存"><a href="#使用直接内存" class="headerlink" title="使用直接内存"></a>使用直接内存</h3><p>NIO 还提供了一个可以直接访问物理内存的类 <code>DirectBuffer</code>。普通的 <code>Buffer</code> 分配的是 JVM 堆内存，而 <code>DirectBuffer</code> 是直接分配物理内存。</p>
+<p>数据要输出到外部设备，必须先从用户空间复制到内核空间，再复制到输出设备，而 <code>DirectBuffer</code> 则是直接将步骤简化为从内核空间复制到外部设备，减少了数据拷贝。</p>
+<p>这里拓展一点，由于 <code>DirectBuffer</code> 申请的是非 JVM 的物理内存，所以创建和销毁的代价很高。<code>DirectBuffer</code> 申请的内存并不是直接由 JVM 负责垃圾回收，但在 <code>DirectBuffer</code> 包装类被回收时，会通过 Java 引用机制来释放该内存块。</p>
+<h3 id="传统-IO"><a href="#传统-IO" class="headerlink" title="传统 IO"></a>传统 IO</h3><ul>
+<li>通过 <code>InputStream</code> &#x2F; <code>OutputStream</code> 进行读写。</li>
+<li><strong>单向流</strong>：只能读或只能写。</li>
+<li>每次调用 <code>read()</code> 或 <code>write()</code> 都会触发 <strong>用户空间 ↔ 内核空间的数据复制</strong>。</li>
+<li>是阻塞的：比如 <code>read()</code> 时，如果没有数据，线程就会挂起。</li>
+</ul>
+<h3 id="NIO-Channel"><a href="#NIO-Channel" class="headerlink" title="NIO Channel"></a>NIO Channel</h3><ul>
+<li><code>Channel</code> 是 <strong>双向的</strong>：同一个对象既能读也能写。</li>
+<li>底层依赖操作系统的 <strong>文件描述符（fd）</strong>。</li>
+<li>与 <code>ByteBuffer</code> 搭配使用，可以做到 <strong>非阻塞 I&#x2F;O</strong>。</li>
+<li>支持 <strong>零拷贝</strong> 技术，避免多次用户态&#x2F;内核态数据复制，提高性能。</li>
+</ul>
+<h2 id="AIO"><a href="#AIO" class="headerlink" title="AIO"></a>AIO</h2><p>AIO即NIO2，在JDK1.7中引入：</p>
+<p>Java 7+ 引入 <code>AsynchronousSocketChannel</code>、<code>AsynchronousServerSocketChannel</code>，基于回调或 Future：</p>
+<ul>
+<li><code>AsynchronousSocketChannel.read(ByteBuffer, attachment, CompletionHandler)</code>：IO 完成后回调 <code>CompletionHandler</code>。</li>
+<li>异步模型让操作更贴近 OS 的真正异步（在 Windows 是 IOCP，在 Linux 早期可能用线程池做模拟，现代内核可借助 io_uring 更高效）。</li>
+<li>与 Selector 模型相比：异步模型更易写出“事件回调”风格代码，但也要处理并发回调、资源竞争。</li>
+</ul>
+<h1 id="传统IO流"><a href="#传统IO流" class="headerlink" title="传统IO流"></a>传统IO流</h1></article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">John Doe</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/')">JavaIO模型</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=JavaIO模型&amp;url=http://example.com/2025/09/27/JavaIO%E6%A8%A1%E5%9E%8B/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/09/22/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">分布式锁</div></div></a></div><div class="next-post pull-right"><a href="/2025/10/14/linux%E5%86%85%E6%A0%B8/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info"></div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5-%E5%BC%82%E6%AD%A5-%E9%98%BB%E5%A1%9E-%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="toc-number">1.</span> <span class="toc-text">同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5"><span class="toc-number">1.0.1.</span> <span class="toc-text">同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5"><span class="toc-number">1.0.2.</span> <span class="toc-text">异步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%BB%E5%A1%9E"><span class="toc-number">1.0.3.</span> <span class="toc-text">阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="toc-number">1.0.4.</span> <span class="toc-text">非阻塞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Unix-IO%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">Unix IO模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EIO"><span class="toc-number">2.1.</span> <span class="toc-text">同步阻塞IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9EIO"><span class="toc-number">2.2.</span> <span class="toc-text">同步非阻塞IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="toc-number">2.3.</span> <span class="toc-text">IO多路复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E5%8F%B7%E9%A9%B1%E5%8A%A8IO"><span class="toc-number">2.4.</span> <span class="toc-text">信号驱动IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5IO"><span class="toc-number">2.5.</span> <span class="toc-text">异步IO</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Java-IO%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">Java IO模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO"><span class="toc-number">3.1.</span> <span class="toc-text">BIO</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#BIO%E7%BC%BA%E9%99%B7"><span class="toc-number">3.1.1.</span> <span class="toc-text">BIO缺陷</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BIO-%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.1.2.</span> <span class="toc-text">BIO+多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BIO-%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-number">3.1.3.</span> <span class="toc-text">BIO+线程池</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO"><span class="toc-number">3.2.</span> <span class="toc-text">NIO</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8ByteBuffer"><span class="toc-number">3.2.1.</span> <span class="toc-text">使用ByteBuffer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%9B%B4%E6%8E%A5%E5%86%85%E5%AD%98"><span class="toc-number">3.2.2.</span> <span class="toc-text">使用直接内存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E7%BB%9F-IO"><span class="toc-number">3.2.3.</span> <span class="toc-text">传统 IO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NIO-Channel"><span class="toc-number">3.2.4.</span> <span class="toc-text">NIO Channel</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO"><span class="toc-number">3.3.</span> <span class="toc-text">AIO</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%A0%E7%BB%9FIO%E6%B5%81"><span class="toc-number">4.</span> <span class="toc-text">传统IO流</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/22/Guava/" title="Guava包">Guava包</a><time datetime="2025-12-21T19:29:29.000Z" title="Created 2025-12-22 03:29:29">2025-12-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/15/encrypt/" title="encrypt">encrypt</a><time datetime="2025-12-14T19:09:50.000Z" title="Created 2025-12-15 03:09:50">2025-12-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/20/%E4%B8%AA%E4%BA%BA%E4%BB%8B%E7%BB%8D/" title="No title">No title</a><time datetime="2025-10-20T02:59:08.663Z" title="Created 2025-10-20 10:59:08">2025-10-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/15/%E7%BD%91%E7%BB%9C/Untitled%201/" title="No title">No title</a><time datetime="2025-10-15T07:38:09.890Z" title="Created 2025-10-15 15:38:09">2025-10-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/10/14/linux%E5%86%85%E6%A0%B8/" title="No title">No title</a><time datetime="2025-10-14T01:43:05.786Z" title="Created 2025-10-14 09:43:05">2025-10-14</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="John Doe" target="_blank">John Doe</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">Articles</div><div class="length-num">36</div></a><a href="/tags/" title="tag"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/" title="category"><div class="headline">Categories</div><div class="length-num">21</div></a></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="Display Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>Display Mode</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/java/" style="font-size: 0.88rem;">java<sup>1</sup></a><a href="/tags/leetcode/" style="font-size: 0.88rem;">leetcode<sup>5</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 0.88rem;">分布式<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 0.88rem;">算法<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">繁</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 John Doe 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

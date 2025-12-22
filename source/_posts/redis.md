@@ -629,3 +629,7 @@ epoll 仍然在主线程中使用；
 
 - 在 Redis 7+ 中引入了 **I/O thread per connection** 的复制机制。
 
+# 哨兵模式
+
+# 集群模式
+

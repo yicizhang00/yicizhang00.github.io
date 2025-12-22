@@ -5,6 +5,11 @@ on:
     branches:
       - source  # 只监听 source 分支的推送
 
+permissions:
+  contents: write
+
+
+
 env:
   TZ: Asia/Shanghai
 

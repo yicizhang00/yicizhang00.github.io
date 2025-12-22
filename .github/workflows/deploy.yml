@@ -1,42 +1,51 @@
-name: Hexo Blog CI/CD
+name: Deploy Hexo Blog to GitHub Pages
 
 on:
   push:
     branches:
-      - source   # 监听 source 分支
+      - source  # 只监听 source 分支的推送
 
-permissions:
-  contents: write   # 允许推送 main 分支
+env:
+  TZ: Asia/Shanghai
 
 jobs:
   deploy:
+    name: Build and Deploy to main branch
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source branch
-        uses: actions/checkout@v4
-        with:
-          ref: source
+    - name: Checkout source branch
+      uses: actions/checkout@v4
+      with:
+        ref: source  # 明确检出 source 分支
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'  # 建议使用较新 LTS 版本（Hexo 支持良好）
 
-      - name: Install dependencies
-        run: |
-          npm install -g hexo-cli
-          npm install
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
-      - name: Build Hexo
-        run: |
-          hexo clean
-          hexo generate
+    - name: Install dependencies
+      run: |
+        npm install -g hexo-cli
+        npm install
 
-      - name: Deploy to GitHub Pages (main branch)
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: main
-          publish_dir: ./public
+    - name: Generate static files
+      run: |
+        hexo clean
+        hexo generate
+
+    - name: Deploy to main branch (GitHub Pages)
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}  # 使用内置 token，无需额外配置
+        publish_dir: ./public                     # Hexo 生成目录
+        publish_branch: main                      # 部署到 main 分支
+        commit_message: ${{ github.event.head_commit.message }} [Bot]

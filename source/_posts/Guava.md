@@ -6,6 +6,10 @@ tags:
 
 # 基本工具
 
+## Optional
+
+使用Optional来避免null
+
 # 集合
 
 # 缓存

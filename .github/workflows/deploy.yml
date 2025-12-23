@@ -1,56 +1,51 @@
-name: Deploy Hexo Blog to GitHub Pages
+name: Blog CI/CD
 
 on:
   push:
-    branches:
-      - source  # 只监听 source 分支的推送
-
-permissions:
-  contents: write
-
-
+    branches: 
+      - source  # 监听 source 分支的推送
 
 env:
   TZ: Asia/Shanghai
 
 jobs:
-  deploy:
-    name: Build and Deploy to main branch
+  blog-cicd:
+    name: Hexo blog build & deploy
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source branch
-      uses: actions/checkout@v4
+    - name: Checkout codes
+      uses: actions/checkout@v4 # 升级到 v4
       with:
-        ref: source  # 明确检出 source 分支
+        submodules: true # 如果你的主题是 git submodule 形式，这行很重要
 
-    - name: Setup Node.js
+    - name: Setup node
       uses: actions/setup-node@v4
       with:
-        node-version: '18'  # 建议使用较新 LTS 版本（Hexo 支持良好）
-
-    - name: Cache node_modules
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+        node-version: '20' # 推荐使用 LTS 版本
+        cache: 'npm'
 
     - name: Install dependencies
       run: |
         npm install -g hexo-cli
         npm install
 
-    - name: Generate static files
+    - name: Generate files
       run: |
         hexo clean
         hexo generate
 
-    - name: Deploy to main branch (GitHub Pages)
-      uses: peaceiris/actions-gh-pages@v4
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}  # 使用内置 token，无需额外配置
-        publish_dir: ./public                     # Hexo 生成目录
-        publish_branch: main                      # 部署到 main 分支
-        commit_message: ${{ github.event.head_commit.message }} [Bot]
+        # GitHub 会自动提供 GITHUB_TOKEN，无需手动设置 secret
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # 部署的目标分支
+        publish_branch: main 
+        # 静态文件所在目录
+        publish_dir: ./public 
+        # 提交信息
+        commit_message: "Auto-deployed by GitHub Actions at $(date +'%Y-%m-%d %H:%M:%S')"
+        # 你的用户名
+        user_name: 'yicizhang00'
+        user_email: 'zhangyici2000@outlook.com'

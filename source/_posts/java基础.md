@@ -594,6 +594,8 @@ public interface Override extends Annotation{
 
 语法糖实际上不是一个真正的语法，只是为了简化某些语法表达而创建的，例如`for-each`就是一个语法糖，JVM并不能识别语法糖，语法糖只在编译器层面被看见，编译器编译代码为字节码时会调用`desugar()`来解码语法糖。
 
+
+
 # Java重要知识
 
 ## 值传递与引用传递
@@ -660,3 +662,596 @@ public class Test {
 
 
 
+## 泛型&通配符详解
+
+### 一、泛型的基本概念
+
+泛型（Generics）是Java 5引入的特性，允许在定义类、接口和方法时使用类型参数（Type Parameter），使得类型可以作为参数传递，提供了编译时的类型安全检查和代码重用。
+
+#### 1.1 为什么需要泛型
+
+在Java 5之前，容器类（如List、Set、Map）只能存储Object类型，使用时需要进行强制类型转换：
+
+```java
+List list = new ArrayList();
+list.add("hello");
+list.add(123);  // 编译时不会报错
+String s = (String) list.get(0);  // 需要强制转换
+Integer i = (Integer) list.get(1);  // 运行时可能抛出ClassCastException
+```
+
+泛型的引入解决了以下问题：
+- **类型安全**：在编译时进行类型检查，避免运行时类型转换异常
+- **消除强制转换**：代码更加简洁，不需要频繁进行类型转换
+- **提高代码可读性**：代码意图更加明确，`List<String>`比`List`更清晰
+
+### 二、泛型的基本用法
+
+#### 2.1 泛型类
+
+泛型类是指在定义类时使用类型参数的类。
+
+```java
+// 定义泛型类
+public class Box<T> {
+    private T value;
+    
+    public void setValue(T value) {
+        this.value = value;
+    }
+    
+    public T getValue() {
+        return value;
+    }
+}
+
+// 使用泛型类
+Box<String> stringBox = new Box<>();
+stringBox.setValue("Hello");
+String value = stringBox.getValue();  // 不需要强制转换
+
+Box<Integer> intBox = new Box<>();
+intBox.setValue(123);
+Integer num = intBox.getValue();
+```
+
+#### 2.2 泛型接口
+
+泛型接口与泛型类类似，接口定义时可以使用类型参数。
+
+```java
+// 定义泛型接口
+public interface Comparable<T> {
+    int compareTo(T other);
+}
+
+// 实现泛型接口
+public class Student implements Comparable<Student> {
+    private String name;
+    private int age;
+    
+    @Override
+    public int compareTo(Student other) {
+        return this.age - other.age;
+    }
+}
+```
+
+#### 2.3 泛型方法
+
+泛型方法可以在非泛型类中定义，方法可以有自己的类型参数。
+
+```java
+public class Utils {
+    // 泛型方法：类型参数在返回类型之前
+    public static <T> T getMiddle(T... args) {
+        return args[args.length / 2];
+    }
+    
+    // 多个类型参数
+    public static <K, V> V getValue(Map<K, V> map, K key) {
+        return map.get(key);
+    }
+}
+
+// 使用泛型方法
+String middle = Utils.getMiddle("a", "b", "c");  // 返回 "b"
+Integer num = Utils.getMiddle(1, 2, 3, 4, 5);  // 返回 3
+```
+
+**类型推断**：在调用泛型方法时，通常不需要显式指定类型参数，编译器可以根据参数类型自动推断。
+
+```java
+// 显式指定类型参数（通常不需要）
+String s = Utils.<String>getMiddle("a", "b", "c");
+
+// 类型推断（推荐方式）
+String s = Utils.getMiddle("a", "b", "c");
+```
+
+### 三、泛型的类型参数限制
+
+#### 3.1 类型变量的限制（类型边界）
+
+可以使用`extends`关键字限制类型参数必须是指定类的子类或实现指定接口。
+
+```java
+// 限制T必须是Number或其子类
+public class NumberBox<T extends Number> {
+    private T value;
+    
+    public double getDoubleValue() {
+        return value.doubleValue();  // 可以安全调用Number的方法
+    }
+}
+
+NumberBox<Integer> intBox = new NumberBox<>();  // 合法
+NumberBox<Double> doubleBox = new NumberBox<>();  // 合法
+NumberBox<String> stringBox = new NumberBox<>();  // 编译错误
+```
+
+#### 3.2 多个边界
+
+可以使用`&`连接多个边界，但类只能有一个，接口可以有多个。
+
+```java
+// T必须同时是Number的子类和Comparable的实现
+public class ComparableNumber<T extends Number & Comparable<T>> {
+    private T value;
+    
+    public int compareTo(ComparableNumber<T> other) {
+        return this.value.compareTo(other.value);
+    }
+}
+```
+
+#### 3.3 类型参数命名规范
+
+- `T` - Type（类型）
+- `E` - Element（元素，常用于集合）
+- `K` - Key（键）
+- `V` - Value（值）
+- `N` - Number（数字）
+- `S, U, V` - 第二个、第三个、第四个类型
+
+### 四、通配符（Wildcards）
+
+通配符用于表示未知类型，提供了更灵活的类型匹配方式。通配符使用`?`表示。
+
+#### 4.1 无界通配符 `?`
+
+无界通配符`List<?>`表示可以接受任何类型的List，但只能读取，不能写入（除了null）。
+
+```java
+public void printList(List<?> list) {
+    for (Object obj : list) {
+        System.out.println(obj);
+    }
+    // list.add("hello");  // 编译错误，不能写入
+    // list.add(123);      // 编译错误，不能写入
+    list.add(null);        // 唯一可以写入的值是null
+}
+
+List<String> stringList = new ArrayList<>();
+List<Integer> intList = new ArrayList<>();
+printList(stringList);  // 合法
+printList(intList);     // 合法
+```
+
+**使用场景**：当方法只需要读取集合中的元素，而不关心具体类型时使用。
+
+#### 4.2 上界通配符 `? extends T`
+
+上界通配符`List<? extends T>`表示可以接受`T`及其子类型的List。
+
+```java
+// 可以接受Number及其子类型的List
+public double sum(List<? extends Number> numbers) {
+    double total = 0.0;
+    for (Number num : numbers) {
+        total += num.doubleValue();
+    }
+    return total;
+}
+
+List<Integer> intList = Arrays.asList(1, 2, 3);
+List<Double> doubleList = Arrays.asList(1.1, 2.2, 3.3);
+double sum1 = sum(intList);     // 合法
+double sum2 = sum(doubleList);  // 合法
+```
+
+**特点**：
+- **只能读取**：可以安全地读取元素并视为`T`类型
+- **不能写入**：除了`null`之外，不能添加任何元素（因为不知道具体是哪个子类型）
+
+```java
+List<? extends Number> list = new ArrayList<Integer>();
+Number num = list.get(0);  // 可以读取
+// list.add(new Integer(1));  // 编译错误
+// list.add(new Double(1.0)); // 编译错误
+list.add(null);            // 只能添加null
+```
+
+**原理说明**：假设`List<? extends Number> list = new ArrayList<Integer>()`，如果允许`list.add(new Double(1.0))`，就会在`ArrayList<Integer>`中存入Double，破坏了类型安全。
+
+#### 4.3 下界通配符 `? super T`
+
+下界通配符`List<? super T>`表示可以接受`T`及其父类型的List。
+
+```java
+// 可以接受Integer及其父类型的List
+public void addNumbers(List<? super Integer> list) {
+    list.add(1);
+    list.add(2);
+    list.add(3);
+}
+
+List<Number> numberList = new ArrayList<>();
+List<Object> objectList = new ArrayList<>();
+addNumbers(numberList);  // 合法
+addNumbers(objectList);  // 合法
+```
+
+**特点**：
+- **只能写入**：可以安全地添加`T`及其子类型的元素
+- **读取受限**：只能读取为`Object`类型
+
+```java
+List<? super Integer> list = new ArrayList<Number>();
+list.add(new Integer(1));      // 可以写入
+list.add(2);                   // 可以写入
+// Integer i = list.get(0);    // 编译错误
+Object obj = list.get(0);      // 只能读取为Object
+```
+
+**原理说明**：假设`List<? super Integer> list = new ArrayList<Number>()`，可以添加Integer，因为Integer是Number的子类；但读取时只能保证是Number的父类Object，无法确定具体类型。
+
+### 五、PECS原则（Producer Extends, Consumer Super）
+
+PECS是使用通配符的重要原则，帮助决定何时使用`extends`还是`super`。
+
+#### 5.1 原则说明
+
+- **Producer Extends（生产者使用extends）**：如果参数是用来**产生/提供**元素的（只读），使用`? extends T`
+- **Consumer Super（消费者使用super）**：如果参数是用来**消费/接收**元素的（只写），使用`? super T`
+
+#### 5.2 实际应用示例
+
+```java
+// 生产者：从src读取元素
+// 消费者：向dest写入元素
+public static <T> void copy(List<? extends T> src, List<? super T> dest) {
+    for (T item : src) {
+        dest.add(item);  // 从extends读取，向super写入
+    }
+}
+
+List<Integer> intList = Arrays.asList(1, 2, 3);
+List<Number> numberList = new ArrayList<>();
+copy(intList, numberList);  // 合法：Integer extends Number
+```
+
+#### 5.3 Collections.copy()的实现
+
+Java标准库中的`Collections.copy()`方法就是PECS原则的典型应用：
+
+```java
+public static <T> void copy(List<? super T> dest, List<? extends T> src) {
+    int srcSize = src.size();
+    if (srcSize > dest.size())
+        throw new IndexOutOfBoundsException("Source does not fit in dest");
+    
+    ListIterator<? super T> di = dest.listIterator();
+    ListIterator<? extends T> si = src.listIterator();
+    for (int i = 0; i < srcSize; i++) {
+        di.next();
+        di.set(si.next());  // 从extends读取，向super写入
+    }
+}
+```
+
+### 六、类型擦除（Type Erasure）
+
+#### 6.1 什么是类型擦除
+
+Java的泛型是通过**类型擦除**实现的，这意味着泛型信息只在编译时存在，在运行时会被擦除，所有的泛型参数都会被替换为它们的**边界类型**（如果没有边界，则替换为`Object`）。
+
+```java
+// 源代码
+public class Box<T> {
+    private T value;
+    public void setValue(T value) { this.value = value; }
+    public T getValue() { return value; }
+}
+
+// 编译后的字节码（伪代码）
+public class Box {
+    private Object value;  // T被擦除为Object
+    public void setValue(Object value) { this.value = value; }
+    public Object getValue() { return value; }
+}
+
+// 如果T extends Number
+public class NumberBox<T extends Number> {
+    private T value;
+}
+
+// 编译后
+public class NumberBox {
+    private Number value;  // T被擦除为Number（边界类型）
+}
+```
+
+#### 6.2 类型擦除的影响
+
+**1. 不能使用instanceof检查泛型类型**
+
+```java
+List<String> list = new ArrayList<>();
+if (list instanceof List<String>) {  // 编译错误
+    // ...
+}
+if (list instanceof List) {  // 合法，但失去了类型信息
+    // ...
+}
+```
+
+**2. 不能创建泛型数组**
+
+```java
+// 以下代码都不合法
+List<String>[] array = new List<String>[10];  // 编译错误
+T[] array = new T[10];  // 编译错误
+
+// 可以创建通配符数组，但不安全
+List<?>[] array = new List<?>[10];  // 合法但不推荐
+```
+
+**3. 不能抛出或捕获泛型类的实例**
+
+```java
+// 以下代码不合法
+try {
+    // ...
+} catch (Exception<String> e) {  // 编译错误
+    // ...
+}
+```
+
+**4. 不能重载具有相同擦除类型的方法**
+
+```java
+// 以下代码不合法，因为擦除后都是相同的签名
+public void method(List<String> list) { }
+public void method(List<Integer> list) { }  // 编译错误，方法签名冲突
+```
+
+#### 6.3 桥方法（Bridge Method）
+
+类型擦除可能导致方法签名不匹配，编译器会生成桥方法来保持多态性。
+
+```java
+// 父类
+public class Parent<T> {
+    public void setValue(T value) { }
+}
+
+// 子类
+public class Child extends Parent<String> {
+    @Override
+    public void setValue(String value) {  // 重写父类方法
+        // ...
+    }
+}
+```
+
+编译后，编译器会生成桥方法：
+
+```java
+// 编译器生成的桥方法（伪代码）
+public class Child extends Parent {
+    public void setValue(String value) {  // 重写的方法
+        // ...
+    }
+    
+    // 桥方法：保持多态性
+    public void setValue(Object value) {
+        setValue((String) value);  // 调用重写的方法
+    }
+}
+```
+
+### 七、泛型的实际应用场景
+
+#### 7.1 集合框架
+
+Java集合框架是泛型最典型的应用：
+
+```java
+// 类型安全的集合
+List<String> stringList = new ArrayList<>();
+Set<Integer> intSet = new HashSet<>();
+Map<String, Integer> map = new HashMap<>();
+
+// 避免了类型转换和运行时错误
+stringList.add("hello");
+String s = stringList.get(0);  // 不需要强制转换
+```
+
+#### 7.2 通用工具类
+
+```java
+public class ArrayUtils {
+    // 交换数组中的两个元素
+    public static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    
+    // 查找数组中的最大值
+    public static <T extends Comparable<T>> T max(T[] array) {
+        if (array == null || array.length == 0) {
+            return null;
+        }
+        T max = array[0];
+        for (T item : array) {
+            if (item.compareTo(max) > 0) {
+                max = item;
+            }
+        }
+        return max;
+    }
+}
+```
+
+#### 7.3 设计模式中的应用
+
+**工厂模式**：
+
+```java
+public interface Factory<T> {
+    T create();
+}
+
+public class StringFactory implements Factory<String> {
+    @Override
+    public String create() {
+        return "default";
+    }
+}
+```
+
+**建造者模式**：
+
+```java
+public class Builder<T> {
+    private T instance;
+    
+    public Builder<T> setInstance(T instance) {
+        this.instance = instance;
+        return this;
+    }
+    
+    public T build() {
+        return instance;
+    }
+}
+```
+
+### 八、常见问题和注意事项
+
+#### 8.1 原始类型（Raw Type）
+
+原始类型是指不使用泛型参数的泛型类，应该避免使用：
+
+```java
+List list = new ArrayList();  // 原始类型，不推荐
+List<String> list = new ArrayList<>();  // 推荐方式
+```
+
+使用原始类型会失去类型安全检查，可能引发`ClassCastException`。
+
+#### 8.2 静态成员不能使用类型参数
+
+```java
+public class Box<T> {
+    // private static T value;  // 编译错误
+    // public static T getValue() { }  // 编译错误
+    
+    private static int count = 0;  // 合法
+    public static <T> void method(T param) { }  // 泛型方法合法
+}
+```
+
+原因：静态成员属于类，而不属于实例，但类型参数属于实例层面。
+
+#### 8.3 基本类型不能作为类型参数
+
+```java
+// List<int> list;  // 编译错误
+List<Integer> list;  // 必须使用包装类型
+```
+
+#### 8.4 类型推断的限制
+
+在某些情况下，编译器无法推断类型，需要显式指定：
+
+```java
+// 类型推断失败
+List<String> list = Collections.emptyList();  // 需要显式指定
+// 或者
+List<String> list = Collections.<String>emptyList();
+```
+
+#### 8.5 泛型与重载
+
+由于类型擦除，不能仅通过泛型参数的不同来重载方法：
+
+```java
+// 编译错误：方法签名相同（擦除后都是List）
+public void method(List<String> list) { }
+public void method(List<Integer> list) { }
+
+// 合法：类型参数不同
+public <T> void method(List<T> list) { }
+public void method(List<?> list) { }  // 通配符类型不同
+```
+
+### 九、获取泛型信息（反射）
+
+虽然运行时类型被擦除，但可以通过反射API获取某些泛型信息（如字段、方法参数的泛型信息）。
+
+```java
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+public class GenericInfo {
+    private List<String> stringList;
+    
+    public static void main(String[] args) throws NoSuchFieldException {
+        Field field = GenericInfo.class.getDeclaredField("stringList");
+        Type type = field.getGenericType();
+        
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) type;
+            Type[] actualTypes = pt.getActualTypeArguments();
+            System.out.println("实际类型参数: " + actualTypes[0]);  // class java.lang.String
+        }
+    }
+}
+```
+## Java反射
+### 反射获取对象类的方式
+#### 1. 类名.class
+```Java
+Class<String> clazz = String.class;
+```
+- 编译器就确定
+- 不会触发类初始化，不执行static语句
+
+#### 2. 对象.getClass()
+```Java
+String s = "hello";
+Class<? extends String> clazz = s.getClass();
+```
+- 运行期获取
+- 先存在对象，再获取类，一定会触发类初始化
+
+#### 3. Class.forName("全限定类名")
+```Java
+Class<?> clazz = Class.forName("java.lang.String");
+```
+- 运行期动态获取
+- 默认触发类初始化
+- 如果类不存在会抛出`ClassNotFoundException`
+
+#### 4. 通过ClassLoader加载
+```Java
+ClassLoader cl = Thread.currentThread().getContextClassLoader();
+Class<?> clazz = cl.loadClass("java.lang.String");
+
+```
+- 只加载，不初始化
+- 不会执行static块

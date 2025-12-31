@@ -6,7 +6,85 @@ categories:
   - java
 ---
 
+
+<!-- TOC -->
+- [JDK8](#jdk8)
+  - [接口默认方法（非抽象方法）](#接口默认方法非抽象方法)
+  - [Lambda表达式](#lambda表达式)
+  - [StreamAPI](#streamapi)
+  - [默认方法](#默认方法)
+  - [Optional类](#optional类)
+- [JDK9](#jdk9)
+  - [模块化系统（Project Jigsaw）](#模块化系统project-jigsaw)
+  - [G1 成为默认垃圾回收器（GC）](#g1-成为默认垃圾回收器gc)
+  - [JShell（交互式 REPL 工具）](#jshell交互式-repl-工具)
+  - [其他新特性](#其他新特性)
+- [JDK10](#jdk10)
+  - [局部变量类型推断（var）](#局部变量类型推断var)
+- [JDK11](#jdk11)
+  - [新特性介绍](#新特性介绍)
+  - [局部类型推断Var](#局部类型推断var)
+  - [字符串API增强](#字符串api增强)
+  - [标准化HttpClient](#标准化httpclient)
+  - [模块化](#模块化)
+- [JDK14](#jdk14)
+  - [Switch表达式](#switch表达式)
+- [JDK15](#jdk15)
+  - [文本块](#文本块)
+- [JDK16](#jdk16)
+  - [record类](#record类)
+  - [Instance of 匹配](#instance-of-匹配)
+- [JDK17](#jdk17)
+  - [Spring和SpringBoot](#spring和springboot)
+  - [增强的伪随机数生成器](#增强的伪随机数生成器)
+  - [Sealed Class 密封类](#sealed-class-密封类)
+- [JDK21](#jdk21)
+  - [Record Patterns](#record-patterns)
+  - [Switch类型匹配](#switch类型匹配)
+  - [虚拟线程](#虚拟线程)
+  - [分代ZGC](#分代zgc)
+- [JDK22](#jdk22)
+  - [未命名变量](#未命名变量)
+<!-- /TOC -->
+
 # JDK8
+## 接口默认方法（非抽象方法）
+JDK8允许在接口中定义默认方法（使用default关键字），这样接口可以包含实现代码，但实现类可以选择是否覆盖它。
+
+**示例：**
+```java
+interface MyInterface {
+    void abstractMethod();
+
+    default void defaultMethod() {
+        System.out.println("这是接口的默认方法实现");
+    }
+}
+
+class MyClass implements MyInterface {
+    @Override
+    public void abstractMethod() {
+        System.out.println("实现抽象方法");
+    }
+
+    // 可以选择覆盖默认方法，也可以不覆盖，直接使用接口提供的实现
+    // @Override
+    // public void defaultMethod() {
+    //     System.out.println("自定义实现");
+    // }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        MyClass obj = new MyClass();
+        obj.abstractMethod(); // 输出: 实现抽象方法
+        obj.defaultMethod();  // 输出: 这是接口的默认方法实现
+    }
+}
+```
+**意义：**
+- 接口添加新方法时不会破坏已有实现类（向后兼容）
+- 便于接口功能进化
 
 ## Lambda表达式
 
@@ -15,8 +93,216 @@ categories:
 ## 默认方法
 
 ## Optional类
+# JDK9
+## 模块化系统（Project Jigsaw）
+
+JDK9 最大的变化之一是引入了模块系统——Project Jigsaw，这意味着 Java 平台本身，以及开发者自定义的代码，都可以被组织到模块中。
+
+### 主要变化
+- 原有的大型 JDK 被拆分为 90 多个模块
+- 开发者可以根据应用需求只引入需要的模块，减小体积
+- 模块化提高了安全性，易于维护
+
+### 关键语法
+- 新增 `module-info.java` 文件来定义模块
+
+**示例：**
+```java
+// module-info.java
+module com.example.myapp {
+    requires java.sql;
+    exports com.example.myapp.api;
+}
+```
+- `requires` 指定依赖的模块
+- `exports` 导出本模块中的包
+
+### 启动模块化应用
+```sh
+java --module-path mods -m com.example.myapp/com.example.myapp.Main
+```
+## G1 成为默认垃圾回收器（GC）
+
+JDK9 开始，G1（Garbage-First）垃圾回收器正式取代 Parallel GC，成为 Java 虚拟机的默认垃圾回收器。G1 优先满足低延迟、高吞吐的服务端场景，适合大内存、多核处理器的现代应用。
+
+### 主要特性
+- 支持多核并发、低暂停 GC
+- 可以通过 `-XX:MaxGCPauseMillis` 控制最大暂停时间
+- 按“分区”内存区域，灵活高效地并行/并发收集
+- 不再需要手动指定 `-XX:+UseG1GC`，移除后默认采用 G1
+
+### 代码体验
+一般不需要更改代码，仅 VM 参数会切换。如需观察，启动参数可加：
+
+```
+-XX:+PrintGCDetails -XX:+PrintGCDateStamps
+```
+
+### 手动指定使用其它 GC
+如需切换回旧的 Parallel GC，可加参数：
+
+```
+-XX:+UseParallelGC
+```
+
+**小结**：  
+G1 适用于绝大多数服务端应用，并且易于配置、更加智能，自动平衡吞吐与延迟。
+
+更多参考：  
+- [Java 官方文档](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm)
+- [JEP 248: Make G1 the Default Garbage Collector](https://openjdk.org/jeps/248)
+
+
+## JShell（交互式 REPL 工具）
+
+JDK9 新增了 Java 的 REPL 工具——JShell，可以直接输入 Java 代码片段并立刻执行，便于学习、测试和调试。
+
+**常用命令：**
+- 输入表达式/语句后直接回车即可查看运行结果。
+- `/exit` 退出 JShell
+
+**示例：**
+```sh
+jshell
+jshell> int x = 10;
+jshell> System.out.println(x * 2);
+20
+```
+
+-------
+
+## 其他新特性
+
+### 私有接口方法
+接口中允许添加 private 方法，用于接口内部的代码复用。例如：
+```java
+interface MyInterface {
+    default void foo() {
+        bar();
+    }
+    private void bar() {
+        System.out.println("私有接口方法");
+    }
+}
+```
+
+### 集合工厂方法
+可以用更简洁的语法创建不可变集合：
+```java
+List<String> list = List.of("a", "b", "c");
+Set<Integer> set = Set.of(1, 2, 3);
+Map<String, Integer> map = Map.of("a", 1, "b", 2);
+```
+
+### try-with-resources 改进
+资源变量可以在 try 外部声明并在 try 内部使用：
+```java
+Resource resource = new Resource();
+try (resource) {
+    // 使用 resource
+}
+```
+
+### Stream API 增强
+
+- 新增 `takeWhile`, `dropWhile`, `ofNullable` 方法提升流处理能力
+
+**示例：**
+```java
+List<Integer> list = List.of(1, 2, 3, 4, 5, 0, 6, 7);
+list.stream().takeWhile(n -> n > 0).forEach(System.out::println); // 输出: 1 2 3 4 5
+```
+
+-------
 
 # JDK11
+
+### 新特性介绍
+
+#### 1. 新的字符串方法
+
+JDK11 为 `String` 类增加了大量实用方法：
+
+- `isBlank()`：判断字符串是否为空白。
+- `lines()`：按行拆分字符串为流。
+- `strip()`, `stripLeading()`, `stripTrailing()`：去除空白符（更全面支持 Unicode 空白，不同于 `trim()`）。
+- `repeat(int count)`：重复字符串。
+
+**示例：**
+```java
+String str = "  Hello Java  \nwelcome  ";
+System.out.println(str.isBlank()); // false
+str.lines().forEach(System.out::println); // 按行输出
+System.out.println(str.strip()); // 去除所有前后空白
+System.out.println("abc".repeat(3)); // abcabcabc
+```
+
+#### 2. 本地变量类型推断支持 lambda 参数（升级）
+
+允许在 lambda 表达式参数类型前使用 `var` 关键字，可以增强代码一致性和可读性：
+
+```java
+BiFunction<Integer, Integer, Integer> add = (var a, var b) -> a + b;
+```
+
+#### 3. 文件 I/O 增强
+
+##### a) `Files.readString` 和 `Files.writeString`  
+简化字符串与文件之间的读写操作：
+
+```java
+Path path = Paths.get("demo.txt");
+Files.writeString(path, "Hello JDK11!");
+String content = Files.readString(path);
+System.out.println(content);
+```
+
+##### b) `InputStream.transferTo(OutputStream)`
+简化流传输：
+
+```java
+try (InputStream in = Files.newInputStream(Paths.get("input.txt"));
+     OutputStream out = Files.newOutputStream(Paths.get("output.txt"))) {
+    in.transferTo(out); // 直接将输入流内容写入输出流
+}
+```
+
+#### 4. 集合工厂方法增强
+
+`var` 结合集合工厂方法，使集合构建更加简洁：
+
+```java
+var immutableList = List.of("a", "b", "c");
+```
+
+#### 5. 新的 Http Client API 标准
+
+JDK11 标准引入了异步/同步型 Http Client：
+
+```java
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://example.com"))
+    .build();
+HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+System.out.println(response.body());
+```
+
+#### 6. 垃圾回收器变化
+
+- 默认移除了 CMS，支持 ZGC(实验性)。
+- `-XX:+UseZGC` 启动参数可使用低延迟垃圾回收器。
+
+#### 7. 新的类库和API移除
+
+- 移除了 Java EE 和 CORBA 模块。
+
+#### 8. 其他
+
+- 支持运行单文件源代码，如 `java Hello.java` 可直接运行。
+- Flight Recorder 商业特性开源。
+
+
 
 ## 局部类型推断Var
 
@@ -453,6 +739,34 @@ if (shape instanceof Rectangle r || r.length() > 0) { // error
 ## Spring和SpringBoot
 
 Spring Framework6和SpringBoot 3默认采用最低JDK17。
+## 增强的伪随机数生成器
+JDK17 增加了新的伪随机数生成器（RandomGenerator）接口，并提供了多种现代高质量的实现。它相比老的 java.util.Random 更易于使用，支持可插拔算法和流式 API 操作，适合对可重复性和性能有更高要求的场景。
+
+### 新API举例：
+
+```java
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
+
+// 获取系统默认高质量生成器
+RandomGenerator generator = RandomGenerator.getDefault();
+int r = generator.nextInt(); // 生成随机整数
+
+// 也可以指定算法，比如 "L64X128MixRandom"
+RandomGenerator l64x128 = RandomGeneratorFactory.of("L64X128MixRandom").create();
+System.out.println(l64x128.nextDouble());
+
+// 支持流式生成
+generator.ints(5, 1, 10).forEach(System.out::println); // 输出5个1~9的随机整数
+```
+
+### 已内置的实现包括：
+- L32X64MixRandom
+- L64X128MixRandom
+- Xoroshiro128PlusPlus
+- SplittableRandom（JDK8已有，被统一管理）
+- 以及传统的 Random、SecureRandom 等
+
 
 ## Sealed Class 密封类
 
@@ -487,7 +801,176 @@ public non-sealed class Rectangle extends Shape {
 
 ## Record Patterns
 
-## Switch 匹配
+## Switch类型匹配
+
+JDK21 增强了 `switch`，可用于类型判断和模式匹配，使代码更简洁、类型安全。
+
+### 基本语法：
+
+```java
+static String formatter(Object obj) {
+    return switch (obj) {
+        case Integer i -> "整数: " + i;
+        case String s -> "字符串: " + s;
+        case null     -> "null";
+        default       -> "其他类型";
+    };
+}
+```
+
+- `case Integer i`：如果是`Integer`类型，自动解包为变量`i`
+- `case String s`：如果是`String`类型，自动解包为变量`s`
+- 可以直接匹配`null`
+- `default`为兜底分支
+
+### 结合守卫（when）进一步增强：
+
+```java
+static String kind(Number number) {
+    return switch (number) {
+        case Integer i when i > 0 -> "正整数";
+        case Integer i -> "非正整数";
+        case Double d when d.isNaN() -> "NaN";
+        case Double d -> "浮点数";
+        default -> "其他数字类型或null";
+    };
+}
+```
+
+- `when`后跟条件，只有条件满足时才匹配该分支
+
+### 使用示例：
+
+```java
+public static void main(String[] args) {
+    System.out.println(formatter(123));      // 输出: 整数: 123
+    System.out.println(formatter("hi"));     // 输出: 字符串: hi
+    System.out.println(formatter(null));     // 输出: null
+    System.out.println(formatter(3.14));     // 输出: 其他类型
+
+    System.out.println(kind(5));             // 输出: 正整数
+    System.out.println(kind(-10));           // 输出: 非正整数
+    System.out.println(kind(Double.NaN));    // 输出: NaN
+    System.out.println(kind(2.5));           // 输出: 浮点数
+}
+```
+- 类型安全，避免频繁的`instanceof`+强转
+- 代码逻辑更清晰、简洁
+
+## 虚拟线程
+JDK21 正式引入虚拟线程（virtual threads），这是 Java 并发模型的一次重要革新。虚拟线程是一种轻量级线程，由 Java 虚拟机（JVM）调度，可以大幅提升高并发场景下的吞吐与资源利用率，极大简化高并发服务器编写难度。
+
+### 主要特性
+- 虚拟线程是 `Thread` 的一种实现（`java.lang.Thread`），与平台线程拥有基本一致的 API。
+- 创建和销毁虚拟线程的代价极低，通常能轻松创建数万甚至百万级的虚拟线程。
+- 让阻塞型代码（如 I/O、sleep 等）与异步编程一样高效，但代码风格仍为同步方式，易读易维护。
+- 线程调度交由 JVM，背后通常与平台线程池绑定，但用户无需关心。
+
+### 基本用法示例
+
+```java
+public class VirtualThreadDemo {
+    public static void main(String[] args) throws InterruptedException {
+        // 创建单个虚拟线程并启动
+        Thread vThread = Thread.startVirtualThread(() -> {
+            System.out.println("Hello from virtual thread! 当前线程: " + Thread.currentThread());
+        });
+
+        // 等待线程结束
+        vThread.join();
+
+        // 同时启动一万个虚拟线程，每个线程 sleep 一下
+        int count = 10_000;
+        Thread[] threads = new Thread[count];
+        for (int i = 0; i < count; i++) {
+            threads[i] = Thread.startVirtualThread(() -> {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {}
+            });
+        }
+        // 等待所有虚拟线程结束
+        for (Thread t : threads) {
+            t.join();
+        }
+        System.out.println("所有虚拟线程已结束");
+    }
+}
+```
+
+### 使用 Executors 新 API 批量提交任务
+
+```java
+var executor = Executors.newVirtualThreadPerTaskExecutor();
+try (executor) {
+    IntStream.range(0, 10_000).forEach(i ->
+        executor.submit(() -> {
+            Thread.sleep(100);
+        })
+    );
+}
+System.out.println("全部任务提交结束");
+```
+
+### 主要意义
+
+- 能用“看起来阻塞、实则调度高效”的方式编写高并发网络应用程序（如 Web 服务器）。
+- 大幅减少复杂“回调地狱”或异步代码需求。
+- 提高应用的可维护性、扩展性和吞吐能力。
+
+> 虚拟线程的提出标志着 Java 在并发编程领域迈向 Go 之类“百万协程”时代的能力，同时保留了严谨的类型系统和现有生态的兼容性。
+
+## 分代ZGC
+### JDK21 引入的分代ZGC（Generational ZGC）
+
+**分代ZGC**（Generational ZGC）是在原有 ZGC 垃圾回收器基础上实现的分代（Generational）功能，进一步提升了低延迟垃圾回收的效率，特别是在大对象、新生代对象生命周期频繁变动的应用场景。
+
+#### 主要特性
+
+- 支持将堆划分为新生代（Young Generation）和老年代（Old Generation）
+- 对大多数短命对象进行更高效的内存回收，减少 Full GC 发生频率
+- 保持 ZGC 本身的低暂停（亚毫秒级）和可扩展性
+- 提升了吞吐量，降低了应用延迟
+
+#### 启用分代ZGC
+
+启动参数示例（JDK21+）：
+```
+-XX:+UseZGC -XX:+ZGenerational
+```
+
+#### 代码体验（无需代码改动，参数可用即生效）
+
+```java
+// 启动 JVM 时加如下参数：
+// -XX:+UseZGC -XX:+ZGenerational
+
+public class ZGCDemo {
+    public static void main(String[] args) throws Exception {
+        for (int i = 0; i < 100_000; i++) {
+            byte[] arr = new byte[1024 * 1024]; // 分配 1MB
+            Thread.sleep(10);
+        }
+    }
+}
+```
+
+日志示例（可以添加 -Xlog:gc* 观察）：
+
+```
+[0.123s][info][gc,start     ] GC(0) Pause Young (Normal) (G1 Evacuation Pause)
+[0.126s][info][gc,stats     ] GC(0) Pause Young (Normal) 2M->0.5M(32M)
+...
+```
+
+#### 小结
+
+- 分代ZGC 结合了分代回收的高效性和 ZGC 的低延迟能力，非常适用于服务端、大型数据应用和需要低暂停的系统。
+- 若使用 ZGC，推荐在 JDK21+ 加启 `-XX:+ZGenerational` 以充分发挥优势。
+
+更多参考：  
+https://openjdk.org/jeps/439  
+https://wiki.openjdk.org/display/zgc/Main
 
 
 

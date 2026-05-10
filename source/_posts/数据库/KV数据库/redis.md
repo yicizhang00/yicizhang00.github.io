@@ -2,7 +2,7 @@
 title: redis
 date: 2025-09-22 01:44:36
 tags:
-  - java
+  - Java
 
 ---
 

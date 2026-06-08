@@ -1,24 +1,17 @@
 menu:
-  # 文章:
-  #   隧道: /archives/ || anzhiyu-icon-box-archive
-  #   分类: /categories/ || anzhiyu-icon-shapes
-  #   标签: /tags/ || anzhiyu-icon-tags
+  文章:
+    归档: /archives/ || anzhiyu-icon-box-archive
+    分类: /categories/ || anzhiyu-icon-shapes
+    标签: /tags/ || anzhiyu-icon-tags
 
-  # 友链:
-  #   友人帐: /link/ || anzhiyu-icon-link
-  #   朋友圈: /fcircle/ || anzhiyu-icon-artstation
-  #   留言板: /comments/ || anzhiyu-icon-envelope
+  学习:
+    分布式: /categories/分布式/ || anzhiyu-icon-cloud
+    一致性协议: /categories/一致性协议/ || anzhiyu-icon-network-wired
+    论文阅读: /categories/论文阅读/ || anzhiyu-icon-book
 
-  # 我的:
-  #   音乐馆: /music/ || anzhiyu-icon-music
-  #   追番页: /bangumis/ || anzhiyu-icon-bilibili
-  #   相册集: /album/ || anzhiyu-icon-images
-  #   小空调: /air-conditioner/ || anzhiyu-icon-fan
-
-  # 关于:
-  #   关于本人: /about/ || anzhiyu-icon-paper-plane
-  #   闲言碎语: /essay/ || anzhiyu-icon-lightbulb
-  #   随便逛逛: javascript:toRandomPost() || anzhiyu-icon-shoe-prints1
+  关于:
+    关于: /about/ || anzhiyu-icon-paper-plane
+    随便逛逛: javascript:toRandomPost() || anzhiyu-icon-shoe-prints1
 
 # nav相关配置
 nav:
@@ -110,7 +103,7 @@ docsearch:
 
 # Local search
 local_search:
-  enable: false
+  enable: true
   preload: true
   CDN:
 
@@ -128,8 +121,8 @@ mathjax:
 
 # KaTeX
 katex:
-  enable: false
-  per_page: false
+  enable: true
+  per_page: true
   hide_scrollbar: true
 
 # Image (图片设置)
@@ -614,8 +607,8 @@ site_verification:
 
 theme_color:
   enable: true
-  main: "#425AEF"
-  dark_main: "#f2b94b"
+  main: "#3b82f6"
+  dark_main: "#60a5fa"
   paginator: "#425AEF"
   #   button_hover: "#FF7242"
   text_selection: "#2128bd"
@@ -815,7 +808,7 @@ aside:
     enable: false
     content: 欢迎来看我的博客鸭~
   card_weixin:
-    enable: true
+    enable: false
     face: https://bu.dusays.com/2023/01/13/63c02edf44033.png
     backFace: https://bu.dusays.com/2023/05/13/645fa415e8694.png
   card_recent_post:
@@ -864,7 +857,7 @@ runtimeshow:
 
 # Console - Newest Comments
 newest_comments:
-  enable: true
+  enable: false
   sort_order: # Don't modify the setting unless you know how it works
   limit: 6
   storage: 10 # unit: mins, save data to localStorage
@@ -1090,7 +1083,7 @@ friends_vue:
 
 # 深色模式粒子效果canvas
 universe:
-  enable: true
+  enable: false
 
 # 页面卡片顶部气泡升起效果
 bubble:
@@ -1127,7 +1120,7 @@ comment_barrage_config:
 # 左下角音乐配置项
 # https://github.com/metowolf/MetingJS
 nav_music:
-  enable: true
+  enable: false
   console_widescreen_music: false # 宽屏状态控制台显示音乐而不是标签 enable为true 控制台依然会显示
   id: 8152976493
   server: netease
@@ -1183,7 +1176,7 @@ greetingBox:
 
 # 文章顶部ai摘要
 post_head_ai_description:
-  enable: true
+  enable: false
   gptName: AnZhiYu
   mode: local # 默认模式 可选值: tianli/local
   switchBtn: false # 可以配置是否显示切换按钮 以切换tianli/local
@@ -1224,7 +1217,7 @@ rightClickMenu:
 
 # 首页随便逛逛people模式 而非技能点模式，关闭后为技能点模式需要配置creativity.yml
 peoplecanvas:
-  enable: true
+  enable: false
   img: https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png
 
 # 动效

@@ -2,50 +2,53 @@ name: Blog CI/CD
 
 on:
   push:
-    branches: 
-      - source  # 监听 source 分支的推送
+    branches:
+      - source
+
+permissions:
+  contents: write
 
 env:
   TZ: Asia/Shanghai
 
 jobs:
   blog-cicd:
-    name: Hexo blog build & deploy
+    name: Hexo Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout codes
-      uses: actions/checkout@v4 # 升级到 v4
-      with:
-        submodules: true # 如果你的主题是 git submodule 形式，这行很重要
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
 
-    - name: Setup node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20' # 推荐使用 LTS 版本
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-    - name: Install dependencies
-      run: |
-        npm install -g hexo-cli
-        npm install
+      - name: Install Dependencies
+        run: |
+          npm install -g hexo-cli
+          npm install
 
-    - name: Generate files
-      run: |
-        hexo clean
-        hexo generate
+      - name: Generate Static Files
+        run: |
+          hexo clean
+          hexo generate
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        # GitHub 会自动提供 GITHUB_TOKEN，无需手动设置 secret
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        # 部署的目标分支
-        publish_branch: main 
-        # 静态文件所在目录
-        publish_dir: ./public 
-        # 提交信息
-        commit_message: "Auto-deployed by GitHub Actions at $(date +'%Y-%m-%d %H:%M:%S')"
-        # 你的用户名
-        user_name: 'yicizhang00'
-        user_email: 'zhangyici2000@outlook.com'
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: main
+          force_orphan: true
+
+          user_name: yicizhang00
+          user_email: zhangyici2000@outlook.com
+
+          commit_message: |
+            deploy: site updated at $(date +"%Y-%m-%d %H:%M:%S")

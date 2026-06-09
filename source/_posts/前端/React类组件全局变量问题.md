@@ -1,11 +1,12 @@
 ---
-title: React 类组件全局变量陷阱：深度解析实例隔离问题
+title: React类组件全局变量陷阱：深度解析实例隔离问题
 date: 2026-01-09 09:59:24
 tags:
   - React
   - JavaScript
   - 最佳实践
 categories:
+  - 前端
   - React
 ---
 

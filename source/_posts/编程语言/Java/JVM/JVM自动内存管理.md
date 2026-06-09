@@ -2,10 +2,11 @@
 title: JVM自动内存管理
 date: 2025-08-12 01:55:16
 tags:
+  - Java
+  - JVM
 categories:  
   - Java
   - JVM
-
 ---
 
 # 内存管理

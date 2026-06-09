@@ -4,6 +4,7 @@ date: 2026-01-29 08:50:01
 tags:
 categories:
     - Java
+    - 工程实践
 ---
 # 导言
 Spring Boot 应用中，基于注解的 AOP 切面只能作用于由 Spring 容器管理的 Bean。对于第三方 JAR 包中的类（未被 Spring 管理），常规 AOP 无法生效。为此，可引入 LTW（Load-Time Weaving），在类加载时动态织入切面逻辑，从而修改第二方或第三方代码的行为。

@@ -2,7 +2,11 @@
 title: redis
 date: 2025-09-22 01:44:36
 tags:
-  - Java
+  - 存储系统
+  - KV数据库
+categories:	
+  - 存储系统
+  - KV数据库
 
 ---
 

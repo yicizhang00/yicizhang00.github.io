@@ -1,10 +1,10 @@
 ---
-title: java基础
+title: Java基础
 date: 2025-08-12 01:55:16
 tags:
 categories: 
-  - 数据结构 
-  - java
+  - Java
+  - Java基础
 ---
 
 # Java基础知识

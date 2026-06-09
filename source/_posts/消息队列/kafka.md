@@ -1,10 +1,11 @@
 ---
-title: kafka
+title: Kafka
 date: 2025-08-12 01:55:16
 tags:
+   - 消息队列
 categories: 
-  - kafka
-  - java
+   - 消息队列
+   - Kafka
 ---
 
 # 初步概念

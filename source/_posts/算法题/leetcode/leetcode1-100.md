@@ -1,10 +1,10 @@
 ---
-title: 数据库
+title: Leetcode(1-100)
 date: 2025-08-12 01:57:43
 categories:
-  - leetcode
+  - Leetcode
 tags:
-  - leetcode
+  - Leetcode
 ---
 # leetcode 1
 

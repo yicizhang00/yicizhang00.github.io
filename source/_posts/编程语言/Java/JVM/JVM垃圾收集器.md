@@ -2,6 +2,8 @@
 title: JVM垃圾收集器
 date: 2025-08-13 01:55:16
 tags:
+  - Java
+  - JVM
 categories:  
   - Java
   - JVM

@@ -1,7 +1,12 @@
 ---
-title: JavaIO模型
+title: Java IO模型
 date: 2025-09-27 03:29:29
 tags:
+    - Java
+    - IO
+categories:
+    - Java
+    - IO
 ---
 
 # 同步/异步/阻塞/非阻塞

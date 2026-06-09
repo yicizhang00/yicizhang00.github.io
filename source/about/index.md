@@ -106,7 +106,11 @@ pretty_urls:
 
 ---
 # ❓️ 为什么那么多TODO和空笔记
+<div class="note note-warning">
 <div align="center">该笔记迁移自我的历史知识库，正在努力构建中（Working Hard）</div>
+
+</div>
+
 ---
 
 # 📫 保持联系

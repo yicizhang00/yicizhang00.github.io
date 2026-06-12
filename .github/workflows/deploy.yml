@@ -46,6 +46,10 @@ jobs:
           publish_dir: ./public
           publish_branch: main
           force_orphan: true
+          
+          # ======= 核心修改：在这里加上自定义域名绑定 =======
+          cname: www.yiciblog.xyz
+          # ===============================================
 
           user_name: yicizhang00
           user_email: zhangyici2000@outlook.com

@@ -745,7 +745,7 @@ post:
     specific: false
 
     # Options: mathjax | katex
-    engine: katex
+    engine: mathjax
 
   # 流程图，基于 mermaid-js，具体请见：https://fluid.ist/docs/guide/#mermaid-流程图
   # Flow chart, based on mermaid-js, see: https://fluid.ist/docs/en/guide/#mermaid

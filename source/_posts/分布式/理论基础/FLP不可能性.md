@@ -59,7 +59,7 @@ FLP 定理证明的核心，在于证实确定性算法无法在最坏的异步�
 在至少包含两个进程的完全异步系统中，只要允许发生单点崩溃故障，就不存在任何确定性共识算法，能够保证在所有可能的执行序列中皆满足一致性、有效性与终止性。
 
 # 证明概要与核心逻辑
-FLP 的证明极其精巧，主要利用了**“配置价性（Configuration Valency）”**与**“事件调度（Event Schedules）”**的分析技巧。其核心思想分为以下几个关键步骤：
+FLP 的证明极其精巧，主要利用了**配置价性（Configuration Valency）**与**事件调度（Event Schedules）**的分析技巧。其核心思想分为以下几个关键步骤：
 
 ### 1. 配置与事件系统
 - **配置（Configuration）**：代表系统在某一时刻的全局快照，包含所有进程的本地状态以及网络中尚未送达的消息集合（Message Buffer）。
@@ -181,7 +181,7 @@ FLP 的证明极其精巧，主要利用了**“配置价性（Configuration Val
 1. 系统中存在两个活跃提案者 $Proposer_1$ 与 $Proposer_2$。
 2. $Proposer_1$ 发起 `Prepare(n_1)` 并成功获得多数派（Quorum）的 Promise，此时其提案值（例如 0）具有潜在决议基础。
 3. 在 $Proposer_1$ 进入 `Accept(n_1, v)` 阶段之前，$Proposer_2$ 发起更高编号的 `Prepare(n_2)`（$n_2 > n_1$），并同样获得 Quorum Promise。
-4. Acceptor 更新承诺，拒绝所有小于 $n_2$ 的提案编号。
+4. $Acceptor$ 更新承诺，拒绝所有小于 $n_2$ 的提案编号。
 5. $Proposer_1$ 迟到的 `Accept(n_1, v)` 被全部拒绝，原本可能形成的决议被打断。
 6. $Proposer_1$ 被迫发起更高编号提案 $n_3 > n_2$ 以重新争夺主导权。
 
@@ -216,7 +216,7 @@ Raft 中更常见的“类双稳态现象”发生在**Leader 选举阶段的 sp
 
 - 各节点定时器几乎同时触发
 - 投票持续被平均分割
-- Term 不断递增（T → T+1 → T+2 ...）
+- Term 不断递增（$T \rightarrow T+1 \rightarrow T+2$ ...）
 - 每一轮都没有 Leader 产生
 
 系统表现为持续选举但永远无 Leader 的空转状态。

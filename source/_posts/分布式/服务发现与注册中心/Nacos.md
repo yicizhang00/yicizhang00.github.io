@@ -14,4 +14,4 @@ categories:
 // TODO
 
 # Nacos
-// TODO
+nacos不仅支持AP也支持CP，其作为配置中心的功能主要实现的是CP，强调的是强一致性。作为注册中心i的功能实现的是AP，强调的是可用性。

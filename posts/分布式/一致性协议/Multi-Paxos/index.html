@@ -1,0 +1,1401 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言Google 在设计 Chubby 时，希望构建一个能够提供分布式锁（Distributed Lock）、Master 选举（Leader Election）以及元数据存储（Metadata Storage）能力的基础设施。后续的 GFS 和 Bigtable 等核心系统均建立在 Chubby 之上。 Chubby 的早期版本采用商用数据库 3DB 作为底层存储引擎。然而在生产环境中，3DB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Multi Paxos">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/Multi-Paxos/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言Google 在设计 Chubby 时，希望构建一个能够提供分布式锁（Distributed Lock）、Master 选举（Leader Election）以及元数据存储（Metadata Storage）能力的基础设施。后续的 GFS 和 Bigtable 等核心系统均建立在 Chubby 之上。 Chubby 的早期版本采用商用数据库 3DB 作为底层存储引擎。然而在生产环境中，3DB">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260603003449365.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260603004214630.png">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.831Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Distributed Systems">
+<meta property="article:tag" content="Raft">
+<meta property="article:tag" content="Paxos">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Backend">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260603003449365.png">
+  
+  
+  
+  <title>Multi Paxos - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Multi Paxos</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          58 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Multi Paxos</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Google 在设计 Chubby 时，希望构建一个能够提供<code>分布式锁（Distributed Lock）</code>、<code>Master 选举（Leader Election）</code>以及<code>元数据存储（Metadata Storage）</code>能力的基础设施。后续的 GFS 和 Bigtable 等核心系统均建立在 Chubby 之上。</p>
+<p>Chubby 的早期版本采用商用数据库 3DB 作为底层存储引擎。然而在生产环境中，3DB 暴露出了复制错误（Replication Bugs）、一致性语义不明确等问题。更重要的是，其复制协议缺乏严格的理论证明，无法从理论上保证系统状态的一致性。</p>
+<p>为了解决这一问题，Google 决定基于 Paxos 共识算法重新设计底层存储系统。然而，在实际工程实践过程中，研究人员发现：</p>
+<blockquote>
+<p>理论上的 Paxos 算法与生产级分布式系统之间存在巨大的实现鸿沟（Gap Between Theory and Practice）。</p>
+</blockquote>
+<p>因此，Google 在保持 Paxos 安全性不变的前提下，引入了一系列工程化扩展和优化，最终构建出了能够在生产环境稳定运行的 Chubby 系统。</p>
+<h2 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h2><p>构建容错系统最常见的方法之一，是通过共识算法保证多个副本之间的数据一致性。</p>
+<p>通过不断对一系列输入值重复执行共识算法，可以在所有副本上维护一份完全一致的复制日志（Replicated Log）。如果日志中的值表示对某个数据结构的操作，则所有副本按照相同顺序执行这些操作后，将得到完全相同的状态。</p>
+<p>例如，当日志记录的是数据库操作时：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Insert(A)<br>Update(B)<br>Delete(C)<br></code></pre></td></tr></table></figure>
+
+<p>所有副本按照相同顺序重放这些操作后，最终将获得一致的数据库内容。</p>
+<p>这一思想被称为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Replicated Log<br>        +<br>State Machine Replication<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<blockquote>
+<p>共识协议负责保证日志一致性，而状态机负责执行日志，从而保证系统状态一致性。</p>
+</blockquote>
+<h1 id="Chubby"><a href="#Chubby" class="headerlink" title="Chubby"></a>Chubby</h1><p>Chubby 通过副本复制实现容错。一个典型的 Chubby Cell 由五个副本组成，每个副本运行相同的代码，并部署在独立的服务器上。</p>
+<p>每一个 Chubby 对象（例如锁、目录或文件）都会作为数据库中的一条记录存储，而真正被复制的是整个数据库。</p>
+<p>在任意时刻，这五个副本中有且仅有一个被选举为<code>Master</code>。</p>
+<p>Chubby 客户端（例如 GFS 和 Bigtable）始终通过 Master 提供服务。如果客户端连接到非 Master 副本，该副本会返回当前 Master 的地址，客户端随后重新连接至 Master。</p>
+<p>当 Master 发生故障时，系统会自动选举新的 Master。由于所有副本都维护着一致的数据库副本，因此新的 Master 可以在本地状态基础上继续提供服务，从而保证系统状态的连续性。</p>
+<p>Chubby 的整体架构如下所示：</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260603003449365.png" srcset="/img/loading.gif" lazyload alt="ChubbyArch"></p>
+<p>在协议栈最底层，是基于 Paxos 的容错复制日志层（Fault-Tolerant Replicated Log）。</p>
+<p>每个副本都维护着一份本地日志副本。Paxos 被不断重复执行，以确保所有副本最终拥有完全一致的日志序列。</p>
+<p>副本之间通过 Paxos 协议进行通信。</p>
+<p>协议栈的上一层是容错数据库层（Fault-Tolerant Database）。</p>
+<p>每个副本都维护数据库的本地副本，数据库由以下两部分组成：</p>
+<ul>
+<li>Snapshot（快照）</li>
+<li>Replay Log（重放日志）</li>
+</ul>
+<p>新的数据库操作首先提交到复制日志层。</p>
+<p>当某个日志条目在副本间达成共识后，该操作会被应用到各副本的本地数据库中。</p>
+<p>在最顶层，Chubby 使用该数据库保存锁、文件和系统元数据等状态信息，并通过 Chubby 协议向客户端提供服务。</p>
+<p>Chubby 的容错日志结构如下：</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260603004214630.png" srcset="/img/loading.gif" lazyload></p>
+<p>它提供一个向日志提交新值的接口。</p>
+<p>当某个值被成功写入容错日志（即在集群中被 Chosen）后，系统会在每个副本上触发回调函数（Callback），并将该值传递给应用程序。</p>
+<p>这里的 Callback 并不是回调客户端（Client），而是回调运行在各副本上的状态机应用程序。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs text">Client<br>    ↓<br>submit(value)<br>    ↓<br>Leader 发起 Paxos<br>    ↓<br>多数派 Accepted<br>    ↓<br>Chosen<br>    ↓<br>Leader 广播 Commit<br>    ↓<br>每个副本触发 onCommit(value)<br>    ↓<br>状态机执行<br>    ↓<br>所有副本得到相同状态<br></code></pre></td></tr></table></figure>
+
+<p>总体而言：</p>
+<blockquote>
+<p>Paxos 负责保证所有副本拥有完全一致的日志；应用程序通过 <code>onCommit()</code> 按照相同顺序执行日志，从而保证所有副本最终达到一致状态。</p>
+</blockquote>
+<h2 id="Basic-Paxos"><a href="#Basic-Paxos" class="headerlink" title="Basic Paxos"></a>Basic Paxos</h2><p>Paxos 是一种用于解决非拜占庭故障环境下一致性问题的共识算法。</p>
+<p>系统中的副本可能发生：</p>
+<ul>
+<li>节点崩溃（Crash）</li>
+<li>节点恢复（Recovery）</li>
+<li>网络延迟（Delay）</li>
+<li>网络丢包（Loss）</li>
+<li>网络分区（Partition）</li>
+</ul>
+<p>同时，每个副本均拥有能够跨越崩溃保存状态的持久化存储。</p>
+<p>Paxos 保证：</p>
+<blockquote>
+<p>如果最终有超过半数的副本持续存活并能够互相通信，则系统最终能够就某个被提议的值达成一致。</p>
+</blockquote>
+<p>在 Chubby 中，被共识的对象不是单个业务值，而是复制日志中的下一条日志记录（Log Entry）。</p>
+<p>该算法可以抽象为三个阶段：</p>
+<ol>
+<li>选举协调者（Coordinator）。</li>
+<li>协调者提出待共识的值。</li>
+<li>多数派接受后宣布提交（Commit）。</li>
+</ol>
+<p>由于故障可能发生，上述过程可能被重复执行。</p>
+<p>为了保证一致性，Paxos 允许多个副本同时尝试成为协调者。</p>
+<p>多个协调者可能同时存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Coordinator A<br>Coordinator B<br>Coordinator C<br></code></pre></td></tr></table></figure>
+
+<p>并且可能提出不同的值。</p>
+<p>为了解决这一问题，Paxos 引入了两项关键机制：</p>
+<ol>
+<li>对协调者进行全局排序（Proposal Number）。</li>
+<li>限制协调者选择值的自由度。</li>
+</ol>
+<p>协调者排序机制通过 Proposal Number 实现。</p>
+<p>每个副本记录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">maxPromisedProposalNumber<br></code></pre></td></tr></table></figure>
+
+<p>当副本尝试成为协调者时，会生成一个全局唯一且递增的 Proposal Number：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Prepare(n)<br></code></pre></td></tr></table></figure>
+
+<p>并向所有副本发送提议。</p>
+<p>如果多数派副本返回：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Promise(n)<br></code></pre></td></tr></table></figure>
+
+<p>则该副本获得当前轮次的协调权。</p>
+<p>Promise 的含义为：</p>
+<blockquote>
+<p>承诺未来不会再接受编号小于 n 的提案。</p>
+</blockquote>
+<p>为了保证已经达成的共识不会被后续提案破坏，Promise 消息还需要返回：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">最高编号的已接受提案<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">(n&#x27;, v&#x27;)<br></code></pre></td></tr></table></figure>
+
+<p>新的协调者必须从收到的所有回复中选择 Proposal Number 最大的那个值继续提议。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">V1 → (#1,1)<br>V2 → (#5,3)<br>V3 → (#2,2)<br></code></pre></td></tr></table></figure>
+
+<p>则新的协调者必须继续提议：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">value = 3<br></code></pre></td></tr></table></figure>
+
+<p>而不是自由选择新的值。</p>
+<p>这一规则构成了 Paxos 安全性的核心基础。</p>
+<h2 id="Multi-Paxos"><a href="#Multi-Paxos" class="headerlink" title="Multi-Paxos"></a>Multi-Paxos</h2><p>在实际系统中，Paxos 很少用于对单个值达成共识，而是被用于维护一条持续增长的复制日志。</p>
+<p>最直接的实现方式是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">Slot1 → Paxos Instance 1<br>Slot2 → Paxos Instance 2<br>Slot3 → Paxos Instance 3<br>...<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<blockquote>
+<p>每个日志槽位（Slot）对应一次独立的 Paxos 实例。</p>
+</blockquote>
+<p>因此，向日志提交一个值，本质上就是执行一次新的 Paxos 实例。</p>
+<p>在 Multi-Paxos 中，一些较慢（Lagging）的副本可能没有参与最近的 Paxos 实例，因此需要通过 Catch-up 机制追赶最新进度。</p>
+<p>每个副本都会维护本地持久化日志（Persistent Log），用于记录所有 Paxos 状态变化。</p>
+<p>当副本崩溃恢复后，可以通过重放日志恢复崩溃前状态。</p>
+<p>这些日志同样用于帮助落后副本追赶最新进度。</p>
+<p>Basic Paxos 的一个严重性能问题在于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">Prepare<br>Promise<br>Accept<br>Accepted<br>Commit<br></code></pre></td></tr></table></figure>
+
+<p>每个阶段都需要持久化。</p>
+<p>因此一次共识可能需要五次磁盘刷盘（Disk Flush）。</p>
+<p>在低延迟网络环境中，磁盘刷盘时间往往会成为整个系统的主要性能瓶颈。</p>
+<p>为了解决这一问题，Multi-Paxos 引入了著名优化：</p>
+<blockquote>
+<p>当 Coordinator 未发生变化时，可以省略后续实例中的 Prepare&#x2F;Promise 阶段。</p>
+</blockquote>
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">Prepare<br>Promise<br><br>Accept(slot1)<br>Accept(slot2)<br>Accept(slot3)<br>...<br></code></pre></td></tr></table></figure>
+
+<p>只在 Leader 切换时执行一次 Prepare。</p>
+<p>Google 将长期稳定存在的 Coordinator 称为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master<br></code></pre></td></tr></table></figure>
+
+<p>通过该优化，每个 Paxos 实例只需要一次关键写盘操作，并且多个副本可以并行执行写盘。</p>
+<p>此外，为提高吞吐量，系统还支持：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Batch<br></code></pre></td></tr></table></figure>
+
+<p>即将多个客户端请求打包到同一个 Paxos 实例中统一提交，从而提高整体吞吐能力。</p>
+<h2 id="现实挑战"><a href="#现实挑战" class="headerlink" title="现实挑战"></a>现实挑战</h2><h3 id="处理硬盘损坏"><a href="#处理硬盘损坏" class="headerlink" title="处理硬盘损坏"></a>处理硬盘损坏</h3><p>Paxos 的经典理论模型假设：</p>
+<blockquote>
+<p>持久化存储（Persistent Storage）是可靠的。</p>
+</blockquote>
+<p>然而在真实生产环境中，这一假设并不总是成立。</p>
+<p>副本（Replica）可能因为以下原因发生磁盘损坏：</p>
+<ul>
+<li>磁盘介质故障（Media Failure）</li>
+<li>文件系统损坏（Filesystem Corruption）</li>
+<li>运维误操作（Operational Mistake）</li>
+<li>数据误删除（Accidental Deletion）</li>
+</ul>
+<p>当副本丢失持久化状态后，它将忘记自己曾经做出的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">Promise<br>Accepted<br></code></pre></td></tr></table></figure>
+
+<p>记录。</p>
+<p>这意味着它可能违反过去已经做出的承诺（Promise），从而破坏 Paxos 的安全性假设。</p>
+<p>为了检测磁盘损坏，Chubby 采用了两种机制：</p>
+<h4 id="校验和检测"><a href="#校验和检测" class="headerlink" title="校验和检测"></a>校验和检测</h4><p>对于每个持久化文件，系统都会维护对应的校验和（Checksum）。</p>
+<p>当文件内容发生意外修改时，可以通过校验和验证发现数据损坏。</p>
+<h4 id="空磁盘检测"><a href="#空磁盘检测" class="headerlink" title="空磁盘检测"></a>空磁盘检测</h4><p>部分故障并不会导致文件内容损坏，而是导致整个磁盘变为空。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">rm -rf /<br></code></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">磁盘重新格式化<br></code></pre></td></tr></table></figure>
+
+<p>此时系统无法区分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">新加入节点<br></code></pre></td></tr></table></figure>
+
+<p>和：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">磁盘损坏节点<br></code></pre></td></tr></table></figure>
+
+<p>为了解决这一问题，Google 在 GFS 中记录节点身份标记。</p>
+<p>如果某副本重新启动时发现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">本地磁盘为空<br>+<br>GFS 中存在历史身份记录<br></code></pre></td></tr></table></figure>
+
+<p>则可以判断该节点发生了磁盘损坏。</p>
+<h4 id="状态重建"><a href="#状态重建" class="headerlink" title="状态重建"></a>状态重建</h4><p>当检测到磁盘损坏后，该副本不会立即参与投票。</p>
+<p>而是以：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Non-Voting Replica<br></code></pre></td></tr></table></figure>
+
+<p>身份加入集群。</p>
+<p>即：</p>
+<ul>
+<li>接收日志</li>
+<li>执行 Catch-up</li>
+<li>恢复状态</li>
+</ul>
+<p>但是不会回复：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">Promise<br>Accepted<br></code></pre></td></tr></table></figure>
+
+<p>消息。</p>
+<p>只有当其完成状态同步，并观察到一个完整的新 Paxos 实例后，才重新获得投票资格。</p>
+<p>这样能够确保：</p>
+<blockquote>
+<p>它不会因为遗忘历史状态而违反过去做出的承诺。</p>
+</blockquote>
+<hr>
+<h3 id="主节点租约"><a href="#主节点租约" class="headerlink" title="主节点租约"></a>主节点租约</h3><p>基础 Paxos 存在一个容易被忽略的问题：</p>
+<blockquote>
+<p>读取操作也必须经过共识协议。</p>
+</blockquote>
+<p>原因在于：</p>
+<p>某个旧 Master 可能已经失去领导权。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master A<br></code></pre></td></tr></table></figure>
+
+<p>发生网络隔离。</p>
+<p>随后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master B<br></code></pre></td></tr></table></figure>
+
+<p>被成功选举出来。</p>
+<p>如果客户端仍然向旧 Master A 发起读取请求，则可能读取到过期数据（Stale Data）。</p>
+<p>因此，理论上：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Read<br></code></pre></td></tr></table></figure>
+
+<p>也需要经过 Paxos 进行线性化（Linearization）。</p>
+<p>然而在实际系统中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">读请求数量<br>&gt;&gt;<br>写请求数量<br></code></pre></td></tr></table></figure>
+
+<p>如果每次读取都执行 Paxos，共识层将成为系统瓶颈。</p>
+<hr>
+<p>为了解决这一问题，Chubby 引入了：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master Lease<br></code></pre></td></tr></table></figure>
+
+<p>机制。</p>
+<p>其核心思想是：</p>
+<blockquote>
+<p>在租约有效期间，保证不会出现新的合法 Master。</p>
+</blockquote>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">拥有租约的 Master<br></code></pre></td></tr></table></figure>
+
+<p>可以直接基于本地状态提供读取服务。</p>
+<p>无需经过 Paxos。</p>
+<hr>
+<p>在实现上：</p>
+<p>所有副本都会隐式向当前 Master 授予租约。</p>
+<p>租约期间：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Follower<br></code></pre></td></tr></table></figure>
+
+<p>拒绝处理来自其他节点的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">Prepare<br>Accept<br></code></pre></td></tr></table></figure>
+
+<p>请求。</p>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">新 Leader<br></code></pre></td></tr></table></figure>
+
+<p>无法获得多数派支持。</p>
+<hr>
+<p>为了维持租约：</p>
+<p>Master 会周期性提交：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Heartbeat<br></code></pre></td></tr></table></figure>
+
+<p>日志条目。</p>
+<p>用于刷新租约时间。</p>
+<p>同时：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Master Lease Timeout<br>&lt;<br>Follower Lease Timeout<br></code></pre></td></tr></table></figure>
+
+<p>从而容忍一定程度的时钟漂移（Clock Drift）。</p>
+<p>这一思想后来深刻影响了：</p>
+<ul>
+<li>ZooKeeper Lease</li>
+<li>Raft Lease Read</li>
+<li>ReadIndex</li>
+<li>Spanner Leader Lease</li>
+</ul>
+<p>等现代分布式系统设计。</p>
+<hr>
+<h3 id="Master-Churn-问题"><a href="#Master-Churn-问题" class="headerlink" title="Master Churn 问题"></a>Master Churn 问题</h3><p>Multi-Paxos 的性能建立在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">长期稳定 Leader<br></code></pre></td></tr></table></figure>
+
+<p>的前提之上。</p>
+<p>然而网络故障可能导致：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Leader A<br></code></pre></td></tr></table></figure>
+
+<p>短暂失联。</p>
+<p>此时集群可能选举出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Leader B<br></code></pre></td></tr></table></figure>
+
+<p>作为新的 Master。</p>
+<hr>
+<p>随后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Leader A<br></code></pre></td></tr></table></figure>
+
+<p>重新连接。</p>
+<p>由于它可能拥有更高的 Proposal Number，因此又重新夺回领导权。</p>
+<p>之后再次失联。</p>
+<p>再次被替换。</p>
+<p>形成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">A → B → A → B → A<br></code></pre></td></tr></table></figure>
+
+<p>的循环。</p>
+<p>这种现象称为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master Churn<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<blockquote>
+<p>Leader 频繁切换。</p>
+</blockquote>
+<hr>
+<p>Master Churn 会导致：</p>
+<ul>
+<li>Leader 不断变更</li>
+<li>客户端频繁重连</li>
+<li>Paxos Prepare 阶段频繁执行</li>
+<li>系统吞吐量下降</li>
+</ul>
+<hr>
+<p>为了解决这一问题：</p>
+<p>Google 的实现允许当前 Master 定期主动提升自己的 Proposal Number。</p>
+<p>即主动执行：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Prepare(n)<br></code></pre></td></tr></table></figure>
+
+<p>刷新自身领导权。</p>
+<p>从而减少 Leader 抖动现象。</p>
+<hr>
+<h3 id="纪元号（Epoch-Number）"><a href="#纪元号（Epoch-Number）" class="headerlink" title="纪元号（Epoch Number）"></a>纪元号（Epoch Number）</h3><p>考虑如下场景：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Client<br>    ↓<br>Master A<br></code></pre></td></tr></table></figure>
+
+<p>客户端发出请求。</p>
+<p>在请求执行过程中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master A<br></code></pre></td></tr></table></figure>
+
+<p>失去领导权。</p>
+<p>随后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master B<br></code></pre></td></tr></table></figure>
+
+<p>当选。</p>
+<p>之后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Master A<br></code></pre></td></tr></table></figure>
+
+<p>又重新成为 Master。</p>
+<hr>
+<p>此时：</p>
+<p>客户端请求横跨了多个 Master 周期。</p>
+<p>系统必须保证：</p>
+<blockquote>
+<p>该请求不能继续执行。</p>
+</blockquote>
+<p>否则可能产生一致性问题。</p>
+<hr>
+<p>Chubby 引入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Epoch Number<br></code></pre></td></tr></table></figure>
+
+<p>机制。</p>
+<p>定义如下：</p>
+<blockquote>
+<p>当且仅当某个副本在两个请求之间持续担任 Master 时，两次读取到的 Epoch Number 才相同。</p>
+</blockquote>
+<hr>
+<p>Epoch 被存储于复制数据库中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">epoch = 100<br>epoch = 101<br>epoch = 102<br></code></pre></td></tr></table></figure>
+
+<p>每次 Master 切换：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">epoch++<br></code></pre></td></tr></table></figure>
+
+<hr>
+<p>所有数据库操作都携带 Epoch。</p>
+<p>如果发现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">请求开始时 Epoch<br>≠<br>请求结束时 Epoch<br></code></pre></td></tr></table></figure>
+
+<p>则直接：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Abort<br></code></pre></td></tr></table></figure>
+
+<p>终止请求。</p>
+<p>从而保证请求执行期间 Leadership 没有发生变化。</p>
+<hr>
+<h3 id="成员组管理"><a href="#成员组管理" class="headerlink" title="成员组管理"></a>成员组管理</h3><p>实际系统无法假设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">集群成员永久固定<br></code></pre></td></tr></table></figure>
+
+<p>因为：</p>
+<ul>
+<li>节点可能永久损坏</li>
+<li>节点可能扩容</li>
+<li>节点可能下线维护</li>
+</ul>
+<p>因此需要支持：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Reconfiguration<br></code></pre></td></tr></table></figure>
+
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">成员组变更<br></code></pre></td></tr></table></figure>
+
+<hr>
+<p>虽然理论上：</p>
+<blockquote>
+<p>Paxos 本身也可以对配置变更达成共识。</p>
+</blockquote>
+<p>但是在实际系统中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">Multi-Paxos<br>+<br>Catch-up<br>+<br>Lease<br>+<br>Disk Corruption<br></code></pre></td></tr></table></figure>
+
+<p>等机制同时存在时，</p>
+<p>成员组管理会变得异常复杂。</p>
+<hr>
+<p>Google 在论文中指出：</p>
+<blockquote>
+<p>现有文献对这一问题描述不足，大量工程细节需要自行设计和验证。</p>
+</blockquote>
+<hr>
+<h3 id="快照"><a href="#快照" class="headerlink" title="快照"></a>快照</h3><p>复制日志会持续增长：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">Log1<br>Log2<br>Log3<br>...<br>Log1000000<br></code></pre></td></tr></table></figure>
+
+<p>这会导致两个问题：</p>
+<ol>
+<li>无限增长的存储开销。</li>
+<li>无限增长的恢复时间。</li>
+</ol>
+<hr>
+<p>因此需要引入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Snapshot<br></code></pre></td></tr></table></figure>
+
+<p>机制。</p>
+<p>快照保存：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">某时刻完整状态<br></code></pre></td></tr></table></figure>
+
+<p>而非：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">达到该状态的全部操作历史<br></code></pre></td></tr></table></figure>
+
+<hr>
+<p>恢复流程变为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">安装最新 Snapshot<br>+<br>重放剩余日志<br></code></pre></td></tr></table></figure>
+
+<p>而不是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">重放全部历史日志<br></code></pre></td></tr></table></figure>
+
+<hr>
+<p>快照由应用层负责生成。</p>
+<p>Paxos 框架本身并不了解：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">数据库<br>文件系统<br>锁服务<br></code></pre></td></tr></table></figure>
+
+<p>等具体业务状态。</p>
+<p>因此：</p>
+<blockquote>
+<p>只有应用层知道如何生成快照。</p>
+</blockquote>
+<hr>
+<p>当应用通知 Paxos：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Snapshot Completed<br></code></pre></td></tr></table></figure>
+
+<p>后，</p>
+<p>Paxos 可以安全删除：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Snapshot Point<br></code></pre></td></tr></table></figure>
+
+<p>之前的日志。</p>
+<p>这一过程称为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Log Truncation<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="数据库事务"><a href="#数据库事务" class="headerlink" title="数据库事务"></a>数据库事务</h3><p>Chubby 对数据库功能需求并不复杂。</p>
+<p>主要支持：</p>
+<ul>
+<li>Insert</li>
+<li>Delete</li>
+<li>Lookup</li>
+<li>Compare-And-Swap（CAS）</li>
+<li>Iteration</li>
+</ul>
+<hr>
+<p>数据库采用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">Snapshot<br>+<br>Paxos Log<br></code></pre></td></tr></table></figure>
+
+<p>结构实现。</p>
+<hr>
+<p>其中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">CAS<br></code></pre></td></tr></table></figure>
+
+<p>需要保证原子性。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">if value == A<br>    value = B<br></code></pre></td></tr></table></figure>
+
+<p>不能被其他操作插入。</p>
+<hr>
+<p>Chubby 的做法是：</p>
+<p>将整个 CAS 操作封装为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">一个 Paxos Value<br></code></pre></td></tr></table></figure>
+
+<p>提交给共识层。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">CAS(key,A,B)<br></code></pre></td></tr></table></figure>
+
+<p>作为单条日志进入 Paxos。</p>
+<hr>
+<p>由于 Paxos 保证：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">日志顺序唯一<br></code></pre></td></tr></table></figure>
+
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">CAS<br></code></pre></td></tr></table></figure>
+
+<p>天然具有原子性。</p>
+<hr>
+<p>Google 进一步发现：</p>
+<p>这一机制实际上已经具备了轻量级事务（Transaction）的基础能力。</p>
+<p>无需实现复杂数据库事务系统，</p>
+<p>即可获得足够强的一致性保证。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>《Paxos Made Live》最重要的贡献并不在于提出新的共识算法，而在于揭示：</p>
+<blockquote>
+<p>从理论 Paxos 到生产级系统之间存在大量未被论文覆盖的工程问题。</p>
+</blockquote>
+<p>这些问题包括：</p>
+<ul>
+<li>磁盘损坏（Disk Corruption）</li>
+<li>成员变更（Reconfiguration）</li>
+<li>主节点租约（Master Lease）</li>
+<li>日志追赶（Catch-up）</li>
+<li>快照（Snapshot）</li>
+<li>数据库事务（Transaction）</li>
+<li>测试与运维（Testing &amp; Operations）</li>
+</ul>
+<p>Google 的实践表明：</p>
+<blockquote>
+<p>构建一个正确且可运行的 Paxos 系统，其难度远远超过理解 Paxos 算法本身。</p>
+</blockquote>
+<p>论文最后总结了三点重要经验：</p>
+<ol>
+<li>Paxos 理论与实际系统之间存在巨大的实现鸿沟；</li>
+<li>容错计算领域缺少易于工程实现的工具链；</li>
+<li>测试是构建容错系统不可或缺的组成部分。</li>
+</ol>
+<p>《Paxos Made Live》因此被广泛认为是：</p>
+<blockquote>
+<p>从理论共识协议迈向工业级分布式系统的重要里程碑。</p>
+</blockquote>
+<p>它也深刻影响了后续的：</p>
+<ul>
+<li>ZooKeeper</li>
+<li>Spanner</li>
+<li>etcd</li>
+<li>TiKV</li>
+<li>CockroachDB</li>
+</ul>
+<p>等现代分布式系统的设计理念。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/" class="category-chain-item">一致性协议</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Multi Paxos</div>
+      <div>https://yicizhang00.github.io/posts/分布式/一致性协议/Multi-Paxos/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/kafka/" title="Kafka">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kafka</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/Paxos/" title="Basic Paxos">
+                        <span class="hidden-mobile">Basic Paxos</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

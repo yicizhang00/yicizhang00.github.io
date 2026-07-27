@@ -1,0 +1,26 @@
+/* 自定义行内代码 (inline code) 样式 */
+#article-container code {
+    /* 背景颜色：浅灰色 */
+    background: #f3f4f4; 
+    /* 字体颜色：深蓝灰色 */
+    color: #497697;
+    /* 间距：上下 2px，左右 4px */
+    padding: 2px 4px;
+    /* 圆角：4px */
+    border-radius: 4px;
+    /* 字体大小：稍微缩小一点显得更精致 */
+    font-size: 0.9em;
+    /* 字体族：等宽字体 */
+    font-family: 'Source Code Pro', Consolas, Menlo, Monaco, 'Courier New', monospace;
+    /* 边框：可选，如果想要更有层次感可以加一个极淡的边框 */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin: 0 4px;
+    word-break: break-word;
+  }
+  
+  /* 夜间模式适配 */
+  [data-theme="dark"] #article-container code {
+    background: #2c2c2c;
+    color: #a3c1da;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }

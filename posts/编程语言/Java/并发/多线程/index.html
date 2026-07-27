@@ -1,0 +1,1074 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="多线程基础并发和并行概念定义并发(Concurrency)是指多个任务在同一时间段内交替执行。这些任务由于共享CPU资源，实际上并不是真正的同时执行，而是CPU通过时间片轮转等机制快速地在不同任务之间切换，给用户造成了同时执行的错觉。 并行(Parallelism)是指多个任务在同一时刻同时执行。这要求计算机必须有多个处理器(CPU)或者多核处理器，每个任务分别在不同的处理器或核心上执行，是真正的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多线程">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B9%B6%E5%8F%91/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="多线程基础并发和并行概念定义并发(Concurrency)是指多个任务在同一时间段内交替执行。这些任务由于共享CPU资源，实际上并不是真正的同时执行，而是CPU通过时间片轮转等机制快速地在不同任务之间切换，给用户造成了同时执行的错觉。 并行(Parallelism)是指多个任务在同一时刻同时执行。这要求计算机必须有多个处理器(CPU)或者多核处理器，每个任务分别在不同的处理器或核心上执行，是真正的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Distributed Systems">
+<meta property="article:tag" content="Raft">
+<meta property="article:tag" content="Paxos">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Backend">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>多线程 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">多线程</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          45 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">多线程</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="多线程基础"><a href="#多线程基础" class="headerlink" title="多线程基础"></a>多线程基础</h1><h2 id="并发和并行"><a href="#并发和并行" class="headerlink" title="并发和并行"></a>并发和并行</h2><h3 id="概念定义"><a href="#概念定义" class="headerlink" title="概念定义"></a>概念定义</h3><p>并发(Concurrency)是指多个任务在同一时间段内交替执行。这些任务由于共享CPU资源，实际上并不是真正的同时执行，而是CPU通过时间片轮转等机制快速地在不同任务之间切换，给用户造成了同时执行的错觉。</p>
+<p>并行(Parallelism)是指多个任务在同一时刻同时执行。这要求计算机必须有多个处理器(CPU)或者多核处理器，每个任务分别在不同的处理器或核心上执行，是真正的同时执行。</p>
+<h3 id="区别对比"><a href="#区别对比" class="headerlink" title="区别对比"></a>区别对比</h3><p>1. </p>
+<ol start="2">
+<li><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><strong>并发 (Concurrency)</strong></th>
+<th align="left"><strong>并行 (Parallelism)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>核心定义</strong></td>
+<td align="left"><strong>逻辑上</strong>的同时处理</td>
+<td align="left"><strong>物理上</strong>的同时执行</td>
+</tr>
+<tr>
+<td align="left"><strong>关注点</strong></td>
+<td align="left"><strong>任务交替</strong>执行的能力</td>
+<td align="left"><strong>任务同时</strong>执行的能力</td>
+</tr>
+<tr>
+<td align="left"><strong>资源状态</strong></td>
+<td align="left"><strong>共享资源</strong>，存在竞争条件</td>
+<td align="left"><strong>独享资源</strong>，通常无竞争</td>
+</tr>
+<tr>
+<td align="left"><strong>实现前提</strong></td>
+<td align="left">单核CPU即可实现</td>
+<td align="left"><strong>必须多核</strong>CPU才能实现</td>
+</tr>
+<tr>
+<td align="left"><strong>主要目标</strong></td>
+<td align="left"><strong>降低延迟</strong>，提高响应性和资源利用率</td>
+<td align="left"><strong>提高吞吐量</strong>，缩短计算时间</td>
+</tr>
+<tr>
+<td align="left"><strong>典型问题</strong></td>
+<td align="left"><strong>线程安全</strong>、死锁、竞态条件</td>
+<td align="left"><strong>任务分解</strong>、数据划分、负载均衡</td>
+</tr>
+<tr>
+<td align="left"><strong>编程模型</strong></td>
+<td align="left">多线程、异步回调、协程</td>
+<td align="left">多进程、MPI、MapReduce</td>
+</tr>
+<tr>
+<td align="left"><strong>设计哲学</strong></td>
+<td align="left"><strong>“看起来”</strong> 同时发生</td>
+<td align="left"><strong>“真正”</strong> 同时发生</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<h3 id="实际应用"><a href="#实际应用" class="headerlink" title="实际应用"></a>实际应用</h3><ol>
+<li><p>Web服务器处理请求</p>
+<ul>
+<li>采用并发模型处理多个用户请求</li>
+<li>每个请求作为一个独立的任务在线程池中执行</li>
+</ul>
+</li>
+<li><p>视频处理软件</p>
+<ul>
+<li>采用并行计算加速视频编码解码</li>
+<li>将视频帧分配到不同CPU核心进行处理</li>
+</ul>
+</li>
+<li><p>游戏引擎</p>
+<ul>
+<li>物理计算采用并行处理</li>
+<li>游戏逻辑和UI渲染采用并发处理</li>
+</ul>
+</li>
+</ol>
+<h3 id="编程考虑"><a href="#编程考虑" class="headerlink" title="编程考虑"></a>编程考虑</h3><ol>
+<li><p>并发编程需要注意：</p>
+<ul>
+<li>线程安全问题</li>
+<li>死锁预防</li>
+<li>资源同步</li>
+<li>上下文切换开销</li>
+</ul>
+</li>
+<li><p>并行编程需要注意：</p>
+<ul>
+<li>任务分解粒度</li>
+<li>负载均衡</li>
+<li>数据依赖关系</li>
+<li>硬件资源利用率</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>并发​​指的是程序​​设计结构​​，关注的是在一段时间内，​​交替​​处理多个任务的能力，解决的是‘等待’的问题，核心挑战是​​线程安全​​。<br>​- ​并行​​指的是程序​​执行状态​​，依赖多核硬件，在同一​​时刻同时​​执行多个任务，目标是​​提高吞吐量​​，核心挑战是​​任务分解与负载均衡​​。</li>
+</ul>
+<p>它们的关系是：​​并发是并行的基础，并行是并发的理想执行模式​​。一个设计良好的并发程序，在有多核硬件支持时，可以高效地并行运行。</p>
+<h2 id="进程和线程"><a href="#进程和线程" class="headerlink" title="进程和线程"></a>进程和线程</h2><h1 id="通信方式"><a href="#通信方式" class="headerlink" title="通信方式"></a>通信方式</h1><h2 id="进程间（IPC）"><a href="#进程间（IPC）" class="headerlink" title="进程间（IPC）"></a>进程间（IPC）</h2><p>进程彼此独立，空间地址隔离，不能直接访问内存，需要由操作系统提供访问方式。</p>
+<h3 id="管道pipe"><a href="#管道pipe" class="headerlink" title="管道pipe"></a>管道pipe</h3><p>单向通信，父子进程间常用<code>ls | grep xxx</code></p>
+<p>有匿名管道和命名管道</p>
+<h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h3><p>以消息为单位进行通信，存放在内核队列里。</p>
+<p>进程间可以异步读写消息。</p>
+<p>缺点：有长度限制，大量消息可能阻塞。</p>
+<h3 id="共享内存"><a href="#共享内存" class="headerlink" title="共享内存"></a>共享内存</h3><p>不经过内核拷贝，直接映射一块物理内存给多个进程使用。</p>
+<p>速度最快，但需要配合锁&#x2F;信号量来保证同步。</p>
+<p>比如 <code>mmap</code>。</p>
+<h3 id="信号"><a href="#信号" class="headerlink" title="信号"></a>信号</h3><p>用来通知某个进程发生了事件（如 <code>SIGKILL</code>、<code>SIGINT</code>）。</p>
+<p>只能传很小的信息（基本就是编号），不是大规模数据通信手段。</p>
+<h3 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h3><p>严格意义上是同步工具，不直接传递数据。</p>
+<p>常用于共享内存访问的互斥和同步。</p>
+<h3 id="套接字"><a href="#套接字" class="headerlink" title="套接字"></a>套接字</h3><p>不仅可用于不同主机之间，也可以在同一台机器上不同进程通信。</p>
+<p>本地 Unix Domain Socket 用得很多（MySQL 客户端连接本地 MySQL）。</p>
+<h2 id="线程间（ITC）"><a href="#线程间（ITC）" class="headerlink" title="线程间（ITC）"></a>线程间（ITC）</h2><p>线程共享同一进程的地址空间，所以通信方式比进程间简单很多，本质是 <strong>共享内存 + 同步机制</strong>：</p>
+<h3 id="共享变量"><a href="#共享变量" class="headerlink" title="共享变量"></a>共享变量</h3><p>所有线程可以直接读写进程内的全局变量、堆对象。</p>
+<p>需要同步机制避免竞态。</p>
+<h3 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h3><p><strong>互斥锁（mutex）</strong>：保证同一时刻只有一个线程访问共享资源。</p>
+<p><strong>读写锁（rwlock）</strong>：读操作可并行，写操作独占。</p>
+<p><strong>自旋锁</strong>：忙等待，适合短临界区。</p>
+<h3 id="条件变量"><a href="#条件变量" class="headerlink" title="条件变量"></a>条件变量</h3><p>配合锁使用，让线程在某个条件下等待&#x2F;唤醒。</p>
+<p>典型场景：生产者-消费者模型。</p>
+<h3 id="信号量-1"><a href="#信号量-1" class="headerlink" title="信号量"></a>信号量</h3><p>线程间的 PV 操作，控制并发量。</p>
+<p>比如限流、连接池。</p>
+<h3 id="阻塞队列"><a href="#阻塞队列" class="headerlink" title="阻塞队列"></a>阻塞队列</h3><p>在线程池、生产者-消费者模型中常用。</p>
+<p>Java 的 <code>BlockingQueue</code> 就是典型例子。</p>
+<h3 id="事件-通知机制"><a href="#事件-通知机制" class="headerlink" title="事件&#x2F;通知机制"></a>事件&#x2F;通知机制</h3><p>比如 Java 的 <code>CountDownLatch</code>、<code>CyclicBarrier</code>，或 Linux 的 <code>eventfd</code>。</p>
+<h2 id="AQS-抽象队列同步器"><a href="#AQS-抽象队列同步器" class="headerlink" title="AQS(抽象队列同步器)"></a>AQS(抽象队列同步器)</h2><p>AQS是AbstractQueueSynchronizer，主要用于管理同步状态State和线程的排队等待CLH</p>
+<p>AQS不实现具体的锁逻辑，而是定义了一系列通用函数，具体让子类来实现其方法</p>
+<ul>
+<li>tryAcquire()如何获取独占锁</li>
+<li>tryRelease()如何释放独占锁</li>
+<li>tryAcquireShared()获取共享锁</li>
+<li>tryReleaseShared()释放共享锁</li>
+</ul>
+<h3 id="同步状态：State"><a href="#同步状态：State" class="headerlink" title="同步状态：State"></a>同步状态：State</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-type">int</span> state;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>state &#x3D; 0;表示没人占用</li>
+<li>state&#x3D;1；表示被某线程独占</li>
+<li>state&gt;1;表示重入次数（Semaphore）</li>
+</ul>
+<p>所有对state的修改必须通过<code>getState()</code>,<code>setState()</code>,<code>compareAndSetState()</code>等unsafe的原子类操作。</p>
+<h3 id="双向等待队列：CLH双向队列"><a href="#双向等待队列：CLH双向队列" class="headerlink" title="双向等待队列：CLH双向队列"></a>双向等待队列：CLH双向队列</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">   <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span> &#123;<br>       <span class="hljs-keyword">volatile</span> Node prev;       <span class="hljs-comment">// initially attached via casTail</span><br>       <span class="hljs-keyword">volatile</span> Node next;       <span class="hljs-comment">// visibly nonnull when signallable</span><br>       Thread waiter;            <span class="hljs-comment">// visibly nonnull when enqueued</span><br>       <span class="hljs-keyword">volatile</span> <span class="hljs-type">int</span> status;      <span class="hljs-comment">// written by owner, atomic bit ops by others</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>每个等待的线程会被封装为一个<code>Node</code>节点，由于是双线队列，因此可以实现公平锁，可以让先排队的线程拿到刚释放的锁。</p>
+<h1 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h1><h2 id="《Java开发手册》中提到的并发处理"><a href="#《Java开发手册》中提到的并发处理" class="headerlink" title="《Java开发手册》中提到的并发处理"></a>《Java开发手册》中提到的并发处理</h2><h3 id="1-获取单例对象需要保证线程安全，其中的方法也要保证线程安全。"><a href="#1-获取单例对象需要保证线程安全，其中的方法也要保证线程安全。" class="headerlink" title="1. 获取单例对象需要保证线程安全，其中的方法也要保证线程安全。"></a>1. 获取单例对象需要保证线程安全，其中的方法也要保证线程安全。</h3><p>资源驱动类、工具类、单例工厂类都需要注意。</p>
+<p>其中Spring管理的Bean是线程安全的吗？<br>Spring中默认Bean的作用域（<code>@Scope(&quot;singleton&quot;)</code>）为单例，但<strong>单例Bean并不是线程安全的</strong>，因为Spring只是保证了容器中只有一个Bean实例，但如果Bean内部包含了可变的成员变量，并且被多个线程访问和修改，依然可能存在线程安全问题。</p>
+<p>所以：</p>
+<ul>
+<li><strong>无状态Bean</strong>（如工具类、DAO通常无成员变量）一般是线程安全的</li>
+<li><strong>有状态Bean</strong>（含成员变量，或成员变量随业务逻辑变化）需要开发者自己保证线程安全</li>
+</ul>
+<p><strong>解决方式：</strong></p>
+<ol>
+<li>使用无状态设计（即将成员变量限定为方法内局部变量）：不包含任何成员变量</li>
+<li>通过加锁&#x2F;并发集合等手段保证线程安全：对修改状态的方法加 synchronized 或使用 ReentrantLock</li>
+<li>使用<code>@Scope(&quot;prototype&quot;)</code>让每次请求都新建实例（开销大）</li>
+<li>对于Web应用，可注入作用域为request&#x2F;session的bean，每个请求或者会话创建一个单独的Bean</li>
+<li>使用线程安全的成员变量，例如AtomicInteger, ConcurrentHashMap</li>
+<li>使用不可变对象<code>final</code>修饰</li>
+</ol>
+<blockquote>
+<p>Spring Bean 的作用域（Scope）<br>默认作用域是 singleton：整个 Spring 容器中只有一个实例（类似单例模式）</p>
+<p>其他作用域：prototype、request、session 等</p>
+</blockquote>
+<h3 id="2-创建线程或线程池时指定有意义的线程名称"><a href="#2-创建线程或线程池时指定有意义的线程名称" class="headerlink" title="2. 创建线程或线程池时指定有意义的线程名称"></a>2. 创建线程或线程池时指定有意义的线程名称</h3><h3 id="3-线程资源必须通过线程池提供，不允许在应用中自行显式创建线程。"><a href="#3-线程资源必须通过线程池提供，不允许在应用中自行显式创建线程。" class="headerlink" title="3. 线程资源必须通过线程池提供，不允许在应用中自行显式创建线程。"></a>3. 线程资源必须通过线程池提供，不允许在应用中自行显式创建线程。</h3><p>自行创建显示线程可能会导致：</p>
+<ul>
+<li>内存溢出（OOM）：每个线程默认占用 1MB 栈空间（-Xss），10,000 线程 ≈ 10GB 内存</li>
+<li>CPU 过载：频繁上下文切换（Context Switching），CPU 时间耗在调度而非业务</li>
+<li>系统僵死：操作系统无法创建更多线程（Linux 默认 ulimit -u 限制）</li>
+</ul>
+<h3 id="4-线程池不允许使用-Executors-去创建，而是通过-ThreadPoolExecutor-的方式，这样的处理方"><a href="#4-线程池不允许使用-Executors-去创建，而是通过-ThreadPoolExecutor-的方式，这样的处理方" class="headerlink" title="4. 线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样的处理方"></a>4. 线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样的处理方</h3><p>式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险。</p>
+<ul>
+<li>不允许通过<code>Executors</code>工厂类创建线程池，建议<strong>直接用ThreadPoolExecutor</strong>，可合理配置核心数、队列、拒绝策略等参数。</li>
+<li>线程池资源要合理释放，避免内存泄漏（如<code>shutdown()</code>）。</li>
+<li>合理设置队列长度，避免OOM。</li>
+<li>任务实现尽量避免死循环、长时间阻塞。</li>
+</ul>
+<h2 id="2-线程池的原理"><a href="#2-线程池的原理" class="headerlink" title="2. 线程池的原理"></a>2. 线程池的原理</h2><p>线程池的本质是复用和管理一组线程，避免频繁创建销毁线程，提高系统性能。<br>核心实现类：<code>java.util.concurrent.ThreadPoolExecutor</code></p>
+<p>主要构造参数说明：</p>
+<ul>
+<li>corePoolSize：核心线程数，线程池常驻线程个数</li>
+<li>maximumPoolSize：最大线程数</li>
+<li>keepAliveTime：非核心线程空闲超时回收时间</li>
+<li>unit：超时单位</li>
+<li>workQueue：阻塞队列，保存等待执行的任务</li>
+<li>threadFactory：线程工厂，定制线程创建</li>
+<li>handler：任务拒绝处理策略</li>
+</ul>
+<p>各组件协作流程见下图：</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs clean">新任务提交 -&gt; <br>  若线程数&lt;corePoolSize，则新建线程处理<br>  否则入队列<br>队列满 -&gt;<br>  若线程数&lt;maximumPoolSize，则新建线程处理<br>  否则执行拒绝策略<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="1-Executors工厂方法"><a href="#1-Executors工厂方法" class="headerlink" title="1.Executors工厂方法"></a>1.Executors工厂方法</h3><ul>
+<li><code>Executors.newFixedThreadPool(n)</code>: 固定大小线程池（适合CPU密集型），允许的队列长度为Integer.MAX_VALUE，可能导致OOM</li>
+<li><code>Executors.newCachedThreadPool()</code>: 可伸缩缓存线程池（适合短任务），允许的线程数量为Integer.MAX_VALUE，可能导致OOM</li>
+<li><code>Executors.newSingleThreadExecutor()</code>: 单线程池，允许的队列长度为Integer.MAX_VALUE，可能导致OOM</li>
+<li><code>Executors.newScheduledThreadPool(n)</code>: 定时任务线程池，允许的线程数量为Integer.MAX_VALUE，可能导致OOM</li>
+</ul>
+<p><strong>建议：线上不要用Executors工厂类创建线程池，推荐自己指定参数使用<code>ThreadPoolExecutor</code></strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 线程池的核心参数</span><br><span class="hljs-keyword">public</span> <span class="hljs-title function_">ThreadPoolExecutor</span><span class="hljs-params">(</span><br><span class="hljs-params">    <span class="hljs-type">int</span> corePoolSize,      // 核心线程数</span><br><span class="hljs-params">    <span class="hljs-type">int</span> maximumPoolSize,   // 最大线程数</span><br><span class="hljs-params">    <span class="hljs-type">long</span> keepAliveTime,    // 空闲线程超时时间</span><br><span class="hljs-params">    TimeUnit unit,</span><br><span class="hljs-params">    BlockingQueue&lt;Runnable&gt; workQueue, // 任务队列</span><br><span class="hljs-params">    ThreadFactory threadFactory,</span><br><span class="hljs-params">    RejectedExecutionHandler handler   // 拒绝策略</span><br><span class="hljs-params">)</span><br><br><span class="hljs-type">ThreadPoolExecutor</span> <span class="hljs-variable">pool</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>(<br>    <span class="hljs-number">2</span>,        <span class="hljs-comment">// core corePoolSize</span><br>    <span class="hljs-number">4</span>,        <span class="hljs-comment">// 最大线程数 maximumPoolSize</span><br>    <span class="hljs-number">60</span>,       <span class="hljs-comment">// 空闲线程超时时间 keepAliveTime</span><br>    TimeUnit.SECONDS, <span class="hljs-comment">// 时间单位</span><br>    <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayBlockingQueue</span>&lt;&gt;(<span class="hljs-number">100</span>),  <span class="hljs-comment">// 等待队列</span><br>    Executors.defaultThreadFactory(), <span class="hljs-comment">// 线程工厂</span><br>    <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>.AbortPolicy() <span class="hljs-comment">// 拒绝策略</span><br>);<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="2-ThreadPoolExecutor线程池执行流程"><a href="#2-ThreadPoolExecutor线程池执行流程" class="headerlink" title="2.ThreadPoolExecutor线程池执行流程"></a>2.ThreadPoolExecutor线程池执行流程</h3><ul>
+<li>判断核心线程数：先判断当前工作线程数是否大于核心线程数，如果结果为 false，则新建线程并执行任务。</li>
+<li>判断任务队列：如果大于核心线程数，则判断任务队列是否已满？如果结果为 false，则把任务添加到任务队列中等待线程执行。</li>
+<li>判断最大线程数：如果任务队列已满，则判断当前线程数量是否超过最大线程数？如果结果为 false，则新建线程执行此任务。</li>
+<li>判断是否要执行拒绝策略：如果超过最大线程数，则将执行线程池的拒绝策略。</li>
+</ul>
+<h3 id="3-创建核心线程数为0的线程池会怎么样执行？"><a href="#3-创建核心线程数为0的线程池会怎么样执行？" class="headerlink" title="3.创建核心线程数为0的线程池会怎么样执行？"></a>3.创建核心线程数为0的线程池会怎么样执行？</h3><p>在标准流程里面看起来核心线程数为0的线程池会放入阻塞队列中，如果队列是无界队列，则这些任务始终不会执行，但是实际上为了防止这种情况，在代码中会创建一个非核心线程以防永远阻塞。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs Java"><span class="hljs-type">int</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> ctl.get();<br><span class="hljs-keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;<br>   <span class="hljs-keyword">if</span> (addWorker(command, <span class="hljs-literal">true</span>))<br>         <span class="hljs-keyword">return</span>;<br>   c = ctl.get();<br>&#125;<br><span class="hljs-keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;<br>   <span class="hljs-type">int</span> <span class="hljs-variable">recheck</span> <span class="hljs-operator">=</span> ctl.get();<br>   <span class="hljs-keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))<br>         reject(command);<br>   <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (workerCountOf(recheck) == <span class="hljs-number">0</span>) <span class="hljs-comment">// &lt;- 实际上还是创建了一个非核心线程</span><br>         addWorker(<span class="hljs-literal">null</span>, <span class="hljs-literal">false</span>);<br>&#125;<br><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!addWorker(command, <span class="hljs-literal">false</span>))<br>   reject(command);<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="4-如何实现线程池监控？"><a href="#4-如何实现线程池监控？" class="headerlink" title="4.如何实现线程池监控？"></a>4.如何实现线程池监控？</h3><p>需要普罗米修斯加spring-boot-admin</p>
+<h3 id="5-如何动态调整线程池的核心线程数？"><a href="#5-如何动态调整线程池的核心线程数？" class="headerlink" title="5.如何动态调整线程池的核心线程数？"></a>5.如何动态调整线程池的核心线程数？</h3>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/%E5%B9%B6%E5%8F%91/" class="category-chain-item">并发</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>多线程</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/并发/多线程/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E5%9F%BA%E7%A1%80/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" title="设计模式">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">设计模式</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E6%96%B0%E7%89%B9%E6%80%A7/JDK%E5%90%84%E7%89%88%E6%9C%AC%E7%89%B9%E6%80%A7/" title="JDK各个版本特性总结">
+                        <span class="hidden-mobile">JDK各个版本特性总结</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

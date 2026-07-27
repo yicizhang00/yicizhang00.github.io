@@ -1,0 +1,1098 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="Paxos协议Paxos 是一种面向崩溃故障（Crash Fault）模型的分布式一致性协议，用于在存在节点失效、网络分区、消息延迟、消息重复以及消息乱序等故障条件下，使一组分布式进程就某个值达成一致。 Paxos不考虑拜占庭故障，即协议假设节点不会恶意篡改消息或伪造协议状态。  核心问题Paxos协议针对分布式一致性问题的本质进行抽象，需满足以下三个关键约束：  值约束：系统仅能选择已被提议的值">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Basic Paxos">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/Paxos/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="Paxos协议Paxos 是一种面向崩溃故障（Crash Fault）模型的分布式一致性协议，用于在存在节点失效、网络分区、消息延迟、消息重复以及消息乱序等故障条件下，使一组分布式进程就某个值达成一致。 Paxos不考虑拜占庭故障，即协议假设节点不会恶意篡改消息或伪造协议状态。  核心问题Paxos协议针对分布式一致性问题的本质进行抽象，需满足以下三个关键约束：  值约束：系统仅能选择已被提议的值">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.831Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="一致性协议">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Basic Paxos - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Basic Paxos</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Basic Paxos</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Paxos协议"><a href="#Paxos协议" class="headerlink" title="Paxos协议"></a>Paxos协议</h1><p>Paxos 是一种面向崩溃故障（Crash Fault）模型的分布式一致性协议，用于在存在节点失效、网络分区、消息延迟、消息重复以及消息乱序等故障条件下，使一组分布式进程就某个值达成一致。</p>
+<p>Paxos不考虑拜占庭故障，即协议假设节点不会恶意篡改消息或伪造协议状态。</p>
+<hr>
+<h2 id="核心问题"><a href="#核心问题" class="headerlink" title="核心问题"></a>核心问题</h2><p>Paxos协议针对分布式一致性问题的本质进行抽象，需满足以下三个关键约束：</p>
+<ol>
+<li><strong>值约束</strong>：系统仅能选择已被提议的值。</li>
+<li><strong>唯一性约束</strong>：系统必须且仅能就单一值达成共识。</li>
+<li><strong>知识约束</strong>：仅当值被选定后，进程才可获知该值已达成共识。</li>
+</ol>
+<p>该协议通过构建容错机制，确保在部分节点故障或网络分区情况下，系统仍能收敛至唯一确定的状态。</p>
+<hr>
+<h2 id="角色定义"><a href="#角色定义" class="headerlink" title="角色定义"></a>角色定义</h2><p>协议参与者分为三类角色，实际系统中节点可兼任多种角色：</p>
+<ol>
+<li><strong>提议者（Proposer）</strong>：负责发起提案（Proposal），包含唯一递增的提案编号与提议值。</li>
+<li><strong>接受者（Acceptor）</strong>：通过投票机制决定提案是否被接受，需满足法定多数（quorum）原则。</li>
+<li><strong>学习者（Learner）</strong>：被动接收已被选定的共识值，不参与决策过程。</li>
+</ol>
+<p>系统拓扑示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs text">Node1<br> ├─ Proposer<br> ├─ Acceptor<br> └─ Learner<br><br>Node2<br> ├─ Acceptor<br> └─ Learner<br><br>Node3<br> ├─ Acceptor<br> └─ Learner<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><h3 id="提案（Proposal）"><a href="#提案（Proposal）" class="headerlink" title="提案（Proposal）"></a>提案（Proposal）</h3><p>提案由二元组构成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">(proposal_number, value)<br></code></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">(#1, 1)<br>(#2, 2)<br>(#100, 1)<br></code></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<ul>
+<li><code>proposal_number</code>：全局单调递增的唯一编号，用于解决冲突。</li>
+<li><code>value</code>：待共识的决策值。</li>
+</ul>
+<h3 id="法定多数（Quorum）"><a href="#法定多数（Quorum）" class="headerlink" title="法定多数（Quorum）"></a>法定多数（Quorum）</h3><p>设系统包含 $N$ 个 Acceptor，则 Quorum 定义为：</p>
+<p>$$<br>\left\lfloor \frac{N}{2} \right\rfloor + 1<br>$$</p>
+<p>例如：</p>
+<table>
+<thead>
+<tr>
+<th>Acceptor数量</th>
+<th>Quorum</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>7</td>
+<td>4</td>
+</tr>
+</tbody></table>
+<p>Paxos安全性的数学基础在于：</p>
+<blockquote>
+<p>任意两个 Quorum 必然存在非空交集。</p>
+</blockquote>
+<p>即：</p>
+<p>$$<br>Q_1 \cap Q_2 \neq \emptyset<br>$$</p>
+<p>其中：</p>
+<p>$$<br>|Q_1| &gt; \frac{N}{2}<br>$$</p>
+<p>且：</p>
+<p>$$<br>|Q_2| &gt; \frac{N}{2}<br>$$</p>
+<p>该性质保证任何已经被多数派接受的提案信息，最终必然能够传播到后续成功提案中。</p>
+<hr>
+<h2 id="协议流程"><a href="#协议流程" class="headerlink" title="协议流程"></a>协议流程</h2><p>Paxos采用两阶段共识协议（Two-Phase Consensus Protocol），通过消息交换达成共识：</p>
+<h3 id="阶段一：预备阶段（Prepare）"><a href="#阶段一：预备阶段（Prepare）" class="headerlink" title="阶段一：预备阶段（Prepare）"></a>阶段一：预备阶段（Prepare）</h3><ol>
+<li>Proposer生成新的提案编号 $n$，向全体Acceptor发送 <code>Prepare(n)</code> 请求。</li>
+<li>Acceptor收到请求后：<ul>
+<li>若 $n &gt; \max{\text{承诺的编号}}$ ，则承诺不再接受编号小于 $n$ 的提案，并返回已接受的最高编号提案 $(n’, v)$（若无则返回空）。</li>
+</ul>
+</li>
+</ol>
+<h3 id="阶段二：接受阶段（Accept）"><a href="#阶段二：接受阶段（Accept）" class="headerlink" title="阶段二：接受阶段（Accept）"></a>阶段二：接受阶段（Accept）</h3><ol>
+<li>Proposer收到Quorum的 <code>Promise(n)</code> 响应后：<ul>
+<li>从收到的 <code>Promise</code> 中选择 accepted proposal number 最大的提案对应的值。</li>
+<li>若历史为空，则自由选择值 $v$。</li>
+</ul>
+</li>
+<li>Proposer向Acceptor发送 <code>Accept(n, v)</code> 请求。</li>
+<li>Acceptor收到请求后：<ul>
+<li>若未对更高编号提案做出承诺，则接受 $(n, v)$ 并返回 <code>Accepted(n, v)</code>。</li>
+</ul>
+</li>
+</ol>
+<p><strong>共识达成条件</strong>：若Quorum接受 $(n, v)$，则称 $v$ 被<strong>选定（Chosen）</strong>。</p>
+<hr>
+<h2 id="核心机制解析"><a href="#核心机制解析" class="headerlink" title="核心机制解析"></a>核心机制解析</h2><h3 id="值选择原则"><a href="#值选择原则" class="headerlink" title="值选择原则"></a>值选择原则</h3><p>协议规定：Proposer必须选取收到的历史提案中<strong>最大编号对应的值</strong>。例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">V1 → (#1, 1)<br>V2 → (#5, 3)<br>V3 → (#2, 2)<br></code></pre></td></tr></table></figure>
+
+<p>应选择(#5, 3)，而非出现频率更高的值（如1）。此举确保：</p>
+<ul>
+<li>新提案继承历史链中<strong>最可能已被选定</strong>的值，避免违背不可撤销性。</li>
+</ul>
+<h3 id="Quorum必要性"><a href="#Quorum必要性" class="headerlink" title="Quorum必要性"></a>Quorum必要性</h3><p>若允许低于Quorum的响应即可进入Accept阶段（如5节点系统中仅2票通过），将导致：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">&#123;V1, V2&#125; 接受 (n1, 1)<br>&#123;V4, V5&#125; 接受 (n2, 2)   # 两集合无交集 → 历史断裂<br></code></pre></td></tr></table></figure>
+
+<p>最终可能同时选定 $1$ 和 $2$，违反一致性。Quorum交集特性保证了<strong>任意两个选定值必然等价</strong>，即：<br>**若 <strong>$(n_1, v_1)$</strong> 和 <strong>$(n_2, v_2)$</strong> 均被选定，则 **$v_1 &#x3D; v_2$。</p>
+<h3 id="安全性不变量"><a href="#安全性不变量" class="headerlink" title="安全性不变量"></a>安全性不变量</h3><p>Paxos的核心安全性保证为：</p>
+<p><strong>不可撤销性（Irrevocability）</strong>：一旦值 $v$ 被选定，则所有后续成功提案的 $v’$ 必然满足 $v’ &#x3D; v$。</p>
+<p>证明基于以下事实：</p>
+<ul>
+<li>新Proposer的Prepare请求必覆盖旧Quorum（由法定多数交集保证）。</li>
+<li>新Proposer将继承历史最大编号提案的值，从而延续选定值。</li>
+</ul>
+<hr>
+<h2 id="Paxos安全性证明"><a href="#Paxos安全性证明" class="headerlink" title="Paxos安全性证明"></a>Paxos安全性证明</h2><h3 id="P1"><a href="#P1" class="headerlink" title="P1"></a>P1</h3><p>最初，Paxos要求：</p>
+<blockquote>
+<p>P1：Acceptor必须接受它收到的第一个提案。</p>
+</blockquote>
+<p>原因很简单：</p>
+<p>如果所有Acceptor都拒绝第一个提案，那么系统将永远无法取得进展。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs text">Proposer A<br>    ↓<br>Accept(#1,1)<br><br>V1 V2 V3<br>全部拒绝<br></code></pre></td></tr></table></figure>
+
+<h3 id="P2"><a href="#P2" class="headerlink" title="P2"></a>P2</h3><p>为了保证一致性，Lamport进一步提出：</p>
+<blockquote>
+<p>P2：如果某个值v已经被选择，那么任何被选择的更高编号提案，其值也必须为v。</p>
+</blockquote>
+<p>即：</p>
+<p>如果：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-punctuation">(</span><span class="hljs-meta">#1,1)</span><br></code></pre></td></tr></table></figure>
+<p>已经被Chosen。</p>
+<p>那么未来：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-punctuation">(</span><span class="hljs-meta">#2,?)</span><br><span class="hljs-punctuation">(</span><span class="hljs-meta">#3,?)</span><br><span class="hljs-punctuation">(</span><span class="hljs-meta">#100,?)</span><br></code></pre></td></tr></table></figure>
+<p>如果被Chosen。</p>
+<p>其值必须仍然是：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">1<br></code></pre></td></tr></table></figure>
+<p>不能变成：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">2<br></code></pre></td></tr></table></figure>
+<p>否则会出现：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Chosen</span><span class="hljs-params">(<span class="hljs-number">1</span>)</span></span><br><span class="hljs-function"><span class="hljs-title">Chosen</span><span class="hljs-params">(<span class="hljs-number">2</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>同时成立。</p>
+<p>破坏一致性。</p>
+<p>但是P2存在的问题是：</p>
+<blockquote>
+<p>Proposer无法知道某个提案是否已经被Chosen</p>
+</blockquote>
+<p>因为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">消息可能延迟；<br>消息可能丢失；<br>网络可能分区。<br></code></pre></td></tr></table></figure>
+<p>因此：<br><code>Chosen</code>这个条件对于Proposer来说不可观察。</p>
+<h3 id="P2a"><a href="#P2a" class="headerlink" title="P2a"></a>P2a</h3><p>Acceptor 的局部状态不足以判断某个值是否已经被 <code>chosen</code>，因此Acceptor只能通过<code>accepted</code>仅仅知道自己接受的值，而不知道其他Acceptor接受的值，因此P2的条件被增强为：</p>
+<blockquote>
+<p>P2a：如果某个值v已经被选择，那么任何更高编号且被Acceptor接受的提案，其值也必须为v。</p>
+</blockquote>
+<p>但是P2a仍然不够，<br>考虑如下场景：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V1</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V2</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V3</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+<p>已经形成多数派。</p>
+<p>因此：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Chosen</span><span class="hljs-params">(<span class="hljs-number">1</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>成立。</p>
+<p>随后：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Prepare</span><span class="hljs-params">(#<span class="hljs-number">2</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>与：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-built_in">V1</span><br>V2<br>V3<br></code></pre></td></tr></table></figure>
+<p>发生网络分区。</p>
+<p>只能联系：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">V4</span><br>V5<br></code></pre></td></tr></table></figure>
+<p>如果允许Proposer自由提出：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Accept</span><span class="hljs-params">(#<span class="hljs-number">2</span>,<span class="hljs-number">2</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>则：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V4</span> accepted (#<span class="hljs-number">2</span>,<span class="hljs-number">2</span>)<br><span class="hljs-attribute">V5</span> accepted (#<span class="hljs-number">2</span>,<span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+<p>可能出现新的值。</p>
+<p>因此仅限制Acceptor是不够的。</p>
+<p>还必须限制Proposer。</p>
+<h3 id="P2b"><a href="#P2b" class="headerlink" title="P2b"></a>P2b</h3><p>为了保证安全性，Lamport进一步提出：</p>
+<blockquote>
+<p>P2b：如果某个值 $v$ 已经被选定，则任何更高编号的提案在被提出时，其值也必须为 $v$。</p>
+</blockquote>
+<p>与 P2a 不同，P2b 的约束对象已经从 Acceptor 转移到了 Proposer。</p>
+<p>P2b 实际上要求：</p>
+<blockquote>
+<p>在提案产生阶段，就必须保证不会引入与历史选定值冲突的新 value。</p>
+</blockquote>
+<p>因此，新的 Proposer 不能自由选择 value，而必须首先收集历史状态，并继承其中可能已经被选定的 value。</p>
+<p>Paxos 的 Prepare&#x2F;Promise 机制正是为了实现这一约束而设计。</p>
+<h3 id="如何实现P2b"><a href="#如何实现P2b" class="headerlink" title="如何实现P2b"></a>如何实现P2b</h3><p>核心思想：</p>
+<blockquote>
+<p>新的Proposer必须继承历史。</p>
+</blockquote>
+<p>假设：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V1</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V2</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V3</span> accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+<p>已经形成：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Chosen</span><span class="hljs-params">(<span class="hljs-number">1</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>现在新的Proposer发起：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Prepare</span><span class="hljs-params">(#<span class="hljs-number">10</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>收到：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V1</span> -&gt; accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V2</span> -&gt; accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V3</span> -&gt; accepted (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+<p>根据Paxos规则：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs applescript">选择回复中<br>accepted proposal <span class="hljs-built_in">number</span>最大的记录<br></code></pre></td></tr></table></figure>
+<p>即：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-punctuation">(</span><span class="hljs-meta">#1,1)</span><br></code></pre></td></tr></table></figure>
+<p>对应：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf"><span class="hljs-attribute">value</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<p>因此必须发送：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Accept</span><span class="hljs-params">(#<span class="hljs-number">10</span>,<span class="hljs-number">1</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>而不能发送：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Accept</span><span class="hljs-params">(#<span class="hljs-number">10</span>,<span class="hljs-number">2</span>)</span></span><br></code></pre></td></tr></table></figure>
+<p>如果收到：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V1</span> -&gt; (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V2</span> -&gt; (#<span class="hljs-number">5</span>,<span class="hljs-number">3</span>)<br><span class="hljs-attribute">V3</span> -&gt; (#<span class="hljs-number">2</span>,<span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+<p>则：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta">#5</span><br></code></pre></td></tr></table></figure>
+<p>最大。</p>
+<p>因此：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">Accept</span><span class="hljs-params">(#<span class="hljs-number">10</span>,<span class="hljs-number">3</span>)</span></span><br></code></pre></td></tr></table></figure>
+
+<p>如果只有5个节点，而新的Proposer和三个节点发生分区，这三个节点此前</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">V1</span> -&gt; (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V2</span> -&gt; (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br><span class="hljs-attribute">V3</span> -&gt; (#<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+
+<p>那么这个Proposer没有收到多数派的Promise，则不能发起Proposal。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Paxos通过以下四个关键机制保证一致性：</p>
+<ul>
+<li>Proposal Number 的全序关系；</li>
+<li>Quorum 的交集性质；</li>
+<li>Prepare&#x2F;Promise 阶段对历史状态的收集；</li>
+<li>最大 Accepted Proposal 的继承规则。</li>
+</ul>
+<p>其核心安全性不变量可以概括为：</p>
+<blockquote>
+<p>一旦某个 value 被 Chosen，则未来任何成功提案最终选择的 value 必然与之相同。</p>
+</blockquote>
+<p>基于这一不变量，Paxos证明了在崩溃故障模型下，即使存在节点失效、网络分区以及消息延迟等问题，系统仍能够保证不会出现两个不同的 Chosen Value。</p>
+<p>Paxos 奠定了现代分布式一致性理论的基础，并直接影响了 Multi-Paxos、Chubby、Spanner、Zab 以及 Raft 等后续协议的设计。</p>
+<hr>
+<p><strong>参考资料</strong>：</p>
+<ol>
+<li>Lamport, L. (1998). <em>The Part-Time Parliament</em>.</li>
+<li>Chubby Lock Service Design (Google).</li>
+<li><em>Paxos Made Simple</em>.</li>
+</ol>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/" class="category-chain-item">一致性协议</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/" class="print-no-link">#一致性协议</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Basic Paxos</div>
+      <div>https://yicizhang00.github.io/posts/分布式/一致性协议/Paxos/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/Multi-Paxos/" title="Multi Paxos">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Multi Paxos</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/Raft/" title="Raft">
+                        <span class="hidden-mobile">Raft</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

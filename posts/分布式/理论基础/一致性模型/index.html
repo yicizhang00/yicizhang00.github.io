@@ -1,0 +1,1160 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言在分布式系统中，一致性模型（consistency model）定义了多个进程或节点对共享数据进行读写操作时应满足的约束与行为保证。一致性模型不仅关乎系统的正确性，也直接影响系统的性能、可用性与可伸缩性。 本文从弱到强介绍主要的一致性模型，并分析它们的权衡、适用场景与在实际系统中的应用。  一致性模型的分类与强弱关系分布式系统中常见的一致性模型可按强度从强到弱排序如下： $$\text{线性一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性模型">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言在分布式系统中，一致性模型（consistency model）定义了多个进程或节点对共享数据进行读写操作时应满足的约束与行为保证。一致性模型不仅关乎系统的正确性，也直接影响系统的性能、可用性与可伸缩性。 本文从弱到强介绍主要的一致性模型，并分析它们的权衡、适用场景与在实际系统中的应用。  一致性模型的分类与强弱关系分布式系统中常见的一致性模型可按强度从强到弱排序如下： $$\text{线性一">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-17T04:44:36.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="理论基础">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>一致性模型 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">一致性模型</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-06-17 12:44" pubdate>
+          2026年6月17日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          37 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">一致性模型</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在分布式系统中，<strong>一致性模型</strong>（consistency model）定义了多个进程或节点对共享数据进行读写操作时应满足的约束与行为保证。一致性模型不仅关乎系统的正确性，也直接影响系统的性能、可用性与可伸缩性。</p>
+<p>本文从弱到强介绍主要的一致性模型，并分析它们的权衡、适用场景与在实际系统中的应用。</p>
+<hr>
+<h1 id="一致性模型的分类与强弱关系"><a href="#一致性模型的分类与强弱关系" class="headerlink" title="一致性模型的分类与强弱关系"></a>一致性模型的分类与强弱关系</h1><p>分布式系统中常见的一致性模型可按强度从强到弱排序如下：</p>
+<p>$$\text{线性一致性} \supset \text{顺序一致性} \supset \text{因果一致性} \supset \text{会话一致性} \supset \text{最终一致性}$$</p>
+<ul>
+<li><strong>强一致性</strong>：对所有客户端而言，系统展现出单一且不可变的视图，任何时刻读取数据都能得到最新的已提交值。</li>
+<li><strong>弱一致性</strong>：不保证实时可见性，允许短暂的不一致，但在某些条件或时间范围后达成一致。</li>
+</ul>
+<hr>
+<h1 id="线性一致性（Linearizability）"><a href="#线性一致性（Linearizability）" class="headerlink" title="线性一致性（Linearizability）"></a>线性一致性（Linearizability）</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>线性一致性是<strong>最强</strong>的一致性保证。它要求：</p>
+<ol>
+<li>每个操作（读或写）在系统中的执行时间点位于其调用时间与返回时间之间（happens-before 偏序）。</li>
+<li>所有操作按全局时间顺序串行执行，就像在单一服务器上运行一样。</li>
+<li>任何读操作都能看到最近提交的所有写操作的结果。</li>
+</ol>
+<p>换句话说，<strong>从外部观察者的视角，分布式系统表现得像一个没有复制的系统</strong>。</p>
+<h2 id="正式描述"><a href="#正式描述" class="headerlink" title="正式描述"></a>正式描述</h2><p>对于任意两个操作 $op_1$ 和 $op_2$，若 $op_1$ 的返回时间早于 $op_2$ 的调用时间，则存在一个全局时间顺序使得 $op_1$ 先于 $op_2$ 被执行。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs less">客户端 <span class="hljs-selector-tag">A</span>                      客户端 <span class="hljs-selector-tag">B</span><br><span class="hljs-selector-tag">write</span>(x, <span class="hljs-number">1</span>)<br>  |<br><span class="hljs-selector-attr">[返回]</span>                        <span class="hljs-selector-tag">read</span>(x)<br>                                |<br>                              返回<span class="hljs-selector-attr">[x=1]</span><br></code></pre></td></tr></table></figure>
+
+<p>在线性一致的系统中，客户端 B 的读操作必然返回客户端 A 写入的最新值 1。</p>
+<h2 id="典型实现"><a href="#典型实现" class="headerlink" title="典型实现"></a>典型实现</h2><ul>
+<li><strong>中央锁定系统</strong>：所有写操作通过单一节点的锁控制。</li>
+<li><strong>主从同步复制</strong>：写操作必须等待主从都确认。</li>
+<li><strong>Paxos&#x2F;Raft（强模式）</strong>：使用强一致共识协议，确保所有副本保持同步。</li>
+</ul>
+<h2 id="成本"><a href="#成本" class="headerlink" title="成本"></a>成本</h2><p>线性一致性要求强同步协调，导致：</p>
+<ul>
+<li>高延迟（需等待跨节点确认）。</li>
+<li>低吞吐（并发受限）。</li>
+<li>分区场景下无法保证可用性（CAP 定理）。</li>
+</ul>
+<hr>
+<h1 id="顺序一致性（Sequential-Consistency）"><a href="#顺序一致性（Sequential-Consistency）" class="headerlink" title="顺序一致性（Sequential Consistency）"></a>顺序一致性（Sequential Consistency）</h1><h2 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h2><p>顺序一致性是由 Lamport 提出的。它要求：</p>
+<ol>
+<li>所有操作结果必须与某个<strong>串行执行顺序</strong>一致。</li>
+<li>各个进程内部的操作顺序保持原序（程序顺序）。</li>
+<li>但<strong>不要求全局时间顺序</strong>，即不同进程的操作可能交错。</li>
+</ol>
+<p>关键区别：顺序一致性比线性一致性弱，因为它只关心逻辑上的串行等价性，不绑定到实时的发生顺序。</p>
+<h2 id="正式描述-1"><a href="#正式描述-1" class="headerlink" title="正式描述"></a>正式描述</h2><p>存在一个全局执行顺序 $\sigma$，使得：</p>
+<ul>
+<li>每个进程 $i$ 的操作在 $\sigma$ 中的相对顺序与程序顺序相同。</li>
+<li>所有操作按 $\sigma$ 串行执行的结果与实际系统的行为一致。</li>
+</ul>
+<h2 id="例子-1"><a href="#例子-1" class="headerlink" title="例子"></a>例子</h2><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs scss">进程 <span class="hljs-selector-tag">A</span>         进程 <span class="hljs-selector-tag">B</span>         进程 C<br><span class="hljs-built_in">write</span>(x, <span class="hljs-number">1</span>)<br>              <span class="hljs-built_in">write</span>(y, <span class="hljs-number">2</span>)<br>                            <span class="hljs-built_in">read</span>(y) ---&gt; <span class="hljs-selector-attr">[返回 2]</span><br>                            <span class="hljs-built_in">read</span>(x) ---&gt; <span class="hljs-selector-attr">[可能返回 0 或 1]</span><br></code></pre></td></tr></table></figure>
+
+<p>在顺序一致的系统中，虽然进程 C 能看到进程 B 的写（因为它发生在 C 的读之前），但不一定看到进程 A 的写（因为没有明确的因果顺序）。</p>
+<h2 id="与线性一致性的区别"><a href="#与线性一致性的区别" class="headerlink" title="与线性一致性的区别"></a>与线性一致性的区别</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>线性一致性</th>
+<th>顺序一致性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>绑定实时顺序</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>程序顺序</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>低</td>
+<td>高于线性一致性</td>
+</tr>
+<tr>
+<td>难度</td>
+<td>难</td>
+<td>相对容易</td>
+</tr>
+</tbody></table>
+<h2 id="典型实现-1"><a href="#典型实现-1" class="headerlink" title="典型实现"></a>典型实现</h2><ul>
+<li><strong>GPU 内存模型</strong>（某些时期）。</li>
+<li><strong>弱同步复制系统</strong>：没有全局时间戳，只保证本地顺序。</li>
+</ul>
+<hr>
+<h1 id="因果一致性（Causal-Consistency）"><a href="#因果一致性（Causal-Consistency）" class="headerlink" title="因果一致性（Causal Consistency）"></a>因果一致性（Causal Consistency）</h1><h2 id="定义-2"><a href="#定义-2" class="headerlink" title="定义"></a>定义</h2><p>因果一致性由 Lamport 的逻辑时钟与向量时钟理论驱动。它要求：</p>
+<ol>
+<li>存在因果关系的操作必须按该顺序被所有进程看到。</li>
+<li>没有因果关系的操作（并发操作）可以被不同进程以不同顺序观察。</li>
+</ol>
+<p>核心思想：<strong>尊重因果依赖，允许并发无关操作的乱序</strong>。</p>
+<h2 id="正式描述-2"><a href="#正式描述-2" class="headerlink" title="正式描述"></a>正式描述</h2><p>对任意两个操作 $op_1$ 和 $op_2$：</p>
+<ul>
+<li>若 $op_1 \to op_2$（因果关系），则所有进程必须先看到 $op_1$ 再看到 $op_2$。</li>
+<li>若 $op_1 \parallel op_2$（并发），则不同进程可以以不同顺序观察它们。</li>
+</ul>
+<h2 id="例子-2"><a href="#例子-2" class="headerlink" title="例子"></a>例子</h2><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs stylus">进程 A: <span class="hljs-built_in">write</span>(<span class="hljs-attribute">x</span>, <span class="hljs-number">1</span>)  ---&gt;  <span class="hljs-built_in">write</span>(y, <span class="hljs-number">2</span>)<br>进程 B:                     <span class="hljs-built_in">read</span>(<span class="hljs-attribute">y</span>) ---&gt; [返回 <span class="hljs-number">2</span>]<br>                           <span class="hljs-built_in">read</span>(<span class="hljs-attribute">x</span>) ---&gt; [必须返回 <span class="hljs-number">1</span>，因为 <span class="hljs-built_in">write</span>(x,<span class="hljs-number">1</span>) 是 <span class="hljs-built_in">write</span>(y,<span class="hljs-number">2</span>) 的因果前驱]<br></code></pre></td></tr></table></figure>
+
+<p>但若两个写操作并发（没有因果关系），不同进程可能看到不同的相对顺序。</p>
+<h2 id="实现技术"><a href="#实现技术" class="headerlink" title="实现技术"></a>实现技术</h2><ul>
+<li><strong>向量时钟</strong>（Vector Clock）：每个进程维护向量时戳，追踪因果依赖。</li>
+<li><strong>版本向量</strong>（Version Vector）：记录各进程对数据的修改版本。</li>
+<li><strong>Dynamo&#x2F;Cassandra</strong> 中的版本向量机制。</li>
+</ul>
+<h2 id="与顺序一致性的区别"><a href="#与顺序一致性的区别" class="headerlink" title="与顺序一致性的区别"></a>与顺序一致性的区别</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>顺序一致性</th>
+<th>因果一致性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全局串行顺序</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>因果关系保护</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>并发操作乱序</td>
+<td>不允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>中等</td>
+<td>更高</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="会话一致性（Session-Consistency）"><a href="#会话一致性（Session-Consistency）" class="headerlink" title="会话一致性（Session Consistency）"></a>会话一致性（Session Consistency）</h1><h2 id="定义-3"><a href="#定义-3" class="headerlink" title="定义"></a>定义</h2><p>会话一致性在客户端维度加入时间限制，要求：</p>
+<ol>
+<li>在同一<strong>会话</strong>内，读写操作满足顺序一致性或线性一致性。</li>
+<li>不同会话的操作可能看到不同版本的数据。</li>
+<li>进程与同一副本通信时效果最好（减少远程副本间的同步成本）。</li>
+</ol>
+<h2 id="关键概念"><a href="#关键概念" class="headerlink" title="关键概念"></a>关键概念</h2><ul>
+<li><strong>会话</strong>（Session）：由单一客户端与系统的交互序列定义，通常绑定到用户登录或连接 ID。</li>
+<li><strong>会话令牌</strong>（Session Token）：服务端返回给客户端，用于追踪其因果历史。</li>
+</ul>
+<h2 id="例子-3"><a href="#例子-3" class="headerlink" title="例子"></a>例子</h2><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs vim">用户 A 在手机上：<br>  <span class="hljs-keyword">write</span>(<span class="hljs-keyword">profile</span>, <span class="hljs-string">&quot;name=Alice&quot;</span>)  ----[返回]<br>                                    |<br>                                <span class="hljs-keyword">read</span>(<span class="hljs-keyword">profile</span>) ---&gt; [返回最新的 <span class="hljs-string">&quot;name=Alice&quot;</span>]<br><br>同时<br>用户 B 在浏览器上：<br>  <span class="hljs-keyword">read</span>(<span class="hljs-keyword">profile</span>) ---&gt; [可能返回旧版本 <span class="hljs-string">&quot;name=Bob&quot;</span>]<br></code></pre></td></tr></table></figure>
+
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><ul>
+<li><strong>会话令牌法</strong>：客户端携带上一次操作的时间戳或版本号，服务端据此确保返回至少包含该版本或更新的数据。</li>
+<li><strong>粘性会话</strong>（Sticky Session）：客户端尽量路由到同一副本，减少跨副本同步需求。</li>
+</ul>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul>
+<li>Web 应用：用户登录后对自己的数据修改立即可见。</li>
+<li>移动应用：用户在设备上的操作顺序保证，但其他用户可能见到延迟。</li>
+</ul>
+<hr>
+<h1 id="最终一致性（Eventual-Consistency）"><a href="#最终一致性（Eventual-Consistency）" class="headerlink" title="最终一致性（Eventual Consistency）"></a>最终一致性（Eventual Consistency）</h1><h2 id="定义-4"><a href="#定义-4" class="headerlink" title="定义"></a>定义</h2><p>最终一致性是<strong>最弱</strong>的一致性保证，仅承诺：</p>
+<ol>
+<li>如果一段时间内没有新的写操作，所有读操作最终会返回同一值。</li>
+<li>不保证读操作何时能看到写操作的结果。</li>
+<li>不同副本间可能暂时不一致。</li>
+</ol>
+<p>这是一个<strong>活性保证</strong>而非<strong>安全保证</strong>。</p>
+<h2 id="正式描述-3"><a href="#正式描述-3" class="headerlink" title="正式描述"></a>正式描述</h2><p>对于任一数据项 $x$，定义最后一次写操作为 $W_{\text{last}}$。如果在 $t$ 时刻后没有新的写操作，则存在延迟 $\Delta$，使得所有在 $t + \Delta$ 之后的读操作都能观察到 $W_{\text{last}}$ 的结果。</p>
+<h2 id="例子（DNS-与-缓存）"><a href="#例子（DNS-与-缓存）" class="headerlink" title="例子（DNS 与 缓存）"></a>例子（DNS 与 缓存）</h2><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs applescript">服务器 A: <span class="hljs-built_in">write</span>(domain, IP1) <br>  ↓ 传播延迟（秒级甚至分钟级）<br>客户端 <span class="hljs-number">1</span>: <span class="hljs-built_in">read</span>(domain) <span class="hljs-comment">---&gt; [可能返回旧 IP]</span><br>客户端 <span class="hljs-number">2</span>: <span class="hljs-built_in">read</span>(domain) <span class="hljs-comment">---&gt; [也可能返回旧 IP]</span><br>  ...等待 TTL 过期或主动刷新...<br>客户端 N: <span class="hljs-built_in">read</span>(domain) <span class="hljs-comment">---&gt; [最终返回 IP1]</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="变体"><a href="#变体" class="headerlink" title="变体"></a>变体</h2><ul>
+<li><strong>强最终一致性</strong>（Strong Eventual Consistency, SEC）：要求无冲突的操作最终收敛到同一结果，常用于 CRDT（无冲突副本数据类型）。</li>
+<li><strong>读你所写一致性</strong>（Read-Your-Write）：客户端的读操作至少能看到自己之前的写，是最终一致性的改进。</li>
+</ul>
+<h2 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h2><ul>
+<li><strong>社交媒体</strong>：点赞、转发等统计可能不实时准确。</li>
+<li><strong>分布式缓存</strong>（Redis、Memcached）。</li>
+<li><strong>DNS 系统</strong>。</li>
+<li><strong>NoSQL 数据库</strong>（Cassandra、DynamoDB 的默认配置）。</li>
+</ul>
+<h2 id="优点与成本"><a href="#优点与成本" class="headerlink" title="优点与成本"></a>优点与成本</h2><table>
+<thead>
+<tr>
+<th>方面</th>
+<th>优点</th>
+<th>成本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>延迟</td>
+<td>极低</td>
+<td>用户可能见到过时数据</td>
+</tr>
+<tr>
+<td>吞吐</td>
+<td>极高</td>
+<td>需处理冲突与版本管理</td>
+</tr>
+<tr>
+<td>可用性</td>
+<td>高</td>
+<td>数据暂时不一致</td>
+</tr>
+<tr>
+<td>复杂性</td>
+<td>低（理论）</td>
+<td>高（工程应对冲突）</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="读写一致性（Read-Your-Write-Consistency）"><a href="#读写一致性（Read-Your-Write-Consistency）" class="headerlink" title="读写一致性（Read-Your-Write Consistency）"></a>读写一致性（Read-Your-Write Consistency）</h1><h2 id="定义-5"><a href="#定义-5" class="headerlink" title="定义"></a>定义</h2><p>读写一致性是对最终一致性的改进，承诺：</p>
+<ol>
+<li>客户端对数据的写操作完成后，该客户端的后续读操作<strong>必然看到该写的结果</strong>。</li>
+<li>其他客户端的读取可能见到旧版本。</li>
+</ol>
+<h2 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h2><ul>
+<li><strong>客户端记忆</strong>：记录该客户端对每个数据项的最后写时间戳，确保读操作从包含该时间戳或更新版本的副本获取。</li>
+<li><strong>会话记号</strong>：类似会话一致性，使用版本向量或时间戳。</li>
+</ul>
+<h2 id="例子-4"><a href="#例子-4" class="headerlink" title="例子"></a>例子</h2><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs scss">用户 <span class="hljs-selector-tag">A</span> 在微博上：<br>  <span class="hljs-built_in">write</span>(bio, &quot;I am Alice&quot;)  ---&gt; <span class="hljs-selector-attr">[返回成功]</span><br>  <span class="hljs-built_in">read</span>(bio) ---&gt; <span class="hljs-selector-attr">[立即看到 <span class="hljs-string">&quot;I am Alice&quot;</span>]</span><br><br>但用户 <span class="hljs-selector-tag">B</span> 此时 <span class="hljs-built_in">read</span>(A的bio) 可能仍见到旧值。<br></code></pre></td></tr></table></figure>
+
+<h2 id="与会话一致性的关系"><a href="#与会话一致性的关系" class="headerlink" title="与会话一致性的关系"></a>与会话一致性的关系</h2><p>读写一致性是会话一致性的特例，侧重于用户对自己操作的可见性保证。</p>
+<hr>
+<h1 id="一致性模型的权衡与选择"><a href="#一致性模型的权衡与选择" class="headerlink" title="一致性模型的权衡与选择"></a>一致性模型的权衡与选择</h1><h2 id="强度-vs-性能权衡"><a href="#强度-vs-性能权衡" class="headerlink" title="强度 vs 性能权衡"></a>强度 vs 性能权衡</h2><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>一致性强度</th>
+<th>延迟</th>
+<th>吞吐</th>
+<th>可用性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>线性一致性</td>
+<td>极强</td>
+<td>高</td>
+<td>低</td>
+<td>低（分区不可用）</td>
+</tr>
+<tr>
+<td>顺序一致性</td>
+<td>强</td>
+<td>中</td>
+<td>中</td>
+<td>中</td>
+</tr>
+<tr>
+<td>因果一致性</td>
+<td>中</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>会话一致性</td>
+<td>弱</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>最终一致性</td>
+<td>极弱</td>
+<td>极低</td>
+<td>极高</td>
+<td>极高</td>
+</tr>
+</tbody></table>
+<h2 id="选择指南"><a href="#选择指南" class="headerlink" title="选择指南"></a>选择指南</h2><ul>
+<li><strong>金融交易系统</strong>：线性一致性或强顺序一致性（必须正确）。</li>
+<li><strong>分布式缓存</strong>：因果一致性或会话一致性（可接受延迟，但不能太离谱）。</li>
+<li><strong>社交媒体、推荐系统</strong>：最终一致性（用户容忍短期不准确）。</li>
+<li><strong>用户个人资料</strong>：读写一致性（用户对自己的改动立即可见）。</li>
+</ul>
+<h2 id="CAP-定理的关联"><a href="#CAP-定理的关联" class="headerlink" title="CAP 定理的关联"></a>CAP 定理的关联</h2><ul>
+<li><strong>线性一致性</strong> 对应 CAP 中的强一致性，不能同时保证分区下的可用性。</li>
+<li><strong>最终一致性</strong> 选择可用性与分区容忍性，放弃一致性。</li>
+<li><strong>实际系统</strong>通常针对不同数据类型或操作采用混合策略。</li>
+</ul>
+<hr>
+<h1 id="工程启示与最佳实践"><a href="#工程启示与最佳实践" class="headerlink" title="工程启示与最佳实践"></a>工程启示与最佳实践</h1><ol>
+<li><p><strong>分层一致性</strong>：为不同数据层级应用不同模型。</p>
+<ul>
+<li>关键数据（账户余额）：线性一致性。</li>
+<li>热数据（缓存）：因果或最终一致性。</li>
+<li>元数据（计数器）：最终一致性。</li>
+</ul>
+</li>
+<li><p><strong>监控与冲突解决</strong>：使用版本向量或时间戳检测并解决冲突。</p>
+</li>
+<li><p><strong>用户感知</strong>：向应用层和用户明确通信可能的不一致性，例如”点赞数可能延迟更新”。</p>
+</li>
+<li><p><strong>混合策略</strong>：同一系统中对不同数据采用不同一致性保证（例如 Spanner 对关键事务用强一致性，对分析查询用最终一致性）。</p>
+</li>
+</ol>
+<hr>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li>Lamport, L. (1979). How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs. IEEE Transactions on Computers, 28(9), 690–691.</li>
+<li>Attiya, H., Welch, J. L. (2004). Distributed Computing: Fundamentals, Simulations and Advanced Topics. Wiley.</li>
+<li>Kleppmann, M. (2017). Designing Data-Intensive Applications. O’Reilly.</li>
+<li>DeCandia, G., et al. (2007). Dynamo: Amazon’s Highly Available Key-value Store. SOSP.</li>
+<li>Corbett, J. C., et al. (2012). Spanner: Google’s Globally Distributed Database. OSDI.</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="category-chain-item">理论基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="print-no-link">#理论基础</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>一致性模型</div>
+      <div>https://yicizhang00.github.io/posts/分布式/理论基础/一致性模型/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年6月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E4%BA%89%E8%AE%BA/" title="分布式锁RedLock争论">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">分布式锁RedLock争论</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/Feign%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5/" title="Feign异常处理实践">
+                        <span class="hidden-mobile">Feign异常处理实践</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

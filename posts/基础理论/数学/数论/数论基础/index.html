@@ -1,0 +1,922 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="最大公约数 (GCD) 基础1. 交换律$$ \gcd(a, b) &#x3D; \gcd(b, a) $$ 证明根据 $\gcd(a, b)$ 的定义，它是集合 ${d \in \mathbb{Z}^+ : d \mid a \text{ 且 } d \mid b}$ 中的最大元素。由于集合的隶属条件与参数顺序无关，故最大公约数相等。 2. 结合律$$ \gcd(a, \gcd(b, c)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GCD基础">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E6%95%B0%E8%AE%BA%E5%9F%BA%E7%A1%80/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="最大公约数 (GCD) 基础1. 交换律$$ \gcd(a, b) &#x3D; \gcd(b, a) $$ 证明根据 $\gcd(a, b)$ 的定义，它是集合 ${d \in \mathbb{Z}^+ : d \mid a \text{ 且 } d \mid b}$ 中的最大元素。由于集合的隶属条件与参数顺序无关，故最大公约数相等。 2. 结合律$$ \gcd(a, \gcd(b, c)">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-18T11:16:53.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.834Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="数学">
+<meta property="article:tag" content="GCD">
+<meta property="article:tag" content="数论">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>GCD基础 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">GCD基础</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-18 19:16" pubdate>
+          2025年8月18日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">GCD基础</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<hr>
+<h1 id="最大公约数-GCD-基础"><a href="#最大公约数-GCD-基础" class="headerlink" title="最大公约数 (GCD) 基础"></a>最大公约数 (GCD) 基础</h1><h2 id="1-交换律"><a href="#1-交换律" class="headerlink" title="1. 交换律"></a>1. 交换律</h2><p>$$ \gcd(a, b) &#x3D; \gcd(b, a) $$</p>
+<p><strong>证明</strong><br>根据 $\gcd(a, b)$ 的定义，它是集合 ${d \in \mathbb{Z}^+ : d \mid a \text{ 且 } d \mid b}$ 中的最大元素。由于集合的隶属条件与参数顺序无关，故最大公约数相等。</p>
+<h2 id="2-结合律"><a href="#2-结合律" class="headerlink" title="2. 结合律"></a>2. 结合律</h2><p>$$ \gcd(a, \gcd(b, c)) &#x3D; \gcd(\gcd(a, b), c) $$</p>
+<p><strong>证明</strong><br>设 $d_1 &#x3D; \gcd(a, \gcd(b, c))$，$d_2 &#x3D; \gcd(\gcd(a, b), c)$：</p>
+<ol>
+<li>由定义可知 $d_1 \mid a$ 且 $d_1 \mid \gcd(b, c)$，进一步推导得 $d_1 \mid a, d_1 \mid b, d_1 \mid c$。因此 $d_1$ 是三个数的公约数。</li>
+<li>同理，$d_2$ 也是这三个数的公约数。<br>根据公约数总是整除最大公约数的性质，结合最大性可证 $d_1 &#x3D; d_2 &#x3D; \gcd(a, b, c)$。</li>
+</ol>
+<h2 id="3-贝祖定理-Bezout’s-Identity"><a href="#3-贝祖定理-Bezout’s-Identity" class="headerlink" title="3. 贝祖定理 (Bézout’s Identity)"></a>3. 贝祖定理 (Bézout’s Identity)</h2><p>$$ \gcd(a, b) &#x3D; \min{ ax + by &gt; 0 \mid x, y \in \mathbb{Z} } $$</p>
+<p><strong>证明</strong><br>设集合 $S &#x3D; { ax + by &gt; 0 \mid x, y \in \mathbb{Z} }$。由良序原理，设 $S$ 中的最小正元素为 $d &#x3D; ax_0 + by_0$：</p>
+<ol>
+<li><strong>整除性</strong>：设 $a &#x3D; qd + r$ ($0 \leq r &lt; d$)。则 $r &#x3D; a - qd &#x3D; a - q(ax_0 + by_0) &#x3D; a(1 - qx_0) + b(-qy_0)$。若 $r &gt; 0$，则 $r \in S$，这与 $d$ 是 $S$ 中的最小元矛盾，故 $r &#x3D; 0$，即 $d \mid a$。同理可证 $d \mid b$。</li>
+<li><strong>最大性</strong>：若存在公约数 $c$ 满足 $c \mid a$ 且 $c \mid b$，则必有 $c \mid (ax_0 + by_0)$，即 $c \mid d$，故 $c \leq d$。</li>
+</ol>
+<h2 id="4-GCD-LCM-恒等式"><a href="#4-GCD-LCM-恒等式" class="headerlink" title="4. GCD-LCM 恒等式"></a>4. GCD-LCM 恒等式</h2><p>$$ \gcd(a, b) \cdot \text{lcm}(a, b) &#x3D; |ab| $$</p>
+<p><strong>证明</strong><br>设 $d &#x3D; \gcd(a, b)$，令 $a &#x3D; da’$，$b &#x3D; db’$，其中 $\gcd(a’, b’) &#x3D; 1$。<br>根据最小公倍数的定义，$\text{lcm}(a, b) &#x3D; d \cdot a’ \cdot b’$。<br>则：$\gcd(a, b) \cdot \text{lcm}(a, b) &#x3D; d \cdot (d \cdot a’ \cdot b’) &#x3D; (da’) \cdot (db’) &#x3D; |ab|$。</p>
+<h2 id="5-欧几里得算法-原理"><a href="#5-欧几里得算法-原理" class="headerlink" title="5. 欧几里得算法 (原理)"></a>5. 欧几里得算法 (原理)</h2><p>$$ \gcd(a, b) &#x3D; \gcd(b, a \bmod b) \quad (b \neq 0) $$</p>
+<p><strong>证明</strong><br>设 $a &#x3D; qb + r$，其中 $r &#x3D; a \bmod b$。</p>
+<ol>
+<li>若 $d \mid a$ 且 $d \mid b$，则 $d \mid (a - qb)$，即 $d \mid r$。</li>
+<li>若 $d’ \mid b$ 且 $d’ \mid r$，则 $d’ \mid (qb + r)$，即 $d’ \mid a$。<br>由于 $(a, b)$ 与 $(b, r)$ 的公约数集合完全相同，其最大元素必然相等。</li>
+</ol>
+<ul>
+<li>递归</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">long</span> <span class="hljs-title function_">gcd</span><span class="hljs-params">(<span class="hljs-type">long</span> a, <span class="hljs-type">long</span> b)</span>&#123;<br>    <span class="hljs-keyword">if</span>(b == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> a;<br>    <span class="hljs-keyword">return</span> gcd(b, a%b);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>迭代</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">long</span> <span class="hljs-title function_">gcd</span><span class="hljs-params">(<span class="hljs-type">long</span> a, <span class="hljs-type">long</span> b)</span> &#123;<br>    <span class="hljs-keyword">while</span> (b != <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-type">long</span> <span class="hljs-variable">temp</span> <span class="hljs-operator">=</span> a % b;<br>        a = b;<br>        b = temp;<br>    &#125;<br>    <span class="hljs-keyword">return</span> a;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="6-倍法性质-线性缩放"><a href="#6-倍法性质-线性缩放" class="headerlink" title="6. 倍法性质 (线性缩放)"></a>6. 倍法性质 (线性缩放)</h2><p>$$ \gcd(ka, kb) &#x3D; k \cdot \gcd(a, b) \quad (k &gt; 0) $$</p>
+<p><strong>证明</strong><br>利用贝祖定理：<br>$\gcd(ka, kb) &#x3D; \min{ kax + kby &gt; 0 } &#x3D; k \cdot \min{ ax + by &gt; 0 } &#x3D; k \cdot \gcd(a, b)$。</p>
+<h2 id="7-同余不变性"><a href="#7-同余不变性" class="headerlink" title="7. 同余不变性"></a>7. 同余不变性</h2><p>若 $a \equiv b \pmod{m}$，则 $\gcd(a, m) &#x3D; \gcd(b, m)$。</p>
+<p><strong>证明</strong><br>由同余定义知 $a &#x3D; km + b$。根据欧几里得算法：<br>$\gcd(a, m) &#x3D; \gcd(km + b, m) &#x3D; \gcd(m, (km + b) \bmod m) &#x3D; \gcd(m, b \bmod m) &#x3D; \gcd(b, m)$。</p>
+<h2 id="8-质数相关性质"><a href="#8-质数相关性质" class="headerlink" title="8. 质数相关性质"></a>8. 质数相关性质</h2><p>对于质数 $p$：<br>$$<br>\gcd(p, a) &#x3D;<br>\begin{cases}<br>p, &amp; \text{若 } p \mid a \<br>1, &amp; \text{若 } p \nmid a<br>\end{cases}<br>$$</p>
+<p><strong>证明</strong><br>由于质数 $p$ 的正因数仅有 ${1, p}$：</p>
+<ul>
+<li>若 $p \mid a$，则 $p$ 是公因数中最大的；</li>
+<li>若 $p \nmid a$，则唯一的正公因数为 $1$。</li>
+</ul>
+<h2 id="9-扩展欧几里得算法-ExGCD-递推"><a href="#9-扩展欧几里得算法-ExGCD-递推" class="headerlink" title="9. 扩展欧几里得算法 (ExGCD) 递推"></a>9. 扩展欧几里得算法 (ExGCD) 递推</h2><p>扩展欧几里得算法用于求满足 $ax + by &#x3D; \gcd(a, b)$ 的一组整数解 $(x, y)$。</p>
+<p><strong>推导</strong>  </p>
+<ol>
+<li><strong>边界情况</strong>：当 $b&#x3D;0$ 时，$\gcd(a, 0)&#x3D;a$。此时 $x&#x3D;1, y&#x3D;0$ 满足 $a(1) + 0(0) &#x3D; a$。</li>
+<li><strong>递推步骤</strong>：假设已知下一层递归 $bx’ + (a \bmod b)y’ &#x3D; \gcd(a, b)$ 的解 $(x’, y’)$。<br>将 $a \bmod b &#x3D; a - \lfloor a&#x2F;b \rfloor b$ 代入上式：<br>$bx’ + (a - \lfloor a&#x2F;b \rfloor b)y’ &#x3D; \gcd(a, b)$<br>整理得：$ay’ + b(x’ - \lfloor a&#x2F;b \rfloor y’) &#x3D; \gcd(a, b)$<br>对应 $ax + by &#x3D; \gcd(a, b)$，可得：<br>$x &#x3D; y’, \quad y &#x3D; x’ - \lfloor a&#x2F;b \rfloor y’$。</li>
+</ol>
+<h2 id="10-分配律-GCD-与-LCM-复合"><a href="#10-分配律-GCD-与-LCM-复合" class="headerlink" title="10. 分配律 (GCD 与 LCM 复合)"></a>10. 分配律 (GCD 与 LCM 复合)</h2><p>$$ \gcd(a, \text{lcm}(b, c)) &#x3D; \text{lcm}(\gcd(a, b), \gcd(a, c)) $$<br>$$ \text{lcm}(a, \gcd(b, c)) &#x3D; \gcd(\text{lcm}(a, b), \text{lcm}(a, c)) $$</p>
+<p><strong>证明思路</strong><br>利用质因数分解指数的视角，$\gcd$ 对应 $\min$ 函数，$\text{lcm}$ 对应 $\max$ 函数。证明等价于验证算效恒等式：<br>$\min(\alpha, \max(\beta, \gamma)) &#x3D; \max(\min(\alpha, \beta), \min(\alpha, \gamma))$。</p>
+<h2 id="11-多元素平权性质"><a href="#11-多元素平权性质" class="headerlink" title="11. 多元素平权性质"></a>11. 多元素平权性质</h2><p>最大公约数运算满足广义的交换律与结合律，计算一组数的 GCD 与处理顺序无关：<br>$$ \gcd(a, b, c) &#x3D; \gcd(\gcd(a, b), c) &#x3D; \gcd(a, \gcd(b, c)) $$</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%95%B0%E5%AD%A6/" class="category-chain-item">数学</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/" class="category-chain-item">数论</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E5%AD%A6/" class="print-no-link">#数学</a>
+      
+        <a href="/tags/GCD/" class="print-no-link">#GCD</a>
+      
+        <a href="/tags/%E6%95%B0%E8%AE%BA/" class="print-no-link">#数论</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GCD基础</div>
+      <div>https://yicizhang00.github.io/posts/基础理论/数学/数论/数论基础/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/KV%E6%95%B0%E6%8D%AE%E5%BA%93/redis/" title="redis">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">redis</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%AE%97%E6%B3%95/" title="基础图路径算法">
+                        <span class="hidden-mobile">基础图路径算法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

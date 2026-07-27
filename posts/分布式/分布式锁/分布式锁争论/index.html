@@ -1,0 +1,1092 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言RedLock 争议是 Redis 作者 Salvatore Sanfilippo（Antirez）与分布式系统研究者 Martin Kleppmann 围绕分布式锁安全性所展开的一场经典技术论战。 这场争论的核心并非仅针对 RedLock 算法本身，而是进一步延伸至一个更本质的问题：  在真实分布式环境中，是否能够仅依赖基于时间的租约（Lease）机制构建同时具备安全性（Safety）、活性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式锁RedLock争论">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E4%BA%89%E8%AE%BA/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言RedLock 争议是 Redis 作者 Salvatore Sanfilippo（Antirez）与分布式系统研究者 Martin Kleppmann 围绕分布式锁安全性所展开的一场经典技术论战。 这场争论的核心并非仅针对 RedLock 算法本身，而是进一步延伸至一个更本质的问题：  在真实分布式环境中，是否能够仅依赖基于时间的租约（Lease）机制构建同时具备安全性（Safety）、活性">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-17T15:22:40.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.832Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="分布式锁">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>分布式锁RedLock争论 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">分布式锁RedLock争论</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-06-17 23:22" pubdate>
+          2026年6月17日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          72 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">分布式锁RedLock争论</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>RedLock 争议是 Redis 作者 Salvatore Sanfilippo（Antirez）与分布式系统研究者 Martin Kleppmann 围绕分布式锁安全性所展开的一场经典技术论战。</p>
+<p>这场争论的核心并非仅针对 RedLock 算法本身，而是进一步延伸至一个更本质的问题：</p>
+<blockquote>
+<p>在真实分布式环境中，是否能够仅依赖基于时间的租约（Lease）机制构建同时具备安全性（Safety）、活性（Liveness）以及高性能（Performance）的分布式锁服务。</p>
+</blockquote>
+<p>从分布式理论视角来看，该争议实际上反映了工程实践与形式化模型之间对于系统假设（System Assumptions）和故障模型（Failure Model）的不同理解。</p>
+<hr>
+<h1 id="RedLock-方案概述"><a href="#RedLock-方案概述" class="headerlink" title="RedLock 方案概述"></a>RedLock 方案概述</h1><p>Redis 单实例锁通常采用如下实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs redis">SET resource_name value NX PX 30000<br></code></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<ul>
+<li><code>NX</code> 保证锁获取操作的原子性（Atomic Acquisition）；</li>
+<li><code>PX</code> 指定锁租约（Lease）的有效期；</li>
+<li><code>value</code> 为客户端生成的唯一随机标识，用于保证解锁操作的正确性。</li>
+</ul>
+<p>然而，在主从复制架构下，该方案存在明显的安全隐患。</p>
+<p>假设客户端已成功获取锁，但锁信息尚未完成主从复制，此时主节点发生故障并触发故障转移（Failover），新的主节点可能并未持有对应锁状态。</p>
+<p>此时多个客户端可能同时认为自己成功获得锁，从而破坏互斥性（Mutual Exclusion）。</p>
+<p>为解决上述问题，Antirez 提出了 RedLock 算法。</p>
+<p>RedLock 的核心思想可以概括为：</p>
+<ol>
+<li>客户端同时向多个相互独立的 Redis 实例发起加锁请求；</li>
+<li>仅当成功获取多数派（Majority Quorum）节点的锁时，才认为加锁成功；</li>
+<li>锁以租约（Lease）的形式存在，并在 TTL 到期后自动失效；</li>
+<li>解锁时仅删除属于当前客户端的锁记录。</li>
+</ol>
+<p>需要特别强调的是：</p>
+<p>虽然 RedLock 同样采用了多数派原则（Majority Principle），但其并不具备共识协议（Consensus Protocol）的核心机制，包括：</p>
+<ul>
+<li>Leader Election</li>
+<li>Term &#x2F; Epoch</li>
+<li>Log Replication</li>
+<li>Majority Commit</li>
+<li>State Machine Replication</li>
+</ul>
+<p>因此，RedLock 本质上并非共识算法，而是一种基于多数派租约（Majority Lease）的分布式锁实现。</p>
+<h1 id="安全性分析（Safety-Analysis）"><a href="#安全性分析（Safety-Analysis）" class="headerlink" title="安全性分析（Safety Analysis）"></a>安全性分析（Safety Analysis）</h1><h2 id="核心假设"><a href="#核心假设" class="headerlink" title="核心假设"></a>核心假设</h2><p>RedLock 的安全性证明建立在以下两个关键前提之上。</p>
+<h3 id="假设一：有界网络延迟（Bounded-Network-Delay）"><a href="#假设一：有界网络延迟（Bounded-Network-Delay）" class="headerlink" title="假设一：有界网络延迟（Bounded Network Delay）"></a>假设一：有界网络延迟（Bounded Network Delay）</h3><p>客户端与 Redis 实例之间的通信延迟存在可接受上界：</p>
+<p>$$<br>T_2 - T_1 &lt; \infty<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$T_1$ 表示开始获取锁的时刻；</li>
+<li>$T_2$ 表示完成多数派加锁的时刻。</li>
+</ul>
+<h3 id="假设二：有界时钟漂移（Bounded-Clock-Drift）"><a href="#假设二：有界时钟漂移（Bounded-Clock-Drift）" class="headerlink" title="假设二：有界时钟漂移（Bounded Clock Drift）"></a>假设二：有界时钟漂移（Bounded Clock Drift）</h3><p>各 Redis 实例之间虽然不存在严格意义上的全局同步时钟，但其时钟误差被认为处于可接受范围内：</p>
+<p>$$<br>CLOCK_DRIFT \ll TTL<br>$$</p>
+<p>在上述假设成立的条件下，RedLock 试图证明：</p>
+<blockquote>
+<p>在锁租约有效期间内，不会存在两个客户端同时获得同一资源访问权的情况。</p>
+</blockquote>
+<p>这对应于分布式锁所要求的互斥性（Mutual Exclusion）属性。</p>
+<hr>
+<h2 id="最小有效时间（MIN-VALIDITY）"><a href="#最小有效时间（MIN-VALIDITY）" class="headerlink" title="最小有效时间（MIN_VALIDITY）"></a>最小有效时间（MIN_VALIDITY）</h2><p>RedLock 使用如下公式定义锁的理论安全窗口：</p>
+<p>$$<br>MIN_VALIDITY&#x3D;TTL-(T_2-T_1)-CLOCK_DRIFT<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$TTL$ 为锁租约时长；</li>
+<li>$(T_2-T_1)$ 为获取多数派锁所消耗的时间；</li>
+<li>$CLOCK_DRIFT$ 为时钟误差补偿项。</li>
+</ul>
+<p>该公式所刻画的是：</p>
+<blockquote>
+<p>多数派节点上的锁记录能够同时存在的最短时间区间。</p>
+</blockquote>
+<p>若满足：</p>
+<p>$$<br>MIN_VALIDITY &gt; 0<br>$$</p>
+<p>则在该时间窗口内，多数派锁记录必然同时存在。</p>
+<p>由于新的客户端无法在多数派节点上再次成功执行 <code>SET NX</code> 操作，因此互斥性得以保证。</p>
+<hr>
+<h2 id="互斥性证明"><a href="#互斥性证明" class="headerlink" title="互斥性证明"></a>互斥性证明</h2><p>互斥性的成立依赖于如下事实：</p>
+<p>若某客户端已成功在多数派节点上建立锁记录，则在锁记录失效之前，任何其他客户端都无法再次获得新的多数派。</p>
+<p>原因在于：</p>
+<p>多数派集合之间必然存在交集（Quorum Intersection）。</p>
+<p>只要交集节点上的锁记录仍然存在，则后续客户端无法在该节点完成加锁操作，从而无法形成新的多数派。</p>
+<p>因此，在 MIN_VALIDITY 时间窗口内，系统满足：</p>
+<p>$$<br>\forall t \in MIN_VALIDITY<br>\quad<br>|\text{Lock Owners}| \le 1<br>$$</p>
+<p>即任意时刻最多只有一个客户端能够持有锁。</p>
+<hr>
+<h2 id="无效租约的处理"><a href="#无效租约的处理" class="headerlink" title="无效租约的处理"></a>无效租约的处理</h2><p>若客户端完成加锁所消耗的时间已经接近甚至超过 TTL：</p>
+<p>$$<br>(T_2-T_1)\ge TTL<br>$$</p>
+<p>则：</p>
+<p>$$<br>MIN_VALIDITY \le 0<br>$$</p>
+<p>此时虽然客户端可能已经获得多数派确认，但锁的有效窗口已经不存在。</p>
+<p>因此 RedLock 要求客户端主动释放所有已获取的锁，并将本次加锁视为失败。</p>
+<p>该机制用于避免客户端持有逻辑上已经失效的租约继续访问共享资源。</p>
+<hr>
+<h2 id="活性（Liveness）证明"><a href="#活性（Liveness）证明" class="headerlink" title="活性（Liveness）证明"></a>活性（Liveness）证明</h2><p>原文：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs Text">The system liveness is based on three main features:<br><br>The auto release of the lock (since keys expire): eventually keys are available again to be locked.<br>The fact that clients, usually, will cooperate removing the locks when the lock was not acquired, or when the lock was acquired and the work terminated, making it likely that we don’t have to wait for keys to expire to re-acquire the lock.<br>The fact that when a client needs to retry a lock, it waits a time which is comparably greater than the time needed to acquire the majority of locks, in order to probabilistically make split brain conditions during resource contention unlikely.<br>However, we pay an availability penalty equal to TTL time on network partitions, so if there are continuous partitions, we can pay this penalty indefinitely. This happens every time a client acquires a lock and gets partitioned away before being able to remove the lock.<br><br>Basically if there are infinite continuous network partitions, the system may become not available for an infinite amount of time.<br><br></code></pre></td></tr></table></figure>
+<p>RedLock采用下面三种方法保证活性：</p>
+<ol>
+<li><p>锁的自动释放：这是最根本的保障。所有锁 Key 都设置了 TTL，即使客户端彻底崩溃，锁也会在 TTL 后自动删除，系统总能恢复。</p>
+</li>
+<li><p>主动清理：客户端在加锁失败或完成任务后，会主动发起解锁操作（DEL 命令），这会加速锁的释放，不必每次都等待 TTL 到期。</p>
+</li>
+<li><p>重试退避：当客户端因冲突而重试加锁时，它会等待一个比通常加锁耗时更长的时间（例如几倍于网络往返时间）。这大大降低了多个客户端在发生网络分区（Split-Brain）时，仍然因同时重试而反复冲突的概率。</p>
+</li>
+</ol>
+<p>不过，文档也坦诚指出了代价：在网络分区期间，系统可用性会受到 TTL 时间的惩罚。 如果客户端在分区期间持有锁并与主网络隔离，无法主动释放，那么所有其他客户端都必须等待 TTL 到期才能再次获取锁。如果分区持续不断，这种不可用状态可能会无限延续。</p>
+<h2 id="性能、崩溃恢复与持久化"><a href="#性能、崩溃恢复与持久化" class="headerlink" title="性能、崩溃恢复与持久化"></a>性能、崩溃恢复与持久化</h2><p>原文</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs Text">Many users using Redis as a lock server need high performance in terms of both latency to acquire and release a lock, and number of acquire / release operations that it is possible to perform per second. In order to meet this requirement, the strategy to talk with the N Redis servers to reduce latency is definitely multiplexing (putting the socket in non-blocking mode, send all the commands, and read all the commands later, assuming that the RTT between the client and each instance is similar).<br><br>However there is another consideration around persistence if we want to target a crash-recovery system model.<br><br>Basically to see the problem here, let’s assume we configure Redis without persistence at all. A client acquires the lock in 3 of 5 instances. One of the instances where the client was able to acquire the lock is restarted, at this point there are again 3 instances that we can lock for the same resource, and another client can lock it again, violating the safety property of exclusivity of lock.<br><br>If we enable AOF persistence, things will improve quite a bit. For example we can upgrade a server by sending it a SHUTDOWN command and restarting it. Because Redis expires are semantically implemented so that time still elapses when the server is off, all our requirements are fine. However everything is fine as long as it is a clean shutdown. What about a power outage? If Redis is configured, as by default, to fsync on disk every second, it is possible that after a restart our key is missing. In theory, if we want to guarantee the lock safety in the face of any kind of instance restart, we need to enable in the persistence settings. This will affect performance due to the additional sync overhead.fsync=always<br><br>However things are better than they look like at a first glance. Basically, the algorithm safety is retained as long as when an instance restarts after a crash, it no longer participates to any currently active lock. This means that the set of currently active locks when the instance restarts were all obtained by locking instances other than the one which is rejoining the system.<br><br>To guarantee this we just need to make an instance, after a crash, unavailable for at least a bit more than the max TTL we use. This is the time needed for all the keys about the locks that existed when the instance crashed to become invalid and be automatically released.<br><br>Using delayed restarts it is basically possible to achieve safety even without any kind of Redis persistence available, however note that this may translate into an availability penalty. For example if a majority of instances crash, the system will become globally unavailable for TTL (here globally means that no resource at all will be lockable during this time).<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><p>性能优化策略<br>为了达到高吞吐和低延迟，客户端需要使用多路复用（Multiplexing）。具体来说，是以非阻塞模式，同时向所有 Redis 节点发送加锁命令，然后一次性读取所有回复，而不是串行地一个接一个请求。</p>
+</li>
+<li><p>崩溃恢复与数据持久化<br>这是一个关键的安全隐患。假设客户端 A 在 5 个节点中的 3 个上成功加锁。随后，其中一个节点发生故障并重启。</p>
+</li>
+</ol>
+<p><strong>无持久化场景</strong>：重启节点丢失所有数据。客户端 B 随后可在该节点及其他 2 个节点上加锁成功，导致两个客户端同时持有锁。</p>
+<p>为规避此风险，有两种权衡方案：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>机制</th>
+<th>优点</th>
+<th>劣点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>强持久化</strong></td>
+<td>每次写入使用 <code>fsync=always</code></td>
+<td>节点重启后数据不丢失</td>
+<td>性能大幅下降</td>
+</tr>
+<tr>
+<td><strong>延迟重启</strong></td>
+<td>节点离线后延迟重启，等待时间 $&gt; \max(TTL)$</td>
+<td>高性能，自动恢复</td>
+<td>节点长时间不可用</td>
+</tr>
+</tbody></table>
+<p>延迟重启的原理：节点离线时间超过所有旧锁的 TTL 后，重启时是”白纸”状态，不会包含有效锁信息，从而无法被新客户端利用破坏互斥性。</p>
+<h2 id="锁续期"><a href="#锁续期" class="headerlink" title="锁续期"></a>锁续期</h2><p>文档提到了一个锁续期（Lock Extension） 机制。如果业务执行时间较长，客户端可以在锁快要过期时，通过一个 Lua 脚本检查锁的 Key 是否存在且 Value 是自己设置的随机值，如果是，则延长该 Key 的 TTL。这个机制必须同样向多数派节点发起，且必须在有效时间内完成。不过文档警告：必须限制续期次数，否则如果客户端永不释放锁，就会违背活性（Liveness）原则。</p>
+<hr>
+<h1 id="Kleppmann-的质疑：RedLock-是否安全？"><a href="#Kleppmann-的质疑：RedLock-是否安全？" class="headerlink" title="Kleppmann 的质疑：RedLock 是否安全？"></a>Kleppmann 的质疑：RedLock 是否安全？</h1><p>Martin Kleppmann 在《How to do distributed locking》一文中指出，RedLock 依赖于一组非常强的系统假设，因此其安全性在实际分布式环境中存在缺陷。主要争议点包括：</p>
+<h2 id="1-客户端暂停（Stop-the-World）与锁过期"><a href="#1-客户端暂停（Stop-the-World）与锁过期" class="headerlink" title="1. 客户端暂停（Stop-the-World）与锁过期"></a>1. 客户端暂停（Stop-the-World）与锁过期</h2><p>RedLock 的实现依赖于客户端能够在锁的 TTL 内完成对资源的访问并释放锁。如果客户端在持锁期间遭遇长时间 GC 暂停或线程阻塞，并且该暂停时间超过了锁的 TTL，那么：</p>
+<ul>
+<li>服务器端可能已经将该锁视为过期并允许其他客户端获取；</li>
+<li>原客户端随后继续执行并访问资源，导致两个客户端同时持有该资源的访问权限。</li>
+</ul>
+<p>这一问题体现的是：RedLock 使用基于时间的租约，而时间租约在完全异步环境下并不可靠。</p>
+<h2 id="2-缺少-fencing-token（栅栏令牌）"><a href="#2-缺少-fencing-token（栅栏令牌）" class="headerlink" title="2. 缺少 fencing token（栅栏令牌）"></a>2. 缺少 fencing token（栅栏令牌）</h2><p>安全的分布式锁通常要求资源访问端具备“栅栏令牌”机制，即：</p>
+<ul>
+<li>每次成功获取锁时，客户端获得一个递增的令牌；</li>
+<li>资源管理方在处理写操作时检查令牌有效性；</li>
+<li>若客户端持有的令牌较旧，则拒绝其写操作。</li>
+</ul>
+<p>如果仅依赖锁的 TTL，而没有 fencing token，即使客户端在锁过期后仍继续执行，它也无法被资源端可靠地拒绝，这会带来“过期锁仍可写”的危险。</p>
+<h2 id="3-时间假设与异步系统的限制"><a href="#3-时间假设与异步系统的限制" class="headerlink" title="3. 时间假设与异步系统的限制"></a>3. 时间假设与异步系统的限制</h2><p>Kleppmann 认为 RedLock 的安全性隐含如下假设：</p>
+<ul>
+<li>时钟漂移受限；</li>
+<li>网络延迟受限；</li>
+<li>客户端停顿时间不会无限延长。</li>
+</ul>
+<p>然而，在真实系统中，时钟误差、网络波动、GC 暂停等因素都可能变得非常大，尤其是在云环境、虚拟化或容器平台上，这些因素不能简单地忽略。</p>
+<p>因此，任何依赖严格时间界限的安全性证明都应保持谨慎。</p>
+<blockquote>
+<p>这与 FLP 不可能性定理的精神类似：在完全异步模型下，不能通过时间来判断节点是否失败。</p>
+</blockquote>
+<hr>
+<h1 id="Antirez-的回应：RedLock-的假设与定位"><a href="#Antirez-的回应：RedLock-的假设与定位" class="headerlink" title="Antirez 的回应：RedLock 的假设与定位"></a>Antirez 的回应：RedLock 的假设与定位</h1><p>Antirez 在《Is RedLock Safe》一文中反驳了 Kleppmann 的观点，强调 RedLock 的适用前提与设计目标。</p>
+<h2 id="1-锁的必要性与资源约束"><a href="#1-锁的必要性与资源约束" class="headerlink" title="1. 锁的必要性与资源约束"></a>1. 锁的必要性与资源约束</h2><p>Antirez 指出，如果底层资源本身能够拒绝旧写入，那么强化锁本身的意义会减弱。也就是说，若资源层能够基于版本号或 idempotency 直接保证安全，那么锁服务可以退化为性能优化工具。</p>
+<p>但在很多场景中，分布式锁仍然是必要的，因为它为不支持幂等写入或乐观并发控制的资源提供了一种统一的互斥语义。</p>
+<h2 id="2-半同步系统假设（Semi-Synchronous-System）"><a href="#2-半同步系统假设（Semi-Synchronous-System）" class="headerlink" title="2. 半同步系统假设（Semi-Synchronous System）"></a>2. 半同步系统假设（Semi-Synchronous System）</h2><p>Antirez 认为 RedLock 并非在“完全异步”模型下设计，而是在一个“半同步”模型下成立：</p>
+<ul>
+<li>时钟存在漂移，但漂移在可接受范围内；</li>
+<li>网络延迟存在，但不会无限大；</li>
+<li>锁的 TTL 设置足够大，以覆盖常见延迟与抖动。</li>
+</ul>
+<p>在这种半同步假设下，RedLock 可以被视为一种基于租约的分布式锁，其安全性依赖于这些延迟边界。</p>
+<h2 id="3-Redis-的定位"><a href="#3-Redis-的定位" class="headerlink" title="3. Redis 的定位"></a>3. Redis 的定位</h2><p>Antirez 还强调，Redis 本身定位为高性能 KV 存储，无法、也不应承担像 Raft、Paxos、etcd 这样的重型共识协议。</p>
+<p>RedLock 的设计目标是为 Redis 提供一种轻量级分布式锁机制，而不是构造一个通用、强一致性的分布式协调系统。</p>
+<hr>
+<h1 id="争议的核心"><a href="#争议的核心" class="headerlink" title="争议的核心"></a>争议的核心</h1><p>RedLock 争议的核心并不是“RedLock 是否工作”，而是“RedLock 的安全性是否在现实条件下成立”。</p>
+<ul>
+<li>如果将 RedLock 视为一个在受限假设下工作的租约锁，它可以提供一定程度的可用性和互斥性；</li>
+<li>但如果强求它在完全异步、无界延迟、无界暂停的系统中也具备强一致性，那么它就不能满足这种要求。</li>
+</ul>
+<p>从本质上讲，要构建一个真正的强一致性分布式锁，需要解决分布式共识问题；而解决共识问题通常会引入 Raft&#x2F;Paxos、领导者选举、日志复制、任期和多数派提交等机制。</p>
+<p>因此，RedLock 更像是一种“工程折衷”，而不是一个形式上完备的共识式锁服务。</p>
+<hr>
+<h1 id="应用场景与风险权衡"><a href="#应用场景与风险权衡" class="headerlink" title="应用场景与风险权衡"></a>应用场景与风险权衡</h1><h2 id="效率优先的锁"><a href="#效率优先的锁" class="headerlink" title="效率优先的锁"></a>效率优先的锁</h2><p>当业务能容忍偶尔的重复执行，且操作本身幂等或后果有限时，RedLock 这类基于租约的锁具有较高价值：</p>
+<ul>
+<li>定时任务调度；</li>
+<li>防止重复发送通知；</li>
+<li>避免重复缓存重建或重复计算。</li>
+</ul>
+<p>在这些场景下，锁失效最多会导致“最多多执行一次”，且只要上层业务设计具备幂等性，风险可控。</p>
+<h2 id="正确性优先的锁"><a href="#正确性优先的锁" class="headerlink" title="正确性优先的锁"></a>正确性优先的锁</h2><p>对于需要严格互斥的业务场景，RedLock 的时间假设风险可能导致严重后果：</p>
+<ul>
+<li>支付扣款；</li>
+<li>实时库存扣减；</li>
+<li>订单状态变更；</li>
+<li>分布式事务协调。</li>
+</ul>
+<p>如果锁失效或客户端执行超过租约时间，可能引发数据不一致、资金错误或状态混乱。</p>
+<hr>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>RedLock 的争议揭示了一个重要原则：</p>
+<ul>
+<li>任何基于时间租约的分布式锁都需要明确其系统假设与故障模型；</li>
+<li>在半同步系统中，RedLock 可被视为一种可行的工程方案；</li>
+<li>但在完全异步、无界暂停的系统语境下，它不能被视为强一致性锁。</li>
+</ul>
+<p>最终，应根据业务需求在“效率优先”和“正确性优先”之间做出权衡，并选择适合的分布式锁或协调机制。</p>
+<hr>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><p><strong>Antirez</strong>. <a target="_blank" rel="noopener" href="https://redis.io/docs/latest/develop/clients/patterns/distributed-locks/"><em>How to do distributed locking</em></a>. Redis Documentation.</p>
+</li>
+<li><p><strong>Antirez</strong>. <em>Is Redlock Safe?</em>. <a target="_blank" rel="noopener" href="http://antirez.com/news/101">http://antirez.com/news/101</a>.</p>
+</li>
+<li><p><strong>Martin Kleppmann</strong>. <em>How to do distributed locking</em>. <a target="_blank" rel="noopener" href="https://martin.kleppmann.com/papers/fencing-tokens.pdf">https://martin.kleppmann.com/papers/fencing-tokens.pdf</a>.</p>
+</li>
+<li><p><strong>Martin Kleppmann</strong>. <em>Designing Data-Intensive Applications</em>. O’Reilly Media, 2017. （第 8-9 章讨论分布式锁与共识）</p>
+</li>
+<li><p><strong>Salvatore Sanfilippo</strong>. <em>Redis</em>. <a target="_blank" rel="noopener" href="https://redis.io/">https://redis.io/</a>.</p>
+</li>
+<li><p><strong>Fischer, M. J., Lynch, N. A., &amp; Paterson, M. S.</strong> (1985). Impossibility of distributed consensus with one faulty process. <em>Journal of the ACM</em>, 32(2), 374–382. （FLP 不可能性定理）</p>
+</li>
+</ul>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="category-chain-item">分布式锁</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E4%BA%89%E8%AE%BA/" class="category-chain-item">争论</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="print-no-link">#分布式锁</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>分布式锁RedLock争论</div>
+      <div>https://yicizhang00.github.io/posts/分布式/分布式锁/分布式锁争论/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年6月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/URL%E8%BE%93%E5%85%A5%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" title="从 URL 输入到页面渲染的全过程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">从 URL 输入到页面渲染的全过程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B/" title="一致性模型">
+                        <span class="hidden-mobile">一致性模型</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

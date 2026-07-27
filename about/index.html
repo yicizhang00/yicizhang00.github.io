@@ -1,0 +1,704 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="张义辞 · Yici Zhang   System · Distributed Systems · AI Systems · Financial Backend    现任金融交易所技术中台后端工程师。   拒绝浮于框架表面的 CRUD，热衷于从系统底层原理、分布式共识与时序状态机出发，探寻高并发与高可用系统的本质解法。      👋 个人简介你好，我是张义辞（Yici Zhang）。 我是">
+<meta property="og:type" content="website">
+<meta property="og:title" content="关于">
+<meta property="og:url" content="https://yicizhang00.github.io/about/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="张义辞 · Yici Zhang   System · Distributed Systems · AI Systems · Financial Backend    现任金融交易所技术中台后端工程师。   拒绝浮于框架表面的 CRUD，热衷于从系统底层原理、分布式共识与时序状态机出发，探寻高并发与高可用系统的本质解法。      👋 个人简介你好，我是张义辞（Yici Zhang）。 我是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Distributed Systems">
+<meta property="article:tag" content="Raft">
+<meta property="article:tag" content="Paxos">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Backend">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>关于 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">关于</span>
+          
+        </div>
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div id="board"
+          >
+          
+            <div class="about-avatar">
+              <img src="/img/avatar.png" srcset="/img/loading.gif" lazyload class="img-fluid" alt="avatar">
+            </div>
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+<div class="text-center">
+  <div class="about-info">
+    <div class="about-name">THIS IS ME!</div>
+    <div class="about-intro">An Explorer of the World and Myself</div>
+    <div class="about-icons">
+      
+        
+        
+        
+        <a href=https://github.com/yicizhang00 class="
+           hint--bottom hint--rounded"
+           aria-label="GitHub"
+           target="_blank"
+        >
+          <i class="iconfont icon-github-fill" aria-hidden="true"></i>
+          
+        </a>
+      
+        
+        
+        
+        <a  class="qr-trigger
+           "
+           
+           target="_self"
+        >
+          <i class="iconfont icon-wechat-fill" aria-hidden="true"></i>
+          
+            <img class="qr-img" src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260609181009278.png" srcset="/img/loading.gif" lazyload alt="qrcode" />
+          
+        </a>
+      
+    </div>
+  </div>
+</div>
+
+<article class="about-content page-content mt-5">
+  <div class="markdown-body">
+    <div align="center">
+
+<h1 id="张义辞-·-Yici-Zhang"><a href="#张义辞-·-Yici-Zhang" class="headerlink" title="张义辞 · Yici Zhang"></a>张义辞 · Yici Zhang</h1><p align="center">
+  <strong>System · Distributed Systems · AI Systems · Financial Backend</strong>
+</p>
+
+<p align="center" style="color: #666; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+现任金融交易所技术中台后端工程师。<br>
+  拒绝浮于框架表面的 CRUD，热衷于从系统底层原理、分布式共识与时序状态机出发，探寻高并发与高可用系统的本质解法。
+</p>
+
+</div>
+
+<hr>
+<h1 id="👋-个人简介"><a href="#👋-个人简介" class="headerlink" title="👋 个人简介"></a>👋 个人简介</h1><p>你好，我是张义辞（Yici Zhang）。</p>
+<p>我是一个重度的<strong>底层技术与分布式系统爱好者</strong>。在工程实践中，我更倾向于：</p>
+<blockquote>
+<p><strong>从系统原理出发，理解技术设计背后的本质逻辑与数学对称美。</strong></p>
+</blockquote>
+<p>目前我的研究与工作焦点主要收敛于以下三个核心领域：</p>
+<ul>
+<li><strong>分布式共识与强一致性存储</strong>：深入推导 Paxos、Raft 及其成员变更理论（Joint Consensus），利用 TLA+ 进行形式化验证，关注 RocksDB、Redis 等 KV 引擎的底层存储优化（如 HotRing 拓扑、并发控制）。</li>
+<li><strong>金融级高并发后端架构</strong>：专注债券市场（Bond Market）、多级发行募集说明书（Tranche Offering Memorandum）结构化解析、固定收益投资 ROI 逻辑，以及证券&#x2F;债券发行上市的多级审核流与低延迟流水线改造。</li>
+<li><strong>AI 系统与工程落地</strong>：探索多模态视觉语言模型（VLM）与大语言模型（LLM）在医疗、金融垂域的微调（Finetune）与高性能工程化部署。</li>
+</ul>
+<hr>
+<h1 id="🔬-深度研究与技术栈"><a href="#🔬-深度研究与技术栈" class="headerlink" title="🔬 深度研究与技术栈"></a>🔬 深度研究与技术栈</h1><h3 id="💻-系统与分布式底层"><a href="#💻-系统与分布式底层" class="headerlink" title="💻 系统与分布式底层"></a>💻 系统与分布式底层</h3><ul>
+<li><strong>共识算法</strong>：熟练掌握 <strong>Raft &#x2F; Paxos &#x2F; Multi-Paxos</strong> 协议本质，理解单节点变更与联合共识（Joint Consensus）的边界条件与状态机实现。</li>
+<li><strong>存储引擎与并发</strong>：深入理解 MySQL InnoDB 索引机制、MVCC 及锁流转；精通 Redis 高性能架构与其作为分布式全局锁（如 Seata 模式）的底座设计；研究 <strong>RocksDB &#x2F; LSM-Tree</strong> 与高性能哈希（HotRing）的底层演进。</li>
+<li><strong>工程底蕴</strong>：精通 Java 核心（JVM 内存模型、JUC 线程池、类加载机制），对 Spring Cloud &#x2F; Nacos 插件扩展及底层网络通信（Netty&#x2F;RPC）有深入源码级理解。</li>
+</ul>
+<h3 id="🤖-AI-与深度学习"><a href="#🤖-AI-与深度学习" class="headerlink" title="🤖 AI 与深度学习"></a>🤖 AI 与深度学习</h3><ul>
+<li><strong>工程框架</strong>：PyTorch &#x2F; Python &#x2F; Hugging Face 生态。</li>
+<li><strong>模型技术</strong>：Transformer 架构演进、LLM 词表扩充、高效微调（LoRA &#x2F; QLoRA）、多模态视觉语言模型（VLM）交叉对齐。</li>
+</ul>
+<hr>
+<h1 id="💼-工作经历"><a href="#💼-工作经历" class="headerlink" title="💼 工作经历"></a>💼 工作经历</h1><h2 id="中证股转科技有限公司（北京证券交易所技术公司）"><a href="#中证股转科技有限公司（北京证券交易所技术公司）" class="headerlink" title="中证股转科技有限公司（北京证券交易所技术公司）"></a>中证股转科技有限公司（北京证券交易所技术公司）</h2><p><strong>后端开发工程师 ｜ 2025.07 - 至今</strong></p>
+<p>作为核心架构与开发人员，负责<strong>北交所&#x2F;全国股转公司</strong>发行上市与债券审核系统的架构升级。</p>
+<ul>
+<li><strong>债券业务中台建设</strong>：深入参与私募债券审核系统的核心逻辑重构，设计并优化多级申购、分期偿还（Tranche）发行文件的自动化解析流水线。</li>
+<li><strong>高并发流处理优化</strong>：解决复杂审核流中的分布式锁竞争与长事务问题，基于 Redis 维护全局分布式会话与状态机幂等控制。</li>
+</ul>
+<hr>
+<h2 id="上交所技术有限责任公司"><a href="#上交所技术有限责任公司" class="headerlink" title="上交所技术有限责任公司"></a>上交所技术有限责任公司</h2><p><strong>后端开发工程师 ｜ 2022.07 - 2023.07</strong></p>
+<p>参与<strong>上海证券交易所</strong>内部审核相关系统的分布式改造与数据合规迁移。</p>
+<ul>
+<li><strong>异构数据库迁移</strong>：主导核心业务数据从 MySQL 向 PostgreSQL 的平滑迁移，重构深度分页与复杂 SQL 算子，使历史审核数据查询性能提升 <strong>40%</strong>。</li>
+<li><strong>金融级 DevOps 落地</strong>：基于 Jenkins、Docker、Kubernetes 搭建多集群环境下的自动化部署与持续集成（CI&#x2F;CD）流水线，实现交易前置审核系统的单元化隔离与快速回滚。</li>
+</ul>
+<hr>
+<h1 id="🎓-教育经历"><a href="#🎓-教育经历" class="headerlink" title="🎓 教育经历"></a>🎓 教育经历</h1><h2 id="中国人民大学-｜-大数据技术与工程（硕士）"><a href="#中国人民大学-｜-大数据技术与工程（硕士）" class="headerlink" title="中国人民大学 ｜ 大数据技术与工程（硕士）"></a>中国人民大学 ｜ 大数据技术与工程（硕士）</h2><div class="note note-info">2023.09 - 2025.06</div>
+
+<ul>
+<li><strong>研究方向</strong>：医疗大模型（LLM Finetune）、多模态视觉语言模型（VLM）、眼科智能医疗 AI、高并发医患问答系统。</li>
+<li><strong>学术输出</strong>：探索大模型在特定垂直领域的语义对齐与微调加速，研究高性能 AI 系统的吞吐优化。</li>
+</ul>
+<h2 id="哈尔滨工业大学-｜-计算机科学与技术（本科）"><a href="#哈尔滨工业大学-｜-计算机科学与技术（本科）" class="headerlink" title="哈尔滨工业大学 ｜ 计算机科学与技术（本科）"></a>哈尔滨工业大学 ｜ 计算机科学与技术（本科）</h2><div class="note note-success">2018.09 - 2022.06</div>
+
+<ul>
+<li><strong>核心功底</strong>：计算机系统（CSAPP）、编译原理、操作系统设计与实现、硬件模拟（Verilog）。</li>
+<li><strong>技术沉淀</strong>：在校期间完成了完整的类 Unix 操作系统内核原型设计、定制编译器实现，建立起极其扎实的“软硬件协同”系统思维。</li>
+</ul>
+<hr>
+<h1 id="🧠-我的技术理念"><a href="#🧠-我的技术理念" class="headerlink" title="🧠 我的技术理念"></a>🧠 我的技术理念</h1><div class="note note-warning">
+
+<div align="center">始终保持好奇并频繁思考</div>
+
+</div>
+
+<hr>
+<h1 id="✍️-博客关于什么"><a href="#✍️-博客关于什么" class="headerlink" title="✍️ 博客关于什么"></a>✍️ 博客关于什么</h1><p>这个博客是我思维的延伸。我在这里记录：</p>
+<ul>
+<li><strong>分布式理论</strong>：从 Paxos&#x2F;Raft 论文到 TLA+ 形式化验证。</li>
+<li><strong>底层底层再底层</strong>：JVM 源码、LSM-Tree 锁机制、高性能网络模型的拆解。</li>
+<li><strong>AI 落地思考</strong>：模型微调的工程细节与 AI 系统架构。</li>
+<li><strong>金融技术思考</strong>：宏观信用市场、债券业务逻辑在计算机系统中的具象化实现。</li>
+</ul>
+<hr>
+<h1 id="❓️-为什么那么多TODO和空笔记"><a href="#❓️-为什么那么多TODO和空笔记" class="headerlink" title="❓️ 为什么那么多TODO和空笔记"></a>❓️ 为什么那么多TODO和空笔记</h1><div class="note note-warning">
+<div align="center">该笔记迁移自我的历史知识库，正在努力构建中（Working Hard）</div>
+
+</div>
+
+<hr>
+<h1 id="📫-保持联系"><a href="#📫-保持联系" class="headerlink" title="📫 保持联系"></a>📫 保持联系</h1><ul>
+<li><strong>Email</strong>：<a href="mailto:&#x31;&#57;&#x38;&#x34;&#53;&#49;&#x37;&#x38;&#48;&#x32;&#x36;&#64;&#x31;&#x36;&#51;&#46;&#x63;&#111;&#109;">19845178026@163.com</a></li>
+<li><strong>GitHub</strong>：<a target="_blank" rel="noopener" href="https://github.com/yicizhang00">@yicizhang00</a></li>
+</ul>
+<hr>
+
+  </div>
+
+  
+</article>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1017 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="GFS:Google File System背景与设计目标GFS（Google File System）是Google为解决海量数据存储问题而设计的分布式文件系统。与传统的分布式文件系统不同，GFS的设计目标紧密围绕Google的业务场景：  使用廉价机器：系统由大量普通PC服务器组成，硬件故障是常态而非异常 存储大文件：典型文件大小为数百MB到数GB，需要支持数TB的数据集 追加写为主：写操作几">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式系统实现">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="GFS:Google File System背景与设计目标GFS（Google File System）是Google为解决海量数据存储问题而设计的分布式文件系统。与传统的分布式文件系统不同，GFS的设计目标紧密围绕Google的业务场景：  使用廉价机器：系统由大量普通PC服务器组成，硬件故障是常态而非异常 存储大文件：典型文件大小为数百MB到数GB，需要支持数TB的数据集 追加写为主：写操作几">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="系统实现">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>分布式系统实现 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">分布式系统实现</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          35 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">分布式系统实现</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="GFS-Google-File-System"><a href="#GFS-Google-File-System" class="headerlink" title="GFS:Google File System"></a>GFS:Google File System</h1><h2 id="背景与设计目标"><a href="#背景与设计目标" class="headerlink" title="背景与设计目标"></a>背景与设计目标</h2><p>GFS（Google File System）是Google为解决海量数据存储问题而设计的分布式文件系统。与传统的分布式文件系统不同，GFS的设计目标紧密围绕Google的业务场景：</p>
+<ul>
+<li><strong>使用廉价机器</strong>：系统由大量普通PC服务器组成，硬件故障是常态而非异常</li>
+<li><strong>存储大文件</strong>：典型文件大小为数百MB到数GB，需要支持数TB的数据集</li>
+<li><strong>追加写为主</strong>：写操作几乎都是追加（append），很少有随机写；文件一旦写完，通常只顺序读</li>
+<li><strong>高吞吐优于低延迟</strong>：批处理场景对吞吐量要求高，对单次读写的延迟不敏感</li>
+<li><strong>应用协同设计</strong>：GFS提供宽松的一致性模型，将部分一致性责任交给应用层，换取更高的性能</li>
+</ul>
+<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p>GFS采用<strong>单Master + 多ChunkServer</strong>的架构：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">┌──────────────┐<br>│   GFS <span class="hljs-keyword">Master</span> <span class="hljs-title">│  (元数据管理、副本管理、GC</span>)<br>└──────┬───────┘<br>       │ heartbeat<br>┌──────┴──────────────────────────┐<br>│         ChunkServer集群          │<br>│  ┌─────┐  ┌─────┐  ┌─────┐     │<br>│  │Chunk│  │Chunk│  │Chunk│ ... │<br>│  │  <span class="hljs-number">1</span>  │  │  <span class="hljs-number">2</span>  │  │  <span class="hljs-number">3</span>  │     │<br>│  └─────┘  └─────┘  └─────┘     │<br>└─────────────────────────────────┘<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>文件被切分为固定大小的Chunk（64MB）</strong>，每个Chunk由Master分配一个全局唯一的64位Chunk Handle标识</li>
+<li><strong>每个Chunk默认3副本</strong>，分布在不同的ChunkServer上</li>
+<li><strong>Master只存元数据</strong>（文件命名空间、文件到Chunk的映射、Chunk位置信息），所有元数据常驻内存</li>
+<li><strong>Client与ChunkServer直接交互</strong>读写数据，Master只负责元数据查询，避免了Master成为数据I&#x2F;O瓶颈</li>
+</ul>
+<h2 id="Master的核心职责"><a href="#Master的核心职责" class="headerlink" title="Master的核心职责"></a>Master的核心职责</h2><h3 id="元数据管理"><a href="#元数据管理" class="headerlink" title="元数据管理"></a>元数据管理</h3><p>Master维护三类元数据，全部存放在内存中：</p>
+<ul>
+<li><strong>命名空间（Namespace）</strong>：文件和Chunk的命名空间，以及文件的访问控制信息</li>
+<li><strong>文件到Chunk的映射</strong>：每个文件由哪些Chunk组成</li>
+<li><strong>Chunk位置信息</strong>：每个Chunk的副本分布在哪些ChunkServer上（这部分信息通过Heartbeat动态获取，不持久化）</li>
+</ul>
+<p>操作日志（Operation Log）记录了所有元数据的变更，是元数据持久化的核心。Master会定期做Checkpoint（类似数据库的快照），减少故障恢复时需要重放的日志量。</p>
+<h3 id="副本管理"><a href="#副本管理" class="headerlink" title="副本管理"></a>副本管理</h3><ul>
+<li><strong>副本放置策略</strong>：跨机架放置副本，提高可用性和网络带宽利用率</li>
+<li><strong>Chunk创建</strong>：选择磁盘利用率低、最近创建Chunk少的ChunkServer</li>
+<li><strong>再副本化（Re-replication）</strong>：当副本数低于阈值时，自动补足副本</li>
+<li><strong>再均衡（Rebalancing）</strong>：定期检查磁盘使用情况，迁移Chunk以平衡负载</li>
+<li><strong>垃圾回收</strong>：采用延迟删除策略，删除文件后不立即回收空间，而是定期批量清理</li>
+</ul>
+<h3 id="租约机制（Lease）"><a href="#租约机制（Lease）" class="headerlink" title="租约机制（Lease）"></a>租约机制（Lease）</h3><p>对于每个Chunk的写操作，Master会将<strong>租约（Lease）<strong>授予其中一个副本，该副本成为</strong>Primary</strong>。租约初始为60秒，Primary可以通过心跳续租。</p>
+<ul>
+<li><strong>Primary负责确定写操作的顺序</strong>，其他副本（Secondary）按照Primary指定的顺序执行</li>
+<li>如果Master与Primary失联，租约过期后Master可以将租约授予另一个副本</li>
+<li>租约机制保证了在Master不直接参与数据写入的前提下，所有副本的写入顺序一致</li>
+</ul>
+<h3 id="命名空间管理与锁"><a href="#命名空间管理与锁" class="headerlink" title="命名空间管理与锁"></a>命名空间管理与锁</h3><p>Master使用读写锁管理命名空间，<strong>路径上的每个节点都有对应的锁</strong>：</p>
+<ul>
+<li>对 <code>/home/user/foo</code> 的写操作，需要获取 <code>/home</code>、<code>/home/user</code> 的读锁和 <code>/home/user/foo</code> 的写锁</li>
+<li>这种锁机制保证了同一目录下的并发创建&#x2F;删除操作不会冲突，同时允许同一目录下的不同文件被并发修改</li>
+</ul>
+<h2 id="读写流程"><a href="#读写流程" class="headerlink" title="读写流程"></a>读写流程</h2><h3 id="读流程"><a href="#读流程" class="headerlink" title="读流程"></a>读流程</h3><ol>
+<li>Client根据文件名和字节偏移，计算出Chunk Index</li>
+<li>Client向Master发送请求（文件名 + Chunk Index）</li>
+<li>Master返回Chunk Handle和副本位置列表</li>
+<li>Client缓存该信息，直接向最近的ChunkServer请求数据</li>
+<li>ChunkServer直接返回数据</li>
+</ol>
+<p>对一个大文件的顺序读，Client只需与Master交互一次即可获取所有Chunk的位置信息。</p>
+<h3 id="写流程（写入-记录追加）"><a href="#写流程（写入-记录追加）" class="headerlink" title="写流程（写入 &#x2F; 记录追加）"></a>写流程（写入 &#x2F; 记录追加）</h3><p>控制流与数据流分离是GFS写操作的关键设计：</p>
+<ol>
+<li>Client向Master询问Chunk的租约持有者（Primary）和其他副本位置</li>
+<li>Master返回Primary和Secondary的信息，Client缓存</li>
+<li><strong>数据流</strong>：Client将数据推送到所有副本，数据沿着一个精心选择的ChunkServer链<strong>流水线推送</strong>（每个ChunkServer收到数据后立即转发给下一个）</li>
+<li><strong>控制流</strong>：数据沿链推送完成后，Client向Primary发送写请求</li>
+<li>Primary确定写入偏移量，并要求所有Secondary按相同顺序执行</li>
+<li>所有Secondary完成后，Primary回复Client</li>
+<li>如果有副本失败，Client会重试</li>
+</ol>
+<p>流水线推送的核心价值：<strong>将网络带宽最大化</strong>。一台机器将数据转发给离它最近的下一台机器，充分利用每台机器的出站带宽，而不是让Client单独发给所有机器。</p>
+<h3 id="原子记录追加（Atomic-Record-Append）"><a href="#原子记录追加（Atomic-Record-Append）" class="headerlink" title="原子记录追加（Atomic Record Append）"></a>原子记录追加（Atomic Record Append）</h3><p>这是GFS最有特色的操作之一，专为Google的MapReduce等场景设计：</p>
+<ul>
+<li>Client只需指定要追加的数据，<strong>GFS选择偏移量</strong>，保证至少一次原子追加到文件中</li>
+<li>如果追加导致Chunk超过64MB，会填充到边界，然后下一个Chunk继续</li>
+<li>失败的追加会重试，因此<strong>同一数据可能出现多次</strong>，应用需要自行处理重复（例如写入checksum）</li>
+<li>Google的MapReduce使用Atomic Append来实现生产者-消费者之间的数据传递，非常高效</li>
+</ul>
+<h2 id="一致性模型"><a href="#一致性模型" class="headerlink" title="一致性模型"></a>一致性模型</h2><p>GFS提供<strong>宽松的一致性模型</strong>，核心定义如下：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>无故障</th>
+<th>有故障（部分副本失败）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Write（非追加写）</td>
+<td><strong>Consistent</strong>（所有副本看到相同数据）</td>
+<td><strong>Inconsistent</strong></td>
+</tr>
+<tr>
+<td>Record Append</td>
+<td><strong>Defined</strong>（至少原子追加一次，数据完整）</td>
+<td><strong>Inconsistent（部分副本可能有多段重复）</strong></td>
+</tr>
+</tbody></table>
+<p>关键点：</p>
+<ul>
+<li><strong>Consistent</strong>：所有Client看到相同的数据，但数据可能是旧数据或部分写入的数据</li>
+<li><strong>Defined</strong>：Consistent + 所有Client看到的是完整写入的数据</li>
+<li><strong>GFS不保证所有副本完全一致</strong>——它只保证在不发生故障时，经过成功的写操作后，所有副本一致</li>
+<li>应用通过写入checksum、记录边界等方式自己处理一致性问题</li>
+</ul>
+<h2 id="容错设计"><a href="#容错设计" class="headerlink" title="容错设计"></a>容错设计</h2><h3 id="Master的容错"><a href="#Master的容错" class="headerlink" title="Master的容错"></a>Master的容错</h3><ul>
+<li><strong>操作日志</strong>：所有元数据变更先写日志，再修改内存状态。日志会同步到远端</li>
+<li><strong>Checkpoint</strong>：定期将内存中的元数据做快照，恢复时先加载快照，再重放后续日志</li>
+<li><strong>Shadow Master</strong>：提供只读的备用Master，在主Master故障时提供只读服务（不是自动切换，而是人工介入）</li>
+</ul>
+<h3 id="ChunkServer的容错"><a href="#ChunkServer的容错" class="headerlink" title="ChunkServer的容错"></a>ChunkServer的容错</h3><ul>
+<li><strong>多副本</strong>：默认3副本，跨机架分布</li>
+<li><strong>快速恢复</strong>：ChunkServer重启后自动加入集群，Master通过心跳感知</li>
+<li><strong>Checksum校验</strong>：每个Chunk的64KB块都有32位checksum，读数据时校验，防止磁盘数据静默损坏</li>
+</ul>
+<h2 id="实际表现"><a href="#实际表现" class="headerlink" title="实际表现"></a>实际表现</h2><p>GFS在Google内部集群中运行了多年，支撑了MapReduce、BigTable等关键系统。在实际使用中：</p>
+<ul>
+<li><strong>读吞吐</strong>：多个Client并发读时，集群读吞吐可以接近网络总带宽</li>
+<li><strong>写吞吐</strong>：多个Client并发Append时，写吞吐可以达到网络带宽的60%-70%</li>
+<li><strong>Master负载</strong>：Master的内存和CPU负载都不高，因为数据不走Master，元数据查询频率相对较低</li>
+<li><strong>故障恢复</strong>：ChunkServer故障后，副本恢复通常在几分钟内完成</li>
+</ul>
+<h2 id="设计取舍总结"><a href="#设计取舍总结" class="headerlink" title="设计取舍总结"></a>设计取舍总结</h2><table>
+<thead>
+<tr>
+<th>取舍</th>
+<th>选择</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一致性 vs 性能</td>
+<td>宽松一致性</td>
+<td>Google的应用场景（MapReduce）可以接受并处理不一致</td>
+</tr>
+<tr>
+<td>单Master vs 分布式元数据</td>
+<td>单Master</td>
+<td>简化设计，元数据量小可以全部放内存</td>
+</tr>
+<tr>
+<td>大Chunk(64MB) vs 小Chunk</td>
+<td>大Chunk</td>
+<td>减少Master元数据量，减少网络往返次数</td>
+</tr>
+<tr>
+<td>中心化 vs 去中心化</td>
+<td>中心化Master+去中心化ChunkServer</td>
+<td>Master管元数据，数据流去中心化，兼顾简洁和性能</td>
+</tr>
+</tbody></table>
+<p>GFS最大的贡献不在于技术上的绝对领先，而在于它证明了<strong>针对特定业务场景定制分布式系统</strong>的巨大价值——放弃通用的POSIX语义，换来了极高的吞吐能力和简洁的架构。</p>
+<h1 id="BigTable：A-Distributed-Storage-System-for-Structured-Data"><a href="#BigTable：A-Distributed-Storage-System-for-Structured-Data" class="headerlink" title="BigTable：A Distributed Storage System for Structured Data"></a>BigTable：A Distributed Storage System for Structured Data</h1><h1 id="The-Chubby-Lock"><a href="#The-Chubby-Lock" class="headerlink" title="The Chubby Lock"></a>The Chubby Lock</h1><h1 id="Find-a-Needle-in-Haystack"><a href="#Find-a-Needle-in-Haystack" class="headerlink" title="Find a Needle in Haystack"></a>Find a Needle in Haystack</h1><h1 id="WAS：Windows-Azure-Storage"><a href="#WAS：Windows-Azure-Storage" class="headerlink" title="WAS：Windows Azure Storage"></a>WAS：Windows Azure Storage</h1><h1 id="Resilient-Distributed-Datasets"><a href="#Resilient-Distributed-Datasets" class="headerlink" title="Resilient Distributed Datasets"></a>Resilient Distributed Datasets</h1><p>这篇是Spark</p>
+<h1 id="Scaling-Distributed-Machine-Learning-with-the-parameter-Server"><a href="#Scaling-Distributed-Machine-Learning-with-the-parameter-Server" class="headerlink" title="Scaling Distributed Machine Learning with the parameter Server"></a>Scaling Distributed Machine Learning with the parameter Server</h1><p>现在机器学习都上AllReduce</p>
+<h1 id="Dermel"><a href="#Dermel" class="headerlink" title="Dermel"></a>Dermel</h1><h1 id="Pregel"><a href="#Pregel" class="headerlink" title="Pregel"></a>Pregel</h1><h1 id="Spanner"><a href="#Spanner" class="headerlink" title="Spanner"></a>Spanner</h1><p>分布式存储数据库，结合了GPS+原子钟，将TrueTime时间误差控制在1-7ms</p>
+<h1 id="Dynamo"><a href="#Dynamo" class="headerlink" title="Dynamo"></a>Dynamo</h1><p>一致性哈希算法，提升类似购物车的KV store性能</p>
+<h1 id="S4"><a href="#S4" class="headerlink" title="S4"></a>S4</h1><p>类似于Strom和Flink的流计算</p>
+<h1 id="Storm-Twitter"><a href="#Storm-Twitter" class="headerlink" title="Storm:@Twitter"></a>Storm:@Twitter</h1><h1 id="Large-Scale-Cluster-Management-at-Google-with-Borg"><a href="#Large-Scale-Cluster-Management-at-Google-with-Borg" class="headerlink" title="Large-Scale Cluster Management at Google with Borg"></a>Large-Scale Cluster Management at Google with Borg</h1><p>k8s的前身</p>
+<h1 id="F1-The-Fault-Tolerant-Distributed-RDBMS-Supporting-Google’s-ad-Business"><a href="#F1-The-Fault-Tolerant-Distributed-RDBMS-Supporting-Google’s-ad-Business" class="headerlink" title="F1- The Fault-Tolerant Distributed RDBMS Supporting Google’s ad Business"></a>F1- The Fault-Tolerant Distributed RDBMS Supporting Google’s ad Business</h1><p>提出了New-SQl</p>
+<h1 id="Cassandra"><a href="#Cassandra" class="headerlink" title="Cassandra"></a>Cassandra</h1><p>去中心化高可用Nosql数据库</p>
+<h1 id="MegaSotre"><a href="#MegaSotre" class="headerlink" title="MegaSotre"></a>MegaSotre</h1><p>跨数据中心分片方案</p>
+<h1 id="Dapper"><a href="#Dapper" class="headerlink" title="Dapper"></a>Dapper</h1><p>SkyWalking分布式追踪框架，zipkin等追踪框架</p>
+<h1 id="Kafka"><a href="#Kafka" class="headerlink" title="Kafka"></a>Kafka</h1><h1 id="Amazon-Azure-Design-considerations-for-high-Throughput-Cloud-Native-Relational-Database"><a href="#Amazon-Azure-Design-considerations-for-high-Throughput-Cloud-Native-Relational-Database" class="headerlink" title="Amazon Azure :Design considerations for high Throughput Cloud-Native Relational Database"></a>Amazon Azure :Design considerations for high Throughput Cloud-Native Relational Database</h1><p>云环境下数据库操作范式</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/" class="category-chain-item">系统实现</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/" class="print-no-link">#系统实现</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>分布式系统实现</div>
+      <div>https://yicizhang00.github.io/posts/分布式/系统实现/分布式系统实现/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/" title="分布式一致性算法">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">分布式一致性算法</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/" title="系统调用">
+                        <span class="hidden-mobile">系统调用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

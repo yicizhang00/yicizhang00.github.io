@@ -1,0 +1,1281 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="JDK8 接口默认方法（非抽象方法） Lambda表达式 StreamAPI 默认方法 Optional类   JDK9 模块化系统（Project Jigsaw） 主要变化 关键语法 启动模块化应用   G1 成为默认垃圾回收器（GC） 主要特性 代码体验 手动指定使用其它 GC   JShell（交互式 REPL 工具） 其他新特性 私有接口方法 集合工厂方法 try-with-resou">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDK各个版本特性总结">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E6%96%B0%E7%89%B9%E6%80%A7/JDK%E5%90%84%E7%89%88%E6%9C%AC%E7%89%B9%E6%80%A7/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="JDK8 接口默认方法（非抽象方法） Lambda表达式 StreamAPI 默认方法 Optional类   JDK9 模块化系统（Project Jigsaw） 主要变化 关键语法 启动模块化应用   G1 成为默认垃圾回收器（GC） 主要特性 代码体验 手动指定使用其它 GC   JShell（交互式 REPL 工具） 其他新特性 私有接口方法 集合工厂方法 try-with-resou">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Distributed Systems">
+<meta property="article:tag" content="Raft">
+<meta property="article:tag" content="Paxos">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Backend">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>JDK各个版本特性总结 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">JDK各个版本特性总结</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          17k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          141 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">JDK各个版本特性总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <!-- TOC -->
+<ul>
+<li><a href="#jdk8">JDK8</a><ul>
+<li><a href="#%E6%8E%A5%E5%8F%A3%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E9%9D%9E%E6%8A%BD%E8%B1%A1%E6%96%B9%E6%B3%95">接口默认方法（非抽象方法）</a></li>
+<li><a href="#lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F">Lambda表达式</a></li>
+<li><a href="#streamapi">StreamAPI</a></li>
+<li><a href="#%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95">默认方法</a></li>
+<li><a href="#optional%E7%B1%BB">Optional类</a></li>
+</ul>
+</li>
+<li><a href="#jdk9">JDK9</a><ul>
+<li><a href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E7%B3%BB%E7%BB%9Fproject-jigsaw">模块化系统（Project Jigsaw）</a><ul>
+<li><a href="#%E4%B8%BB%E8%A6%81%E5%8F%98%E5%8C%96">主要变化</a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E8%AF%AD%E6%B3%95">关键语法</a></li>
+<li><a href="#%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%9D%97%E5%8C%96%E5%BA%94%E7%94%A8">启动模块化应用</a></li>
+</ul>
+</li>
+<li><a href="#g1-%E6%88%90%E4%B8%BA%E9%BB%98%E8%AE%A4%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8gc">G1 成为默认垃圾回收器（GC）</a><ul>
+<li><a href="#%E4%B8%BB%E8%A6%81%E7%89%B9%E6%80%A7">主要特性</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E4%BD%93%E9%AA%8C">代码体验</a></li>
+<li><a href="#%E6%89%8B%E5%8A%A8%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8%E5%85%B6%E5%AE%83-gc">手动指定使用其它 GC</a></li>
+</ul>
+</li>
+<li><a href="#jshell%E4%BA%A4%E4%BA%92%E5%BC%8F-repl-%E5%B7%A5%E5%85%B7">JShell（交互式 REPL 工具）</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96%E6%96%B0%E7%89%B9%E6%80%A7">其他新特性</a><ul>
+<li><a href="#%E7%A7%81%E6%9C%89%E6%8E%A5%E5%8F%A3%E6%96%B9%E6%B3%95">私有接口方法</a></li>
+<li><a href="#%E9%9B%86%E5%90%88%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95">集合工厂方法</a></li>
+<li><a href="#try-with-resources-%E6%94%B9%E8%BF%9B">try-with-resources 改进</a></li>
+<li><a href="#stream-api-%E5%A2%9E%E5%BC%BA">Stream API 增强</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#jdk11">JDK11</a><ul>
+<li><a href="#%E6%96%B0%E7%89%B9%E6%80%A7%E4%BB%8B%E7%BB%8D">新特性介绍</a><ul>
+<li><a href="#1-%E6%96%B0%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%96%B9%E6%B3%95">1. 新的字符串方法</a></li>
+<li><a href="#2-%E6%9C%AC%E5%9C%B0%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD%E6%94%AF%E6%8C%81-lambda-%E5%8F%82%E6%95%B0%E5%8D%87%E7%BA%A7">2. 本地变量类型推断支持 lambda 参数（升级）</a></li>
+<li><a href="#3-%E6%96%87%E4%BB%B6-io-%E5%A2%9E%E5%BC%BA">3. 文件 I&#x2F;O 增强</a><ul>
+<li><a href="#a-filesreadstring-%E5%92%8C-fileswritestring">a) <code>Files.readString</code> 和 <code>Files.writeString</code></a></li>
+<li><a href="#b-inputstreamtransfertooutputstream">b) <code>InputStream.transferTo(OutputStream)</code></a></li>
+</ul>
+</li>
+<li><a href="#4-%E9%9B%86%E5%90%88%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E5%A2%9E%E5%BC%BA">4. 集合工厂方法增强</a></li>
+<li><a href="#5-%E6%96%B0%E7%9A%84-http-client-api-%E6%A0%87%E5%87%86">5. 新的 Http Client API 标准</a></li>
+<li><a href="#6-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E5%8F%98%E5%8C%96">6. 垃圾回收器变化</a></li>
+<li><a href="#7-%E6%96%B0%E7%9A%84%E7%B1%BB%E5%BA%93%E5%92%8Capi%E7%A7%BB%E9%99%A4">7. 新的类库和API移除</a></li>
+<li><a href="#8-%E5%85%B6%E4%BB%96">8. 其他</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B1%80%E9%83%A8%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%ADvar">局部类型推断Var</a><ul>
+<li><a href="#1%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AE%9A%E4%B9%89%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F">1.初始化定义局部变量</a></li>
+<li><a href="#2%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF">2.增强for循环</a></li>
+<li><a href="#3%E4%BC%A0%E7%BB%9Ffor%E5%BE%AA%E7%8E%AF%E7%9A%84index%E5%AE%9A%E4%B9%89">3.传统for循环的index定义</a></li>
+<li><a href="#4try%E5%8C%85%E8%A3%B9%E7%9A%84%E5%8F%98%E9%87%8F">4.try包裹的变量</a></li>
+<li><a href="#5lambda%E4%B8%AD%E9%9A%90%E5%90%AB%E7%9A%84var%E6%8E%A8%E6%96%AD">5.lambda中隐含的var推断</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AD%97%E7%AC%A6%E4%B8%B2api%E5%A2%9E%E5%BC%BA">字符串API增强</a></li>
+<li><a href="#%E6%A0%87%E5%87%86%E5%8C%96httpclient">标准化HttpClient</a></li>
+<li><a href="#%E6%A8%A1%E5%9D%97%E5%8C%96">模块化</a></li>
+</ul>
+</li>
+<li><a href="#jdk14">JDK14</a><ul>
+<li><a href="#switch%E8%A1%A8%E8%BE%BE%E5%BC%8F">Switch表达式</a></li>
+</ul>
+</li>
+<li><a href="#jdk15">JDK15</a><ul>
+<li><a href="#%E6%96%87%E6%9C%AC%E5%9D%97">文本块</a></li>
+</ul>
+</li>
+<li><a href="#jdk16">JDK16</a><ul>
+<li><a href="#record%E7%B1%BB">record类</a><ul>
+<li><a href="#%E5%AE%9A%E4%B9%89%E6%A0%87%E5%87%86%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0">定义标准构造函数</a></li>
+<li><a href="#%E9%9A%90%E5%BC%8F%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0">隐式构造函数参数</a></li>
+<li><a href="#%E5%AE%9A%E4%B9%89%E9%9D%9E%E6%A0%87%E5%87%86%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0">定义非标准构造函数</a></li>
+<li><a href="#%E6%98%BE%E5%BC%8F%E5%A3%B0%E6%98%8E%E5%85%AC%E5%85%B1%E8%AE%BF%E9%97%AE%E5%99%A8">显式声明公共访问器</a></li>
+<li><a href="#record%E7%89%B9%E6%80%A7">record特性</a></li>
+</ul>
+</li>
+<li><a href="#instance-of-%E5%8C%B9%E9%85%8D">Instance of 匹配</a></li>
+</ul>
+</li>
+<li><a href="#jdk17">JDK17</a><ul>
+<li><a href="#spring%E5%92%8Cspringboot">Spring和SpringBoot</a></li>
+<li><a href="#%E5%A2%9E%E5%BC%BA%E7%9A%84%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E5%99%A8">增强的伪随机数生成器</a><ul>
+<li><a href="#%E6%96%B0api%E4%B8%BE%E4%BE%8B">新API举例：</a></li>
+<li><a href="#%E5%B7%B2%E5%86%85%E7%BD%AE%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8C%85%E6%8B%AC">已内置的实现包括：</a></li>
+</ul>
+</li>
+<li><a href="#sealed-class-%E5%AF%86%E5%B0%81%E7%B1%BB">Sealed Class 密封类</a></li>
+</ul>
+</li>
+<li><a href="#jdk21">JDK21</a><ul>
+<li><a href="#record-patterns">Record Patterns</a></li>
+<li><a href="#switch%E7%B1%BB%E5%9E%8B%E5%8C%B9%E9%85%8D">Switch类型匹配</a><ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95">基本语法：</a></li>
+<li><a href="#%E7%BB%93%E5%90%88%E5%AE%88%E5%8D%ABwhen%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%A2%9E%E5%BC%BA">结合守卫（when）进一步增强：</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B">使用示例：</a></li>
+</ul>
+</li>
+<li><a href="#%E8%99%9A%E6%8B%9F%E7%BA%BF%E7%A8%8B">虚拟线程</a><ul>
+<li><a href="#%E4%B8%BB%E8%A6%81%E7%89%B9%E6%80%A7-1">主要特性</a></li>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95%E7%A4%BA%E4%BE%8B">基本用法示例</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-executors-%E6%96%B0-api-%E6%89%B9%E9%87%8F%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1">使用 Executors 新 API 批量提交任务</a></li>
+<li><a href="#%E4%B8%BB%E8%A6%81%E6%84%8F%E4%B9%89">主要意义</a></li>
+</ul>
+</li>
+<li><a href="#%E5%88%86%E4%BB%A3zgc">分代ZGC</a><ul>
+<li><a href="#jdk21-%E5%BC%95%E5%85%A5%E7%9A%84%E5%88%86%E4%BB%A3zgcgenerational-zgc">JDK21 引入的分代ZGC（Generational ZGC）</a><ul>
+<li><a href="#%E4%B8%BB%E8%A6%81%E7%89%B9%E6%80%A7-2">主要特性</a></li>
+<li><a href="#%E5%90%AF%E7%94%A8%E5%88%86%E4%BB%A3zgc">启用分代ZGC</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E4%BD%93%E9%AA%8C%E6%97%A0%E9%9C%80%E4%BB%A3%E7%A0%81%E6%94%B9%E5%8A%A8%E5%8F%82%E6%95%B0%E5%8F%AF%E7%94%A8%E5%8D%B3%E7%94%9F%E6%95%88">代码体验（无需代码改动，参数可用即生效）</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#jdk22">JDK22</a><ul>
+<li><a href="#%E6%9C%AA%E5%91%BD%E5%90%8D%E5%8F%98%E9%87%8F">未命名变量</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h1 id="JDK8"><a href="#JDK8" class="headerlink" title="JDK8"></a>JDK8</h1><h2 id="接口默认方法（非抽象方法）"><a href="#接口默认方法（非抽象方法）" class="headerlink" title="接口默认方法（非抽象方法）"></a>接口默认方法（非抽象方法）</h2><p>JDK8允许在接口中定义默认方法（使用default关键字），这样接口可以包含实现代码，但实现类可以选择是否覆盖它。</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MyInterface</span> &#123;<br>    <span class="hljs-keyword">void</span> <span class="hljs-title function_">abstractMethod</span><span class="hljs-params">()</span>;<br><br>    <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">defaultMethod</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;这是接口的默认方法实现&quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">MyInterface</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">abstractMethod</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;实现抽象方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">// 可以选择覆盖默认方法，也可以不覆盖，直接使用接口提供的实现</span><br>    <span class="hljs-comment">// @Override</span><br>    <span class="hljs-comment">// public void defaultMethod() &#123;</span><br>    <span class="hljs-comment">//     System.out.println(&quot;自定义实现&quot;);</span><br>    <span class="hljs-comment">// &#125;</span><br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Demo</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">MyClass</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyClass</span>();<br>        obj.abstractMethod(); <span class="hljs-comment">// 输出: 实现抽象方法</span><br>        obj.defaultMethod();  <span class="hljs-comment">// 输出: 这是接口的默认方法实现</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><strong>意义：</strong></p>
+<ul>
+<li>接口添加新方法时不会破坏已有实现类（向后兼容）</li>
+<li>便于接口功能进化</li>
+</ul>
+<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><h2 id="StreamAPI"><a href="#StreamAPI" class="headerlink" title="StreamAPI"></a>StreamAPI</h2><h2 id="默认方法"><a href="#默认方法" class="headerlink" title="默认方法"></a>默认方法</h2><h2 id="Optional类"><a href="#Optional类" class="headerlink" title="Optional类"></a>Optional类</h2><h1 id="JDK9"><a href="#JDK9" class="headerlink" title="JDK9"></a>JDK9</h1><h2 id="模块化系统（Project-Jigsaw）"><a href="#模块化系统（Project-Jigsaw）" class="headerlink" title="模块化系统（Project Jigsaw）"></a>模块化系统（Project Jigsaw）</h2><p>JDK9 最大的变化之一是引入了模块系统——Project Jigsaw，这意味着 Java 平台本身，以及开发者自定义的代码，都可以被组织到模块中。</p>
+<h3 id="主要变化"><a href="#主要变化" class="headerlink" title="主要变化"></a>主要变化</h3><ul>
+<li>原有的大型 JDK 被拆分为 90 多个模块</li>
+<li>开发者可以根据应用需求只引入需要的模块，减小体积</li>
+<li>模块化提高了安全性，易于维护</li>
+</ul>
+<h3 id="关键语法"><a href="#关键语法" class="headerlink" title="关键语法"></a>关键语法</h3><ul>
+<li>新增 <code>module-info.java</code> 文件来定义模块</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// module-info.java</span><br><span class="hljs-keyword">module</span> com.example.myapp &#123;<br>    <span class="hljs-keyword">requires</span> java.sql;<br>    <span class="hljs-keyword">exports</span> com.example.myapp.api;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li><code>requires</code> 指定依赖的模块</li>
+<li><code>exports</code> 导出本模块中的包</li>
+</ul>
+<h3 id="启动模块化应用"><a href="#启动模块化应用" class="headerlink" title="启动模块化应用"></a>启动模块化应用</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">java --module-path mods -m com.example.myapp/com.example.myapp.Main<br></code></pre></td></tr></table></figure>
+<h2 id="G1-成为默认垃圾回收器（GC）"><a href="#G1-成为默认垃圾回收器（GC）" class="headerlink" title="G1 成为默认垃圾回收器（GC）"></a>G1 成为默认垃圾回收器（GC）</h2><p>JDK9 开始，G1（Garbage-First）垃圾回收器正式取代 Parallel GC，成为 Java 虚拟机的默认垃圾回收器。G1 优先满足低延迟、高吞吐的服务端场景，适合大内存、多核处理器的现代应用。</p>
+<h3 id="主要特性"><a href="#主要特性" class="headerlink" title="主要特性"></a>主要特性</h3><ul>
+<li>支持多核并发、低暂停 GC</li>
+<li>可以通过 <code>-XX:MaxGCPauseMillis</code> 控制最大暂停时间</li>
+<li>按“分区”内存区域，灵活高效地并行&#x2F;并发收集</li>
+<li>不再需要手动指定 <code>-XX:+UseG1GC</code>，移除后默认采用 G1</li>
+</ul>
+<h3 id="代码体验"><a href="#代码体验" class="headerlink" title="代码体验"></a>代码体验</h3><p>一般不需要更改代码，仅 VM 参数会切换。如需观察，启动参数可加：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">-<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+PrintGCDetails</span> -<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+PrintGCDateStamps</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="手动指定使用其它-GC"><a href="#手动指定使用其它-GC" class="headerlink" title="手动指定使用其它 GC"></a>手动指定使用其它 GC</h3><p>如需切换回旧的 Parallel GC，可加参数：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">-<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+UseParallelGC</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>小结</strong>：<br>G1 适用于绝大多数服务端应用，并且易于配置、更加智能，自动平衡吞吐与延迟。</p>
+<p>更多参考：  </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm">Java 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/248">JEP 248: Make G1 the Default Garbage Collector</a></li>
+</ul>
+<h2 id="JShell（交互式-REPL-工具）"><a href="#JShell（交互式-REPL-工具）" class="headerlink" title="JShell（交互式 REPL 工具）"></a>JShell（交互式 REPL 工具）</h2><p>JDK9 新增了 Java 的 REPL 工具——JShell，可以直接输入 Java 代码片段并立刻执行，便于学习、测试和调试。</p>
+<p><strong>常用命令：</strong></p>
+<ul>
+<li>输入表达式&#x2F;语句后直接回车即可查看运行结果。</li>
+<li><code>/exit</code> 退出 JShell</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">jshell<br>jshell&gt; int x = 10;<br>jshell&gt; System.out.println(x * 2);<br>20<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="其他新特性"><a href="#其他新特性" class="headerlink" title="其他新特性"></a>其他新特性</h2><h3 id="私有接口方法"><a href="#私有接口方法" class="headerlink" title="私有接口方法"></a>私有接口方法</h3><p>接口中允许添加 private 方法，用于接口内部的代码复用。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MyInterface</span> &#123;<br>    <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">foo</span><span class="hljs-params">()</span> &#123;<br>        bar();<br>    &#125;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">bar</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;私有接口方法&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="集合工厂方法"><a href="#集合工厂方法" class="headerlink" title="集合工厂方法"></a>集合工厂方法</h3><p>可以用更简洁的语法创建不可变集合：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;String&gt; list = List.of(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>);<br>Set&lt;Integer&gt; set = Set.of(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>);<br>Map&lt;String, Integer&gt; map = Map.of(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-number">1</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-number">2</span>);<br></code></pre></td></tr></table></figure>
+
+<h3 id="try-with-resources-改进"><a href="#try-with-resources-改进" class="headerlink" title="try-with-resources 改进"></a>try-with-resources 改进</h3><p>资源变量可以在 try 外部声明并在 try 内部使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Resource</span> <span class="hljs-variable">resource</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Resource</span>();<br><span class="hljs-keyword">try</span> (resource) &#123;<br>    <span class="hljs-comment">// 使用 resource</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="Stream-API-增强"><a href="#Stream-API-增强" class="headerlink" title="Stream API 增强"></a>Stream API 增强</h3><ul>
+<li>新增 <code>takeWhile</code>, <code>dropWhile</code>, <code>ofNullable</code> 方法提升流处理能力</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;Integer&gt; list = List.of(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>);<br>list.stream().takeWhile(n -&gt; n &gt; <span class="hljs-number">0</span>).forEach(System.out::println); <span class="hljs-comment">// 输出: 1 2 3 4 5</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="JDK11"><a href="#JDK11" class="headerlink" title="JDK11"></a>JDK11</h1><h3 id="新特性介绍"><a href="#新特性介绍" class="headerlink" title="新特性介绍"></a>新特性介绍</h3><h4 id="1-新的字符串方法"><a href="#1-新的字符串方法" class="headerlink" title="1. 新的字符串方法"></a>1. 新的字符串方法</h4><p>JDK11 为 <code>String</code> 类增加了大量实用方法：</p>
+<ul>
+<li><code>isBlank()</code>：判断字符串是否为空白。</li>
+<li><code>lines()</code>：按行拆分字符串为流。</li>
+<li><code>strip()</code>, <code>stripLeading()</code>, <code>stripTrailing()</code>：去除空白符（更全面支持 Unicode 空白，不同于 <code>trim()</code>）。</li>
+<li><code>repeat(int count)</code>：重复字符串。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">str</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;  Hello Java  \nwelcome  &quot;</span>;<br>System.out.println(str.isBlank()); <span class="hljs-comment">// false</span><br>str.lines().forEach(System.out::println); <span class="hljs-comment">// 按行输出</span><br>System.out.println(str.strip()); <span class="hljs-comment">// 去除所有前后空白</span><br>System.out.println(<span class="hljs-string">&quot;abc&quot;</span>.repeat(<span class="hljs-number">3</span>)); <span class="hljs-comment">// abcabcabc</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="2-本地变量类型推断支持-lambda-参数（升级）"><a href="#2-本地变量类型推断支持-lambda-参数（升级）" class="headerlink" title="2. 本地变量类型推断支持 lambda 参数（升级）"></a>2. 本地变量类型推断支持 lambda 参数（升级）</h4><p>允许在 lambda 表达式参数类型前使用 <code>var</code> 关键字，可以增强代码一致性和可读性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">BiFunction&lt;Integer, Integer, Integer&gt; add = (<span class="hljs-keyword">var</span> a, <span class="hljs-keyword">var</span> b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-文件-I-O-增强"><a href="#3-文件-I-O-增强" class="headerlink" title="3. 文件 I&#x2F;O 增强"></a>3. 文件 I&#x2F;O 增强</h4><h5 id="a-Files-readString-和-Files-writeString"><a href="#a-Files-readString-和-Files-writeString" class="headerlink" title="a) Files.readString 和 Files.writeString"></a>a) <code>Files.readString</code> 和 <code>Files.writeString</code></h5><p>简化字符串与文件之间的读写操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Path</span> <span class="hljs-variable">path</span> <span class="hljs-operator">=</span> Paths.get(<span class="hljs-string">&quot;demo.txt&quot;</span>);<br>Files.writeString(path, <span class="hljs-string">&quot;Hello JDK11!&quot;</span>);<br><span class="hljs-type">String</span> <span class="hljs-variable">content</span> <span class="hljs-operator">=</span> Files.readString(path);<br>System.out.println(content);<br></code></pre></td></tr></table></figure>
+
+<h5 id="b-InputStream-transferTo-OutputStream"><a href="#b-InputStream-transferTo-OutputStream" class="headerlink" title="b) InputStream.transferTo(OutputStream)"></a>b) <code>InputStream.transferTo(OutputStream)</code></h5><p>简化流传输：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">try</span> (<span class="hljs-type">InputStream</span> <span class="hljs-variable">in</span> <span class="hljs-operator">=</span> Files.newInputStream(Paths.get(<span class="hljs-string">&quot;input.txt&quot;</span>));<br>     <span class="hljs-type">OutputStream</span> <span class="hljs-variable">out</span> <span class="hljs-operator">=</span> Files.newOutputStream(Paths.get(<span class="hljs-string">&quot;output.txt&quot;</span>))) &#123;<br>    in.transferTo(out); <span class="hljs-comment">// 直接将输入流内容写入输出流</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="4-集合工厂方法增强"><a href="#4-集合工厂方法增强" class="headerlink" title="4. 集合工厂方法增强"></a>4. 集合工厂方法增强</h4><p><code>var</code> 结合集合工厂方法，使集合构建更加简洁：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">var</span> <span class="hljs-variable">immutableList</span> <span class="hljs-operator">=</span> List.of(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h4 id="5-新的-Http-Client-API-标准"><a href="#5-新的-Http-Client-API-标准" class="headerlink" title="5. 新的 Http Client API 标准"></a>5. 新的 Http Client API 标准</h4><p>JDK11 标准引入了异步&#x2F;同步型 Http Client：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">HttpClient</span> <span class="hljs-variable">client</span> <span class="hljs-operator">=</span> HttpClient.newHttpClient();<br><span class="hljs-type">HttpRequest</span> <span class="hljs-variable">request</span> <span class="hljs-operator">=</span> HttpRequest.newBuilder()<br>    .uri(URI.create(<span class="hljs-string">&quot;https://example.com&quot;</span>))<br>    .build();<br>HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());<br>System.out.println(response.body());<br></code></pre></td></tr></table></figure>
+
+<h4 id="6-垃圾回收器变化"><a href="#6-垃圾回收器变化" class="headerlink" title="6. 垃圾回收器变化"></a>6. 垃圾回收器变化</h4><ul>
+<li>默认移除了 CMS，支持 ZGC(实验性)。</li>
+<li><code>-XX:+UseZGC</code> 启动参数可使用低延迟垃圾回收器。</li>
+</ul>
+<h4 id="7-新的类库和API移除"><a href="#7-新的类库和API移除" class="headerlink" title="7. 新的类库和API移除"></a>7. 新的类库和API移除</h4><ul>
+<li>移除了 Java EE 和 CORBA 模块。</li>
+</ul>
+<h4 id="8-其他"><a href="#8-其他" class="headerlink" title="8. 其他"></a>8. 其他</h4><ul>
+<li>支持运行单文件源代码，如 <code>java Hello.java</code> 可直接运行。</li>
+<li>Flight Recorder 商业特性开源。</li>
+</ul>
+<h2 id="局部类型推断Var"><a href="#局部类型推断Var" class="headerlink" title="局部类型推断Var"></a>局部类型推断Var</h2><h3 id="1-初始化定义局部变量"><a href="#1-初始化定义局部变量" class="headerlink" title="1.初始化定义局部变量"></a>1.初始化定义局部变量</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">var</span> <span class="hljs-variable">list</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;String&gt;();    <span class="hljs-comment">// infers ArrayList&lt;String&gt;</span><br><span class="hljs-type">var</span> <span class="hljs-variable">stream</span> <span class="hljs-operator">=</span> list.stream();            <span class="hljs-comment">// infers Stream&lt;String&gt;</span><br><span class="hljs-type">var</span> <span class="hljs-variable">path</span> <span class="hljs-operator">=</span> Paths.get(fileName);        <span class="hljs-comment">// infers Path</span><br><span class="hljs-type">var</span> <span class="hljs-variable">bytes</span> <span class="hljs-operator">=</span> Files.readAllBytes(path);  <span class="hljs-comment">// infers bytes[]</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-增强for循环"><a href="#2-增强for循环" class="headerlink" title="2.增强for循环"></a>2.增强for循环</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;String&gt; myList = Arrays.asList(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>);<br><span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> element : myList) &#123;...&#125;  <span class="hljs-comment">// infers String</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="3-传统for循环的index定义"><a href="#3-传统for循环的index定义" class="headerlink" title="3.传统for循环的index定义"></a>3.传统for循环的index定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">for</span> (<span class="hljs-type">var</span> <span class="hljs-variable">counter</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; counter &lt; <span class="hljs-number">10</span>; counter++)  &#123;...&#125;   <span class="hljs-comment">// infers int</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="4-try包裹的变量"><a href="#4-try包裹的变量" class="headerlink" title="4.try包裹的变量"></a>4.try包裹的变量</h3><figure class="highlight nim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs nim"><span class="hljs-keyword">try</span> (<span class="hljs-keyword">var</span> input = <br>     new <span class="hljs-type">FileInputStream</span>(<span class="hljs-string">&quot;validation.txt&quot;</span>)) <span class="hljs-meta">&#123;...&#125;</span>   // infers <span class="hljs-type">FileInputStream</span><br><br></code></pre></td></tr></table></figure>
+
+<h3 id="5-lambda中隐含的var推断"><a href="#5-lambda中隐含的var推断" class="headerlink" title="5.lambda中隐含的var推断"></a>5.lambda中隐含的var推断</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (Integer a, Integer b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<p>可以不用明确表达出<code>Integer</code>，等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (<span class="hljs-keyword">var</span> a, <span class="hljs-keyword">var</span> b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<p>其中<code>var</code>可以省略，等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">BiFunction&lt;Integer, Integer, Integer&gt; sumFunction = (a, b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>要注意不能使用混合语法：</p>
+</blockquote>
+<p>禁止：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">(Integer a, <span class="hljs-keyword">var</span> b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<p>和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">(<span class="hljs-keyword">var</span> a, b) -&gt; a + b;<br></code></pre></td></tr></table></figure>
+
+<h2 id="字符串API增强"><a href="#字符串API增强" class="headerlink" title="字符串API增强"></a>字符串API增强</h2><p>新增了<code>isBlank()</code>、<code>strip()</code>、<code>repeat()</code>等方法，方便对字符串进行处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">str</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;  Hello  &quot;</span>;<br>System.out.println(str.isBlank()); <span class="hljs-comment">//false</span><br>System.out.println(str.strip()); <span class="hljs-comment">// Hello</span><br>System.out.println(str.repeat(<span class="hljs-number">3</span>)); <span class="hljs-comment">//  Hello    Hello    Hello  </span><br></code></pre></td></tr></table></figure>
+
+<h2 id="标准化HttpClient"><a href="#标准化HttpClient" class="headerlink" title="标准化HttpClient"></a>标准化HttpClient</h2><p>标准化了新的HttpClient的API</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">HttpClient</span> <span class="hljs-variable">client</span> <span class="hljs-operator">=</span> HttpClient.newHttpClient();<br><span class="hljs-type">HttpRequest</span> <span class="hljs-variable">request</span> <span class="hljs-operator">=</span> HttpRequest.newBuilder()<br>        .uri(URI.create(<span class="hljs-string">&quot;https://example.com&quot;</span>))<br>        .build();<br>HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());<br>System.out.println(response.body());<br></code></pre></td></tr></table></figure>
+
+<h2 id="模块化"><a href="#模块化" class="headerlink" title="模块化"></a>模块化</h2><h1 id="JDK14"><a href="#JDK14" class="headerlink" title="JDK14"></a>JDK14</h1><h2 id="Switch表达式"><a href="#Switch表达式" class="headerlink" title="Switch表达式"></a>Switch表达式</h2><h1 id="JDK15"><a href="#JDK15" class="headerlink" title="JDK15"></a>JDK15</h1><h2 id="文本块"><a href="#文本块" class="headerlink" title="文本块"></a>文本块</h2><p>将多行文本中的<code>换行符</code>和<code>转义符</code>去除，使其变得更易于阅读。</p>
+<p>一个普通的SQL从使用单行文本和文本块的区别：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java">Using <span class="hljs-string">&quot;one-dimensional&quot;</span> string literals<br><br><span class="hljs-type">String</span> <span class="hljs-variable">query</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;SELECT \&quot;EMP_ID\&quot;, \&quot;LAST_NAME\&quot; FROM \&quot;EMPLOYEE_TB\&quot;\n&quot;</span> +<br>               <span class="hljs-string">&quot;WHERE \&quot;CITY\&quot; = &#x27;INDIANAPOLIS&#x27;\n&quot;</span> +<br>               <span class="hljs-string">&quot;ORDER BY \&quot;EMP_ID\&quot;, \&quot;LAST_NAME\&quot;;\n&quot;</span>;<br>Using a <span class="hljs-string">&quot;two-dimensional&quot;</span> block of text<br><br><span class="hljs-type">String</span> <span class="hljs-variable">query</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">               SELECT &quot;EMP_ID&quot;, &quot;LAST_NAME&quot; FROM &quot;EMPLOYEE_TB&quot;</span><br><span class="hljs-string">               WHERE &quot;CITY&quot; = &#x27;INDIANAPOLIS&#x27;</span><br><span class="hljs-string">               ORDER BY &quot;EMP_ID&quot;, &quot;LAST_NAME&quot;;</span><br><span class="hljs-string">               &quot;&quot;&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>空字符串如下，文本块必须以<code>&quot;&quot;&quot;</code>和换行符开始。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">empty</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">&quot;&quot;&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>以<code>&quot;&quot;&quot;</code>结尾，文本结尾是否换行，代表最后一行是否有换行符。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">结尾没有换行符\n<br><span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">line 1</span><br><span class="hljs-string">line 2</span><br><span class="hljs-string">line 3&quot;&quot;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">结尾有换行符\n<br><span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">line 1</span><br><span class="hljs-string">line 2</span><br><span class="hljs-string">line 3</span><br><span class="hljs-string">&quot;&quot;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>默认情况下，Java <strong>会去掉公共缩进空格</strong>。也就是说，所有行最小的缩进会被当作“基准”去掉。所有的缩进为最小的缩进，如果想要加前导空格，需要将比结尾 <code>&quot;&quot;&quot;</code> 的缩进更多的空格，才能保留下来：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        hello</span><br><span class="hljs-string">&quot;&quot;&quot;</span>;<br><span class="hljs-comment">// 输出：        hello\n</span><br></code></pre></td></tr></table></figure>
+
+<p>但是这样会带来hello末尾强制加上了<code>\n</code>，如果不想要换行符，可以使用续航符<code>\</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        hello\</span><br><span class="hljs-string">&quot;&quot;&quot;</span>;<br><span class="hljs-comment">//输出：：        hello</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="JDK16"><a href="#JDK16" class="headerlink" title="JDK16"></a>JDK16</h1><h2 id="record类"><a href="#record类" class="headerlink" title="record类"></a>record类</h2><p>可以定义<code>record</code>类，会自动生成<code>构造函数</code>,<code>equals</code>,<code>hashcode</code>,<code>toString</code>方法，<code>record</code>类是语法糖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>等价于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Rectangle</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">double</span> length;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">double</span> width;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>        <span class="hljs-built_in">this</span>.length = length;<br>        <span class="hljs-built_in">this</span>.width = width;<br>    &#125;<br><br>    <span class="hljs-type">double</span> <span class="hljs-title function_">length</span><span class="hljs-params">()</span> &#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.length; &#125;<br>    <span class="hljs-type">double</span> <span class="hljs-title function_">width</span><span class="hljs-params">()</span>  &#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.width; &#125;<br><br>    <span class="hljs-comment">// Implementation of equals() and hashCode(), which specify</span><br>    <span class="hljs-comment">// that two record objects are equal if they</span><br>    <span class="hljs-comment">// are of the same type and contain equal field values.</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> equals...<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> hashCode...<br><br>    <span class="hljs-comment">// An implementation of toString() that returns a string</span><br>    <span class="hljs-comment">// representation of all the record class&#x27;s fields,</span><br>    <span class="hljs-comment">// including their names.</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;...&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>会自动生成<code>private final</code>的成员变量，以及和成员变量同名的取值方法<code>witdth()</code>和<code>length()</code>。</p>
+<h3 id="定义标准构造函数"><a href="#定义标准构造函数" class="headerlink" title="定义标准构造函数"></a>定义标准构造函数</h3><p>虽然record会自动生成一个构造函数，但是也可以定义一个构造函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>        <span class="hljs-keyword">if</span> (length &lt;= <span class="hljs-number">0</span> || width &lt;= <span class="hljs-number">0</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">java</span>.lang.IllegalArgumentException(<br>                String.format(<span class="hljs-string">&quot;Invalid dimensions: %f, %f&quot;</span>, length, width));<br>        &#125;<br>        <span class="hljs-built_in">this</span>.length = length;<br>        <span class="hljs-built_in">this</span>.width = width;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="隐式构造函数参数"><a href="#隐式构造函数参数" class="headerlink" title="隐式构造函数参数"></a>隐式构造函数参数</h3><p>由于构造函数中的参数签名是同名的，因此可以使用隐式的参数构造。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>    <span class="hljs-keyword">public</span> Rectangle &#123;<br>        <span class="hljs-keyword">if</span> (length &lt;= <span class="hljs-number">0</span> || width &lt;= <span class="hljs-number">0</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">java</span>.lang.IllegalArgumentException(<br>                String.format(<span class="hljs-string">&quot;Invalid dimensions: %f, %f&quot;</span>, length, width));<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="定义非标准构造函数"><a href="#定义非标准构造函数" class="headerlink" title="定义非标准构造函数"></a>定义非标准构造函数</h3><p>相比起显式声明标准构造函数，我们也可以声明非标准构造函数，其传入的可以是自定义的参数，但是其必须调用标准的构造函数，在这种情况下，两种构造函数都是合法的，相当于构造函数重载。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">RectanglePair</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">RectanglePair</span><span class="hljs-params">(Pair&lt;Double&gt; corner)</span> &#123;<br>        <span class="hljs-built_in">this</span>(corner.x(), corner.y());<br>    &#125;<br>&#125;<br><span class="hljs-type">RectanglePair</span>  <span class="hljs-variable">rectanglePair</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RectanglePair</span>(<span class="hljs-number">5.0</span>,<span class="hljs-number">2.0</span>); <span class="hljs-comment">//合法</span><br><span class="hljs-type">RectanglePair</span>  <span class="hljs-variable">rectanglePair2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RectanglePair</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Pair</span>&lt;&gt;(<span class="hljs-number">6.0</span>, <span class="hljs-number">3.0</span>)); <span class="hljs-comment">//合法</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="显式声明公共访问器"><a href="#显式声明公共访问器" class="headerlink" title="显式声明公共访问器"></a>显式声明公共访问器</h3><p><code>record</code>类会自动生成一个和成员变量同名的访问器方法，我们可以显式地声明他以代替自动生成的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br> <br>    <span class="hljs-comment">// Public accessor method</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">length</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;Length is &quot;</span> + length);<br>        <span class="hljs-keyword">return</span> length;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>可以声明</strong>静态变量、静态初始化块、静态方法，这些是类级别的，不影响record的不可变特性，其行为和普通类中定义是一样的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br><br>    <span class="hljs-keyword">static</span> <span class="hljs-type">double</span> goldenRatio;<br><br>    <span class="hljs-keyword">static</span> &#123;<br>        goldenRatio = (<span class="hljs-number">1</span> + Math.sqrt(<span class="hljs-number">5</span>)) / <span class="hljs-number">2</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">static</span> Rectangle <span class="hljs-title function_">createGoldenRectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> width)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Rectangle</span>(width, width * goldenRatio);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>不能声明</strong>额外的实例变量和实例初始化代码块，这会破坏<code>record</code>不可变特性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br>    BiFunction&lt;Double, Double, Double&gt; diagonal; <span class="hljs-comment">// ❌ 不允许新的实例字段</span><br><br>    &#123; <span class="hljs-comment">// ❌ 实例初始化块也不允许</span><br>        diagonal = (x, y) -&gt; Math.sqrt(x*x + y*y);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>可以声明</strong>额外的实例方法，嵌套类，嵌套record</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">Rectangle</span><span class="hljs-params">(<span class="hljs-type">double</span> length, <span class="hljs-type">double</span> width)</span> &#123;<br><br>    <span class="hljs-comment">// 普通实例方法</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">area</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> length * width;<br>    &#125;<br><br>    <span class="hljs-comment">// 嵌套 record（自动是 static 的）</span><br>    <span class="hljs-keyword">record</span> <span class="hljs-title class_">RotationAngle</span><span class="hljs-params">(<span class="hljs-type">double</span> angle)</span> &#123;<br>        <span class="hljs-keyword">public</span> RotationAngle &#123;<br>            angle = Math.toRadians(angle);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 使用嵌套 record 的实例方法</span><br>    <span class="hljs-keyword">public</span> Rectangle <span class="hljs-title function_">getRotatedRectangleBoundingBox</span><span class="hljs-params">(<span class="hljs-type">double</span> angle)</span> &#123;<br>        <span class="hljs-type">RotationAngle</span> <span class="hljs-variable">ra</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RotationAngle</span>(angle);<br>        <span class="hljs-type">double</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> Math.abs(length * Math.cos(ra.angle())) +<br>                   Math.abs(width  * Math.sin(ra.angle()));<br>        <span class="hljs-type">double</span> <span class="hljs-variable">y</span> <span class="hljs-operator">=</span> Math.abs(length * Math.sin(ra.angle())) +<br>                   Math.abs(width  * Math.cos(ra.angle()));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Rectangle</span>(x, y);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>不能声明</strong>native方法，native方法可能会修改record内部状态。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">record</span> <span class="hljs-title class_">BadRecord</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> &#123;<br>    <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doSomething</span><span class="hljs-params">()</span>; <span class="hljs-comment">// ❌ 编译错误</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="record特性"><a href="#record特性" class="headerlink" title="record特性"></a>record特性</h3><blockquote>
+<p><strong>⚠️ TODO</strong></p>
+<p>当前章节尚未完成，内容正在施工中……</p>
+<p>参考 <a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/24/language/records.html#GUID-4D67C7AF-67A2-4B31-8EA7-F1E913F54BE6">Record Classes</a></p>
+</blockquote>
+<h2 id="Instance-of-匹配"><a href="#Instance-of-匹配" class="headerlink" title="Instance of 匹配"></a>Instance of 匹配</h2><p>可以直接在<code>instance of</code>中进行类型转换</p>
+<p>原先需要</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Shape</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getPerimeter</span><span class="hljs-params">(Shape s)</span> <span class="hljs-keyword">throws</span> IllegalArgumentException &#123;<br>        <span class="hljs-keyword">if</span> (s <span class="hljs-keyword">instanceof</span> Rectangle) &#123;<br>            <span class="hljs-type">Rectangle</span> <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> (Rectangle) s;<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * r.length() + <span class="hljs-number">2</span> * r.width();<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (s <span class="hljs-keyword">instanceof</span> Circle) &#123;<br>            <span class="hljs-type">Circle</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> (Circle) s;<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * c.radius() * Math.PI;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>(<span class="hljs-string">&quot;Unrecognized shape&quot;</span>);<br>        &#125;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以省略<code>Rectangle r = (Rectangle) s</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getPerimeter</span><span class="hljs-params">(Shape shape)</span> <span class="hljs-keyword">throws</span> IllegalArgumentException &#123;<br>    <span class="hljs-keyword">if</span> (s <span class="hljs-keyword">instanceof</span> Rectangle r) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * r.length() + <span class="hljs-number">2</span> * r.width();<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (s <span class="hljs-keyword">instanceof</span> Circle c) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * c.radius() * Math.PI;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>(<span class="hljs-string">&quot;Unrecognized shape&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>要注意其局部变量<code>instance of Object o</code>有范围限制</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getPerimeter</span><span class="hljs-params">(Shape shape)</span> <span class="hljs-keyword">throws</span> IllegalArgumentException &#123;<br>    <span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Rectangle s) &#123;<br>        <span class="hljs-comment">// You can use the pattern variable s (of type Rectangle) here.</span><br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Circle s) &#123;<br>        <span class="hljs-comment">// You can use the pattern variable s of type Circle here</span><br>        <span class="hljs-comment">// but not the pattern variable s of type Rectangle.</span><br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// You cannot use either pattern variable here.</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>局部变量可以超过<code>if</code>的范围</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">bigEnoughRect</span><span class="hljs-params">(Shape s)</span> &#123;<br>    <span class="hljs-keyword">if</span> (!(s <span class="hljs-keyword">instanceof</span> Rectangle r)) &#123;<br>        <span class="hljs-comment">// You cannot use the pattern variable r here because</span><br>        <span class="hljs-comment">// the predicate s instanceof Rectangle is false.</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>    &#125;<br>    <span class="hljs-comment">// You can use r here.</span><br>    <span class="hljs-keyword">return</span> r.length() &gt; <span class="hljs-number">5</span>; <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在<code>if</code>的<code>&amp;&amp;</code>表达式中使用时，要注意前后顺序</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Rectangle r &amp;&amp; r.length() &gt; <span class="hljs-number">5</span>) &#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>无法在<code>||</code>表达式中使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Rectangle r || r.length() &gt; <span class="hljs-number">0</span>) &#123; <span class="hljs-comment">// error</span><br>    <span class="hljs-comment">// ...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="JDK17"><a href="#JDK17" class="headerlink" title="JDK17"></a>JDK17</h1><h2 id="Spring和SpringBoot"><a href="#Spring和SpringBoot" class="headerlink" title="Spring和SpringBoot"></a>Spring和SpringBoot</h2><p>Spring Framework6和SpringBoot 3默认采用最低JDK17。</p>
+<h2 id="增强的伪随机数生成器"><a href="#增强的伪随机数生成器" class="headerlink" title="增强的伪随机数生成器"></a>增强的伪随机数生成器</h2><p>JDK17 增加了新的伪随机数生成器（RandomGenerator）接口，并提供了多种现代高质量的实现。它相比老的 java.util.Random 更易于使用，支持可插拔算法和流式 API 操作，适合对可重复性和性能有更高要求的场景。</p>
+<h3 id="新API举例："><a href="#新API举例：" class="headerlink" title="新API举例："></a>新API举例：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.random.RandomGenerator;<br><span class="hljs-keyword">import</span> java.util.random.RandomGeneratorFactory;<br><br><span class="hljs-comment">// 获取系统默认高质量生成器</span><br><span class="hljs-type">RandomGenerator</span> <span class="hljs-variable">generator</span> <span class="hljs-operator">=</span> RandomGenerator.getDefault();<br><span class="hljs-type">int</span> <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> generator.nextInt(); <span class="hljs-comment">// 生成随机整数</span><br><br><span class="hljs-comment">// 也可以指定算法，比如 &quot;L64X128MixRandom&quot;</span><br><span class="hljs-type">RandomGenerator</span> <span class="hljs-variable">l64x128</span> <span class="hljs-operator">=</span> RandomGeneratorFactory.of(<span class="hljs-string">&quot;L64X128MixRandom&quot;</span>).create();<br>System.out.println(l64x128.nextDouble());<br><br><span class="hljs-comment">// 支持流式生成</span><br>generator.ints(<span class="hljs-number">5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>).forEach(System.out::println); <span class="hljs-comment">// 输出5个1~9的随机整数</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="已内置的实现包括："><a href="#已内置的实现包括：" class="headerlink" title="已内置的实现包括："></a>已内置的实现包括：</h3><ul>
+<li>L32X64MixRandom</li>
+<li>L64X128MixRandom</li>
+<li>Xoroshiro128PlusPlus</li>
+<li>SplittableRandom（JDK8已有，被统一管理）</li>
+<li>以及传统的 Random、SecureRandom 等</li>
+</ul>
+<h2 id="Sealed-Class-密封类"><a href="#Sealed-Class-密封类" class="headerlink" title="Sealed Class 密封类"></a>Sealed Class 密封类</h2><p>sealed 让父类显式声明可以继承其的子类，限制继承类型。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs scala">public <span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Shape</span> <span class="hljs-title">permits</span> <span class="hljs-title">Circle</span>, <span class="hljs-title">Rectangle</span> </span>&#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br><br>public <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Circle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Shape</span> </span>&#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br><br>public non-<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Rectangle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Shape</span> </span>&#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><code>sealed</code>：声明 <code>Shape</code> 的继承是受限制的；</p>
+<p><code>permits</code>：列出<strong>允许的子类</strong>；</p>
+<p>子类必须显式声明继承策略：</p>
+<ul>
+<li><code>final</code> → 不能再被继承；</li>
+<li><code>sealed</code> → 继续限制下一层继承；</li>
+<li><code>non-sealed</code> → 解封，允许任何类再继承。</li>
+</ul>
+<h1 id="JDK21"><a href="#JDK21" class="headerlink" title="JDK21"></a>JDK21</h1><h2 id="Record-Patterns"><a href="#Record-Patterns" class="headerlink" title="Record Patterns"></a>Record Patterns</h2><h2 id="Switch类型匹配"><a href="#Switch类型匹配" class="headerlink" title="Switch类型匹配"></a>Switch类型匹配</h2><p>JDK21 增强了 <code>switch</code>，可用于类型判断和模式匹配，使代码更简洁、类型安全。</p>
+<h3 id="基本语法："><a href="#基本语法：" class="headerlink" title="基本语法："></a>基本语法：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> String <span class="hljs-title function_">formatter</span><span class="hljs-params">(Object obj)</span> &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">switch</span> (obj) &#123;<br>        <span class="hljs-keyword">case</span> Integer i -&gt; <span class="hljs-string">&quot;整数: &quot;</span> + i;<br>        <span class="hljs-keyword">case</span> String s -&gt; <span class="hljs-string">&quot;字符串: &quot;</span> + s;<br>        <span class="hljs-keyword">case</span> <span class="hljs-literal">null</span>     -&gt; <span class="hljs-string">&quot;null&quot;</span>;<br>        <span class="hljs-keyword">default</span>       -&gt; <span class="hljs-string">&quot;其他类型&quot;</span>;<br>    &#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>case Integer i</code>：如果是<code>Integer</code>类型，自动解包为变量<code>i</code></li>
+<li><code>case String s</code>：如果是<code>String</code>类型，自动解包为变量<code>s</code></li>
+<li>可以直接匹配<code>null</code></li>
+<li><code>default</code>为兜底分支</li>
+</ul>
+<h3 id="结合守卫（when）进一步增强："><a href="#结合守卫（when）进一步增强：" class="headerlink" title="结合守卫（when）进一步增强："></a>结合守卫（when）进一步增强：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> String <span class="hljs-title function_">kind</span><span class="hljs-params">(Number number)</span> &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">switch</span> (number) &#123;<br>        <span class="hljs-keyword">case</span> Integer i <span class="hljs-keyword">when</span> i &gt; <span class="hljs-number">0</span> -&gt; <span class="hljs-string">&quot;正整数&quot;</span>;<br>        <span class="hljs-keyword">case</span> Integer i -&gt; <span class="hljs-string">&quot;非正整数&quot;</span>;<br>        <span class="hljs-keyword">case</span> Double d <span class="hljs-keyword">when</span> d.isNaN() -&gt; <span class="hljs-string">&quot;NaN&quot;</span>;<br>        <span class="hljs-keyword">case</span> Double d -&gt; <span class="hljs-string">&quot;浮点数&quot;</span>;<br>        <span class="hljs-keyword">default</span> -&gt; <span class="hljs-string">&quot;其他数字类型或null&quot;</span>;<br>    &#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>when</code>后跟条件，只有条件满足时才匹配该分支</li>
+</ul>
+<h3 id="使用示例："><a href="#使用示例：" class="headerlink" title="使用示例："></a>使用示例：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>    System.out.println(formatter(<span class="hljs-number">123</span>));      <span class="hljs-comment">// 输出: 整数: 123</span><br>    System.out.println(formatter(<span class="hljs-string">&quot;hi&quot;</span>));     <span class="hljs-comment">// 输出: 字符串: hi</span><br>    System.out.println(formatter(<span class="hljs-literal">null</span>));     <span class="hljs-comment">// 输出: null</span><br>    System.out.println(formatter(<span class="hljs-number">3.14</span>));     <span class="hljs-comment">// 输出: 其他类型</span><br><br>    System.out.println(kind(<span class="hljs-number">5</span>));             <span class="hljs-comment">// 输出: 正整数</span><br>    System.out.println(kind(-<span class="hljs-number">10</span>));           <span class="hljs-comment">// 输出: 非正整数</span><br>    System.out.println(kind(Double.NaN));    <span class="hljs-comment">// 输出: NaN</span><br>    System.out.println(kind(<span class="hljs-number">2.5</span>));           <span class="hljs-comment">// 输出: 浮点数</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li>类型安全，避免频繁的<code>instanceof</code>+强转</li>
+<li>代码逻辑更清晰、简洁</li>
+</ul>
+<h2 id="虚拟线程"><a href="#虚拟线程" class="headerlink" title="虚拟线程"></a>虚拟线程</h2><p>JDK21 正式引入虚拟线程（virtual threads），这是 Java 并发模型的一次重要革新。虚拟线程是一种轻量级线程，由 Java 虚拟机（JVM）调度，可以大幅提升高并发场景下的吞吐与资源利用率，极大简化高并发服务器编写难度。</p>
+<h3 id="主要特性-1"><a href="#主要特性-1" class="headerlink" title="主要特性"></a>主要特性</h3><ul>
+<li>虚拟线程是 <code>Thread</code> 的一种实现（<code>java.lang.Thread</code>），与平台线程拥有基本一致的 API。</li>
+<li>创建和销毁虚拟线程的代价极低，通常能轻松创建数万甚至百万级的虚拟线程。</li>
+<li>让阻塞型代码（如 I&#x2F;O、sleep 等）与异步编程一样高效，但代码风格仍为同步方式，易读易维护。</li>
+<li>线程调度交由 JVM，背后通常与平台线程池绑定，但用户无需关心。</li>
+</ul>
+<h3 id="基本用法示例"><a href="#基本用法示例" class="headerlink" title="基本用法示例"></a>基本用法示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">VirtualThreadDemo</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>        <span class="hljs-comment">// 创建单个虚拟线程并启动</span><br>        <span class="hljs-type">Thread</span> <span class="hljs-variable">vThread</span> <span class="hljs-operator">=</span> Thread.startVirtualThread(() -&gt; &#123;<br>            System.out.println(<span class="hljs-string">&quot;Hello from virtual thread! 当前线程: &quot;</span> + Thread.currentThread());<br>        &#125;);<br><br>        <span class="hljs-comment">// 等待线程结束</span><br>        vThread.join();<br><br>        <span class="hljs-comment">// 同时启动一万个虚拟线程，每个线程 sleep 一下</span><br>        <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">10_000</span>;<br>        Thread[] threads = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>[count];<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; count; i++) &#123;<br>            threads[i] = Thread.startVirtualThread(() -&gt; &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">100</span>);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;&#125;<br>            &#125;);<br>        &#125;<br>        <span class="hljs-comment">// 等待所有虚拟线程结束</span><br>        <span class="hljs-keyword">for</span> (Thread t : threads) &#123;<br>            t.join();<br>        &#125;<br>        System.out.println(<span class="hljs-string">&quot;所有虚拟线程已结束&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="使用-Executors-新-API-批量提交任务"><a href="#使用-Executors-新-API-批量提交任务" class="headerlink" title="使用 Executors 新 API 批量提交任务"></a>使用 Executors 新 API 批量提交任务</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">var</span> <span class="hljs-variable">executor</span> <span class="hljs-operator">=</span> Executors.newVirtualThreadPerTaskExecutor();<br><span class="hljs-keyword">try</span> (executor) &#123;<br>    IntStream.range(<span class="hljs-number">0</span>, <span class="hljs-number">10_000</span>).forEach(i -&gt;<br>        executor.submit(() -&gt; &#123;<br>            Thread.sleep(<span class="hljs-number">100</span>);<br>        &#125;)<br>    );<br>&#125;<br>System.out.println(<span class="hljs-string">&quot;全部任务提交结束&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h3 id="主要意义"><a href="#主要意义" class="headerlink" title="主要意义"></a>主要意义</h3><ul>
+<li>能用“看起来阻塞、实则调度高效”的方式编写高并发网络应用程序（如 Web 服务器）。</li>
+<li>大幅减少复杂“回调地狱”或异步代码需求。</li>
+<li>提高应用的可维护性、扩展性和吞吐能力。</li>
+</ul>
+<blockquote>
+<p>虚拟线程的提出标志着 Java 在并发编程领域迈向 Go 之类“百万协程”时代的能力，同时保留了严谨的类型系统和现有生态的兼容性。</p>
+</blockquote>
+<h2 id="分代ZGC"><a href="#分代ZGC" class="headerlink" title="分代ZGC"></a>分代ZGC</h2><h3 id="JDK21-引入的分代ZGC（Generational-ZGC）"><a href="#JDK21-引入的分代ZGC（Generational-ZGC）" class="headerlink" title="JDK21 引入的分代ZGC（Generational ZGC）"></a>JDK21 引入的分代ZGC（Generational ZGC）</h3><p><strong>分代ZGC</strong>（Generational ZGC）是在原有 ZGC 垃圾回收器基础上实现的分代（Generational）功能，进一步提升了低延迟垃圾回收的效率，特别是在大对象、新生代对象生命周期频繁变动的应用场景。</p>
+<h4 id="主要特性-2"><a href="#主要特性-2" class="headerlink" title="主要特性"></a>主要特性</h4><ul>
+<li>支持将堆划分为新生代（Young Generation）和老年代（Old Generation）</li>
+<li>对大多数短命对象进行更高效的内存回收，减少 Full GC 发生频率</li>
+<li>保持 ZGC 本身的低暂停（亚毫秒级）和可扩展性</li>
+<li>提升了吞吐量，降低了应用延迟</li>
+</ul>
+<h4 id="启用分代ZGC"><a href="#启用分代ZGC" class="headerlink" title="启用分代ZGC"></a>启用分代ZGC</h4><p>启动参数示例（JDK21+）：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">-<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+UseZGC</span> -<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+ZGenerational</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="代码体验（无需代码改动，参数可用即生效）"><a href="#代码体验（无需代码改动，参数可用即生效）" class="headerlink" title="代码体验（无需代码改动，参数可用即生效）"></a>代码体验（无需代码改动，参数可用即生效）</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 启动 JVM 时加如下参数：</span><br><span class="hljs-comment">// -XX:+UseZGC -XX:+ZGenerational</span><br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ZGCDemo</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100_000</span>; i++) &#123;<br>            <span class="hljs-type">byte</span>[] arr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[<span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>]; <span class="hljs-comment">// 分配 1MB</span><br>            Thread.sleep(<span class="hljs-number">10</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>日志示例（可以添加 -Xlog:gc* 观察）：</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-selector-attr">[0.123s]</span><span class="hljs-selector-attr">[info]</span><span class="hljs-selector-attr">[gc,start     ]</span> <span class="hljs-built_in">GC</span>(<span class="hljs-number">0</span>) <span class="hljs-attribute">Pause</span> Young (Normal) (G1 Evacuation Pause)<br><span class="hljs-selector-attr">[0.126s]</span><span class="hljs-selector-attr">[info]</span><span class="hljs-selector-attr">[gc,stats     ]</span> <span class="hljs-built_in">GC</span>(<span class="hljs-number">0</span>) <span class="hljs-attribute">Pause</span> Young (Normal) <span class="hljs-number">2</span>M-&gt;<span class="hljs-number">0.5</span><span class="hljs-built_in">M</span>(<span class="hljs-number">32</span>M)<br>...<br></code></pre></td></tr></table></figure>
+
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><ul>
+<li>分代ZGC 结合了分代回收的高效性和 ZGC 的低延迟能力，非常适用于服务端、大型数据应用和需要低暂停的系统。</li>
+<li>若使用 ZGC，推荐在 JDK21+ 加启 <code>-XX:+ZGenerational</code> 以充分发挥优势。</li>
+</ul>
+<p>更多参考：<br><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/439">https://openjdk.org/jeps/439</a><br><a target="_blank" rel="noopener" href="https://wiki.openjdk.org/display/zgc/Main">https://wiki.openjdk.org/display/zgc/Main</a></p>
+<h1 id="JDK22"><a href="#JDK22" class="headerlink" title="JDK22"></a>JDK22</h1><h2 id="未命名变量"><a href="#未命名变量" class="headerlink" title="未命名变量"></a>未命名变量</h2>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/%E6%96%B0%E7%89%B9%E6%80%A7/" class="category-chain-item">新特性</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>JDK各个版本特性总结</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/新特性/JDK各版本特性/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B9%B6%E5%8F%91/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" title="多线程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">多线程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%BA%E6%96%87%E7%9B%AE%E5%BD%95/" title="分布式与大数据领域经典论文研读">
+                        <span class="hidden-mobile">分布式与大数据领域经典论文研读</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

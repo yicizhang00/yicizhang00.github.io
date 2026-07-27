@@ -1,0 +1,1132 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="导言  上图展示的是杭州市民卡APP在2026年1月1日出现的一次典型错误案例：由于埋点功能的异常，不仅导致了主流程中断，还将详细的异常堆栈信息暴露给了用户。这种现象不仅影响了用户体验，也存在安全隐患。如何规范地进行全局异常处理，将在下文详细介绍。 全局异常捕获是现代 Java Web 项目架构不可或缺的一环。它能够集中管理和处理系统中可能出现的各类异常，提升 API 的健壮性、可维护性和用户友好">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全局异常捕获">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="导言  上图展示的是杭州市民卡APP在2026年1月1日出现的一次典型错误案例：由于埋点功能的异常，不仅导致了主流程中断，还将详细的异常堆栈信息暴露给了用户。这种现象不仅影响了用户体验，也存在安全隐患。如何规范地进行全局异常处理，将在下文详细介绍。 全局异常捕获是现代 Java Web 项目架构不可或缺的一环。它能够集中管理和处理系统中可能出现的各类异常，提升 API 的健壮性、可维护性和用户友好">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260105170251061.png">
+<meta property="article:published_time" content="2026-01-05T08:31:25.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="全局异常">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260105170251061.png">
+  
+  
+  
+  <title>全局异常捕获 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">全局异常捕获</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-05 16:31" pubdate>
+          2026年1月5日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          10k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          84 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">全局异常捕获</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="导言"><a href="#导言" class="headerlink" title="导言"></a>导言</h1><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260105170251061.png" srcset="/img/loading.gif" lazyload alt="image-20260105170250771" style="zoom: 25%;" />
+
+<p>上图展示的是杭州市民卡APP在2026年1月1日出现的一次典型错误案例：由于<code>埋点</code>功能的异常，不仅导致了主流程中断，还将详细的异常堆栈信息暴露给了用户。这种现象不仅影响了用户体验，也存在安全隐患。如何规范地进行全局异常处理，将在下文详细介绍。</p>
+<p>全局异常捕获是现代 Java Web 项目架构不可或缺的一环。它能够集中管理和处理系统中可能出现的各类异常，提升 API 的健壮性、可维护性和用户友好性。通过合理设计全局异常处理器，不仅可以保证前后端接口的响应一致性，还能方便排查和定位问题。</p>
+<p>在日常开发中，直接使用 <code>throw e</code> 等方式抛出异常，容易导致大量堆栈信息暴露给调用方，既影响API友好度，也可能带来安全隐患。通过统一的全局异常捕获机制，可以避免异常堆栈泄露，将异常拦截后转化为一致、规范的前端响应。同时，全局异常捕获器还可以作为系统兜底保护——当代码中未被显式捕获的异常发生时，拦截这些异常，返回规范化错误信息，防止系统崩溃或异常信息外泄。</p>
+<p>本篇笔记将系统梳理 Spring Boot&#x2F;Web 项目中常见异常的类别、触发场景和最佳捕获实践。从基础的 <code>@RestControllerAdvice</code>、<code>@ExceptionHandler</code> 的应用，到进阶的各类异常类型归纳，以及推荐的全局异常处理器骨架代码，让项目异常处理更规范、更易扩展。</p>
+<h1 id="全局异常捕获"><a href="#全局异常捕获" class="headerlink" title="全局异常捕获"></a>全局异常捕获</h1><p>核心注解<code>@RestControllerAdvice</code>和<code>@ExceptionHandler</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestControllerAdvice</span>  <span class="hljs-comment">// 或 @ControllerAdvice + @ResponseBody</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">GlobalExceptionHandler</span> &#123;<br><br>    <span class="hljs-comment">// 捕获自定义业务异常</span><br>    <span class="hljs-meta">@ExceptionHandler(BusinessException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;ErrorResponse&gt; <span class="hljs-title function_">handleBusiness</span><span class="hljs-params">(BusinessException ex)</span> &#123;<br>        <span class="hljs-keyword">return</span> ResponseEntity.badRequest()<br>                .body(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ErrorResponse</span>(<span class="hljs-string">&quot;BUSINESS_ERROR&quot;</span>, ex.getMessage()));<br>    &#125;<br>    <span class="hljs-comment">// 注意此处不能使用throw exception抛出所有异常，不然就会抛出所有堆栈信息给前端</span><br><br>    <span class="hljs-comment">// 捕获所有未处理异常（兜底）</span><br>    <span class="hljs-meta">@ExceptionHandler(Exception.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;ErrorResponse&gt; <span class="hljs-title function_">handleGeneral</span><span class="hljs-params">(Exception ex)</span> &#123;<br>        log.error(<span class="hljs-string">&quot;Unexpected error&quot;</span>, ex);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)<br>                .body(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ErrorResponse</span>(<span class="hljs-string">&quot;SYSTEM_ERROR&quot;</span>, <span class="hljs-string">&quot;服务器内部错误&quot;</span>));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>一般统一的全局异常捕获作为一个公共类<code>BaseExceptionHandler</code>，具体微服务中需要引入这个公共类，并定义一个<code>GlobalExceptionHandler</code>继承他。</p>
+<h3 id="BaseExceptionHandler-公共父类示例"><a href="#BaseExceptionHandler-公共父类示例" class="headerlink" title="BaseExceptionHandler 公共父类示例"></a>BaseExceptionHandler 公共父类示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BaseExceptionHandler</span> &#123;<br><br>    <span class="hljs-meta">@ExceptionHandler(BusinessException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;ErrorResponse&gt; <span class="hljs-title function_">handleBusiness</span><span class="hljs-params">(BusinessException ex)</span> &#123;<br>        <span class="hljs-keyword">return</span> ResponseEntity.badRequest()<br>                .body(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ErrorResponse</span>(<span class="hljs-string">&quot;BUSINESS_ERROR&quot;</span>, ex.getMessage()));<br>    &#125;<br><br>    <span class="hljs-meta">@ExceptionHandler(Exception.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;ErrorResponse&gt; <span class="hljs-title function_">handleGeneral</span><span class="hljs-params">(Exception ex)</span> &#123;<br>        <span class="hljs-comment">// 这里假设有日志工具</span><br>        log.error(<span class="hljs-string">&quot;Unexpected system exception&quot;</span>, ex);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)<br>                .body(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ErrorResponse</span>(<span class="hljs-string">&quot;SYSTEM_ERROR&quot;</span>, <span class="hljs-string">&quot;系统异常，请联系管理员&quot;</span>));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="各微服务中的继承实现"><a href="#各微服务中的继承实现" class="headerlink" title="各微服务中的继承实现"></a>各微服务中的继承实现</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestControllerAdvice</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">GlobalExceptionHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">BaseExceptionHandler</span> &#123;<br>    <span class="hljs-comment">// 可根据每个微服务自己的实际情况，添加新的业务异常处理方法</span><br>    <span class="hljs-comment">// 若无特殊需求，可以不写代码，完全继承父类行为</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="RestControllerAdvice"><a href="#RestControllerAdvice" class="headerlink" title="RestControllerAdvice"></a><strong>RestControllerAdvice</strong></h2><p><code>@RestControllerAdvice</code> 是 Spring 中用于全局异常处理的注解。它是 <code>@ControllerAdvice</code> 和 <code>@ResponseBody</code> 的组合注解，作用如下：</p>
+<ul>
+<li><strong>拦截所有被 <code>@RestController</code> 注解的控制器中的异常</strong>，实现统一的异常处理逻辑。</li>
+<li>标注在类上后，该类中用 <code>@ExceptionHandler</code> 注解的方法会自动处理全局范围内的异常，并返回 JSON 数据（即返回体会被自动序列化为 JSON）。</li>
+<li>通常用于<strong>RESTful 接口项目</strong>，提升异常处理的统一性与规范性。</li>
+</ul>
+<p><strong>总结</strong>：<br><code>@RestControllerAdvice</code> 可以让你把所有 Controller 层的异常集中处理，并且方便地返回统一的数据结构（如通用的错误响应对象）。</p>
+<h2 id="ExceptionHandler"><a href="#ExceptionHandler" class="headerlink" title="ExceptionHandler"></a><strong>ExceptionHandler</strong></h2><p><code>@ExceptionHandler</code> 是 Spring 框架提供的异常处理注解，用于定义在某个方法上，当指定类型的异常在 Controller 层被抛出时，由被注解的方法进行处理。</p>
+<ul>
+<li><strong>使用方式</strong>：注解在方法上，参数为需要捕获的异常类型。可以指定一个或多个异常类。</li>
+<li><strong>作用</strong>：捕获并处理指定异常，通常结合全局异常处理类（如上文中的 <code>@RestControllerAdvice</code>）一起使用，实现异常捕获和统一返回响应。</li>
+</ul>
+<p><strong>示例说明：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@ExceptionHandler(NullPointerException.class)</span><br><span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleNullPointer</span><span class="hljs-params">(NullPointerException ex)</span> &#123;<br>    <span class="hljs-comment">// 可以自行处理异常，例如打印日志、组装响应等</span><br>    <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST)<br>        .body(<span class="hljs-string">&quot;空指针异常：&quot;</span> + ex.getMessage());<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li>当控制器方法执行发生 <code>NullPointerException</code>，该方法会被自动调用进行处理。</li>
+<li>此方法统一包装 HTTP 状态码与异常信息返回给客户端。</li>
+</ul>
+<p><strong>总结</strong>：<br><code>@ExceptionHandler</code> 结合 <code>@RestControllerAdvice</code> 使用，实现了捕获全局 Controller 异常、集中处理和统一返回格式的目的。</p>
+<h1 id="常用异常类型"><a href="#常用异常类型" class="headerlink" title="常用异常类型"></a>常用异常类型</h1><p>一般来说，在公共类中尽可能抽象地通用捕获一些常用异常类型，例如<code>HttpRequestMethodNotSupportedException</code>,<code>BindException</code>,<code>MethodArgumentNotValidException</code>,<code>HandlerMethodValidationException</code>等</p>
+<h2 id="常用异常类型-1"><a href="#常用异常类型-1" class="headerlink" title="常用异常类型"></a>常用异常类型</h2><table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议 HTTP 状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MethodArgumentNotValidException</code></td>
+<td>JSR-303&#x2F;380 校验失败（<code>@Valid</code> + 对象参数）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>BindException</code></td>
+<td>表单提交（application&#x2F;x-www-form-urlencoded）校验失败</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>ConstraintViolationException</code></td>
+<td>手动调用 <code>Validator.validate()</code> 或路径变量&#x2F;请求参数校验失败</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>MissingServletRequestParameterException</code></td>
+<td>缺少必需的请求参数（<code>@RequestParam(required = true)</code>）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>ServletRequestBindingException</code></td>
+<td>请求参数绑定失败（如类型不匹配）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>HandlerMethodValidationException</code> (Spring6)</td>
+<td>方法级 <code>@Validated</code> 校验失败</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>HttpRequestMethodNotSupportedException</code></td>
+<td>请求方法不支持（如 POST 访问只允许 GET 的接口）</td>
+<td>405 Method Not Allowed</td>
+</tr>
+<tr>
+<td><code>NoHandlerFoundException</code></td>
+<td>404 路径未找到（需开启 <code>spring.mvc.throw-exception-if-no-handler-found=true</code>）</td>
+<td>404 Not Found</td>
+</tr>
+<tr>
+<td><code>HttpMediaTypeNotSupportedException</code></td>
+<td>请求头 Content-Type 不支持（如接口要求 application&#x2F;json，但传了 text&#x2F;plain）</td>
+<td>415 Unsupported Media Type</td>
+</tr>
+<tr>
+<td><code>HttpMessageNotReadableException</code></td>
+<td>JSON 解析失败（如格式错误、字段类型不匹配）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>HttpMessageNotWritableException</code></td>
+<td>响应序列化失败（通常为服务器编码问题，较少见）</td>
+<td>500 Internal Server Error</td>
+</tr>
+<tr>
+<td><code>MissingPathVariableException</code></td>
+<td><code>@PathVariable</code> 变量缺失（路径模板与注解不匹配）</td>
+<td>500（开发问题）或 400</td>
+</tr>
+<tr>
+<td><code>MissingRequestHeaderException</code></td>
+<td>缺少必需的请求头（<code>@RequestHeader(required = true)</code>）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>TypeMismatchException</code></td>
+<td>路径变量&#x2F;请求参数类型转换失败（如字符串转数字失败）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>AsyncRequestTimeoutException</code></td>
+<td>异步请求超时（如 <code>DeferredResult</code>、<code>Callable</code> 使用时）</td>
+<td>503 Service Unavailable (推荐)</td>
+</tr>
+</tbody></table>
+<p>💡 <strong>说明</strong>：</p>
+<ul>
+<li>部分异常（如 HandlerMethodValidationException）为 Spring6+ 新增，用于方法级参数校验。</li>
+<li>默认 404 不会抛异常，要在 <code>application.yml</code> 中开启 <code>spring.mvc.throw-exception-if-no-handler-found=true</code> 才能被全局异常处理器捕获。</li>
+<li>500 主要用于服务器端开发失误产生的异常，一般应避免暴露给前端用户。</li>
+</ul>
+<p>附配置示例（可捕获 404 路由异常）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">mvc:</span><br>    <span class="hljs-attr">throw-exception-if-no-handler-found:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">web:</span><br>    <span class="hljs-attr">resources:</span><br>      <span class="hljs-attr">add-resources:</span> <span class="hljs-literal">false</span>  <span class="hljs-comment"># 避免静态资源干扰</span><br></code></pre></td></tr></table></figure>
+
+<p>一、参数校验 &amp; 数据绑定类异常</p>
+<table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议 HTTP 状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MethodArgumentNotValidException</code></td>
+<td>JSR-303&#x2F;380 校验失败（<code>@Valid</code> + 对象参数）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>BindException</code></td>
+<td>表单提交（<code>application/x-www-form-urlencoded</code>）校验失败</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>ConstraintViolationException</code></td>
+<td>手动调用 <code>Validator.validate()</code> 或路径变量&#x2F;请求参数校验失败</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>MissingServletRequestParameterException</code></td>
+<td>缺少必需的请求参数（<code>@RequestParam(required = true)</code>）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>ServletRequestBindingException</code></td>
+<td>请求参数绑定失败（如类型不匹配）</td>
+<td>400 Bad Request</td>
+</tr>
+</tbody></table>
+<p>💡 <strong>注意</strong>：</p>
+<ul>
+<li><code>MethodArgumentNotValidException</code> 和 <code>BindException</code> 都继承自 <code>BindException</code>，但通常分开处理以获取不同信息。</li>
+<li>Spring 6 引入了 <code>HandlerMethodValidationException</code>（用于方法级 <code>@Validated</code>），可作为补充。</li>
+</ul>
+<hr>
+<p>二、HTTP 方法 &amp; 路由类异常</p>
+<table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HttpRequestMethodNotSupportedException</code></td>
+<td>请求方法不支持（如 POST 访问只允许 GET 的接口）</td>
+<td>405 Method Not Allowed</td>
+</tr>
+<tr>
+<td><code>NoHandlerFoundException</code></td>
+<td>404 路径未找到（需开启 <code>spring.mvc.throw-exception-if-no-handler-found=true</code>）</td>
+<td>404 Not Found</td>
+</tr>
+</tbody></table>
+<p>⚠️ 默认情况下，Spring Boot 对 404 返回 Whitelabel Error Page，不会抛出异常。</p>
+<p>若想在 <code>@ControllerAdvice</code> 中捕获 404，必须配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">mvc:</span><br>    <span class="hljs-attr">throw-exception-if-no-handler-found:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">web:</span><br>    <span class="hljs-attr">resources:</span><br>      <span class="hljs-attr">add-resources:</span> <span class="hljs-literal">false</span>  <span class="hljs-comment"># 避免静态资源干扰</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<p>三、消息转换 &amp; 内容协商异常</p>
+<table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HttpMediaTypeNotSupportedException</code></td>
+<td>请求头 Content-Type 不支持（如接口要求 application&#x2F;json，但传 text&#x2F;plain）</td>
+<td>415 Unsupported Media Type</td>
+</tr>
+<tr>
+<td><code>HttpMessageNotReadableException</code></td>
+<td>JSON 解析失败（如格式错误、字段类型不匹配）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>HttpMessageNotWritableException</code></td>
+<td>序列化响应失败（较少见）</td>
+<td>500 Internal Server Error</td>
+</tr>
+</tbody></table>
+<hr>
+<p>四、路径变量 &amp; 请求头异常</p>
+<table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MissingPathVariableException</code></td>
+<td><code>@PathVariable</code> 变量缺失（路径模板与注解不匹配）</td>
+<td>500（开发问题）或 400</td>
+</tr>
+<tr>
+<td><code>MissingRequestHeaderException</code></td>
+<td>缺少必需的请求头（<code>@RequestHeader(required = true)</code>）</td>
+<td>400 Bad Request</td>
+</tr>
+<tr>
+<td><code>TypeMismatchException</code></td>
+<td>路径变量&#x2F;请求参数类型转换失败（如字符串转数字失败）</td>
+<td>400 Bad Request</td>
+</tr>
+</tbody></table>
+<hr>
+<p>五、异步 &amp; 超时异常（高级）</p>
+<table>
+<thead>
+<tr>
+<th>异常类</th>
+<th>触发场景</th>
+<th>建议状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AsyncRequestTimeoutException</code></td>
+<td>异步请求超时（使用 <code>DeferredResult</code> 或 <code>Callable</code>）</td>
+<td>503 Service Unavailable</td>
+</tr>
+</tbody></table>
+<hr>
+<p>六、推荐的全局异常处理器骨架</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestControllerAdvice</span><br><span class="hljs-meta">@Slf4j</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">GlobalWebExceptionHandler</span> &#123;<br><br>    <span class="hljs-comment">// 1. 参数校验失败（@Valid 对象参数）</span><br>    <span class="hljs-meta">@ExceptionHandler(MethodArgumentNotValidException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleValidation</span><span class="hljs-params">(MethodArgumentNotValidException ex)</span> &#123;<br>        <span class="hljs-comment">// 提取校验失败信息</span><br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> ex.getBindingResult().getFieldErrors()<br>            .stream().map(e -&gt; e.getField() + <span class="hljs-string">&quot;: &quot;</span> + e.getDefaultMessage())<br>            .reduce((a, b) -&gt; a + <span class="hljs-string">&quot;; &quot;</span> + b).orElse(<span class="hljs-string">&quot;参数校验失败&quot;</span>);<br>        log.warn(<span class="hljs-string">&quot;参数校验异常: &#123;&#125;&quot;</span>, errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 2. 表单参数校验</span><br>    <span class="hljs-meta">@ExceptionHandler(BindException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleBind</span><span class="hljs-params">(BindException ex)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> ex.getBindingResult().getFieldErrors()<br>            .stream().map(e -&gt; e.getField() + <span class="hljs-string">&quot;: &quot;</span> + e.getDefaultMessage())<br>            .reduce((a, b) -&gt; a + <span class="hljs-string">&quot;; &quot;</span> + b).orElse(<span class="hljs-string">&quot;参数绑定异常&quot;</span>);<br>        log.warn(<span class="hljs-string">&quot;参数绑定异常: &#123;&#125;&quot;</span>, errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 3. 方法参数校验（如 @Validated + @PathVariable）</span><br>    <span class="hljs-meta">@ExceptionHandler(ConstraintViolationException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleConstraint</span><span class="hljs-params">(ConstraintViolationException ex)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> ex.getConstraintViolations()<br>            .stream().map(v -&gt; v.getPropertyPath() + <span class="hljs-string">&quot;: &quot;</span> + v.getMessage())<br>            .reduce((a, b) -&gt; a + <span class="hljs-string">&quot;; &quot;</span> + b).orElse(<span class="hljs-string">&quot;约束校验异常&quot;</span>);<br>        log.warn(<span class="hljs-string">&quot;约束校验异常: &#123;&#125;&quot;</span>, errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 4. 缺少请求参数</span><br>    <span class="hljs-meta">@ExceptionHandler(MissingServletRequestParameterException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleMissingParam</span><span class="hljs-params">(MissingServletRequestParameterException ex)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;缺少请求参数: &quot;</span> + ex.getParameterName();<br>        log.warn(errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 5. HTTP 请求方法不允许</span><br>    <span class="hljs-meta">@ExceptionHandler(HttpRequestMethodNotSupportedException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleMethodNotSupported</span><span class="hljs-params">(HttpRequestMethodNotSupportedException ex)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;请求方法不支持: &quot;</span> + ex.getMethod();<br>        log.warn(errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 6. NoHandlerFoundException（即 404）</span><br>    <span class="hljs-meta">@ExceptionHandler(NoHandlerFoundException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleNoHandler</span><span class="hljs-params">(NoHandlerFoundException ex)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">errorMsg</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;请求路径不存在: &quot;</span> + ex.getRequestURL();<br>        log.warn(errorMsg);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMsg);<br>    &#125;<br><br>    <span class="hljs-comment">// 7. JSON解析失败</span><br>    <span class="hljs-meta">@ExceptionHandler(HttpMessageNotReadableException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleNotReadable</span><span class="hljs-params">(HttpMessageNotReadableException ex)</span> &#123;<br>        log.warn(<span class="hljs-string">&quot;消息不可读: &#123;&#125;&quot;</span>, ex.getMessage());<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(<span class="hljs-string">&quot;请求体JSON格式错误&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">// 8. Content-Type不支持</span><br>    <span class="hljs-meta">@ExceptionHandler(HttpMediaTypeNotSupportedException.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleMediaType</span><span class="hljs-params">(HttpMediaTypeNotSupportedException ex)</span> &#123;<br>        log.warn(<span class="hljs-string">&quot;不支持的Content-Type: &#123;&#125;&quot;</span>, ex.getContentType());<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(<span class="hljs-string">&quot;不支持的Content-Type&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">// 9. 统一处理（兜底）</span><br>    <span class="hljs-meta">@ExceptionHandler(Exception.class)</span><br>    <span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">handleDefault</span><span class="hljs-params">(Exception ex)</span> &#123;<br>        log.error(<span class="hljs-string">&quot;服务器内部异常&quot;</span>, ex);<br>        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(<span class="hljs-string">&quot;服务器异常，请联系管理员&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="实际Feign调用实践"><a href="#实际Feign调用实践" class="headerlink" title="实际Feign调用实践"></a>实际Feign调用实践</h1>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/" class="category-chain-item">工程实践</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+        <a href="/tags/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8/" class="print-no-link">#全局异常</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>全局异常捕获</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/工程实践/全局异常捕获/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B9%B6%E5%8F%91/%E8%99%9A%E6%8B%9F%E7%BA%BF%E7%A8%8B/" title="虚拟线程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">虚拟线程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Python/Python%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" title="Python基础语法">
+                        <span class="hidden-mobile">Python基础语法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

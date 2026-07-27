@@ -1,0 +1,981 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言系统设计通常从以下顺序考虑  clarify requirement：清楚约束边界 high-level architecture：高层设计 Metadata design：元数据设计 Sharding：分片 Replication&#x2F;EC：副本可用性&#x2F;数据冗余 Scaling&#x2F;rebalancing：重平衡 HotSpot：热点消除 Failure scenair">
+<meta property="og:type" content="article">
+<meta property="og:title" content="100TB分布式存储系统设计">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/100TB%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E8%AE%BE%E8%AE%A1/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言系统设计通常从以下顺序考虑  clarify requirement：清楚约束边界 high-level architecture：高层设计 Metadata design：元数据设计 Sharding：分片 Replication&#x2F;EC：副本可用性&#x2F;数据冗余 Scaling&#x2F;rebalancing：重平衡 HotSpot：热点消除 Failure scenair">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-22T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="系统设计">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>100TB分布式存储系统设计 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">100TB分布式存储系统设计</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-06-23 01:55" pubdate>
+          2026年6月23日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">100TB分布式存储系统设计</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>系统设计通常从以下顺序考虑</p>
+<ol>
+<li>clarify requirement：清楚约束边界</li>
+<li>high-level architecture：高层设计</li>
+<li>Metadata design：元数据设计</li>
+<li>Sharding：分片</li>
+<li>Replication&#x2F;EC：副本可用性&#x2F;数据冗余</li>
+<li>Scaling&#x2F;rebalancing：重平衡</li>
+<li>HotSpot：热点消除</li>
+<li>Failure scenairo</li>
+</ol>
+<h1 id="1-确认需求"><a href="#1-确认需求" class="headerlink" title="1. 确认需求"></a>1. 确认需求</h1><p>首先清楚约束边界：</p>
+<ol>
+<li>100TB是当前容量还是未来峰值。</li>
+<li>对象的平均大小</li>
+<li>写多还是读多</li>
+<li>需要跨机房容灾吗</li>
+<li>SLA是99.9还是99.99</li>
+</ol>
+<hr>
+<p>假设：<br>容量：100TB usable<br>object avg size：16MB<br>workload：80% read &#x2F; 20% write<br>availability：99.99%<br>durability：11 nines</p>
+<h1 id="2-高层架构"><a href="#2-高层架构" class="headerlink" title="2. 高层架构"></a>2. 高层架构</h1><p>我们设计四层架构</p>
+<ol>
+<li>Client 客户端可以执行命令。</li>
+<li>API Gateway层：负责协议对接，鉴权，请求路由，大文件切片。</li>
+</ol>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">PUT <span class="hljs-keyword">object</span><br><span class="hljs-keyword">GET</span> <span class="hljs-keyword">object</span><br><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">object</span><br>LIST bucket<br></code></pre></td></tr></table></figure>
+<ol start="3">
+<li>Metadata Service：存储对象名称，存储桶，权限，对象到实际物理数据的映射关系，这是控制面。</li>
+<li>Data Node：实际存储的节点，以Chunk或者Slice形式。</li>
+</ol>
+<h1 id="3，元数据设计"><a href="#3，元数据设计" class="headerlink" title="3，元数据设计"></a>3，元数据设计</h1><p>假设每个分片为16MB，那么100TB&#x2F;16MB &#x3D; 6.5M Objects<br>每个metadata设计为</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">object</span> key         <span class="hljs-number">64</span>B <span class="hljs-number">64</span> 字节可以覆盖 <span class="hljs-number">80</span>% 以上的标准文件名路径<br><span class="hljs-attribute">size</span>               <span class="hljs-number">8</span>B 如果只使用<span class="hljs-number">4</span>B，<span class="hljs-number">2</span>^<span class="hljs-number">32</span>=<span class="hljs-number">4</span>GB，对于大文件来说不够用<br><span class="hljs-attribute">version</span>            <span class="hljs-number">8</span>B 乐观锁（Optimistic Locking）和多版本控制（MVCC）<br><span class="hljs-attribute">replica</span> pointers   <span class="hljs-number">24</span>B <span class="hljs-number">3</span>副本的直接寻址，每个副本占用<span class="hljs-number">8</span>B，<br><span class="hljs-attribute">checksum</span>           <span class="hljs-number">32</span>B <span class="hljs-number">32</span>B正好是SHA-<span class="hljs-number">256</span>算法的输出长度，用于完整性校验<br><span class="hljs-attribute">timestamp</span>          <span class="hljs-number">8</span>B <span class="hljs-number">64</span>bit的时间戳是Unix最精确的纳秒级别长度<br></code></pre></td></tr></table></figure>
+<p>最终元数据大小为</p>
+<p>$$6.5M \times 144B &#x3D; 1 GB$$</p>
+<p>元数据可以轻松加载进Master的内存</p>
+<hr>
+<p>元数据可以存储在TiKV或者RockDB中，与GFS不同，元数据不仅仅存储于Master中，为了避免：</p>
+<ul>
+<li>内存瓶颈：海量小文件会导致每个文件需要一个Object Key。</li>
+<li>单点故障：虽然有辅助的Shadow Master，但是切换不是瞬间，存在数据不一致风险。</li>
+<li>写入瓶颈：在高并发写入时，Master 为了保证一致性，会对目录树加锁。大量并发请求会阻塞在 Master 的单机锁上。同时控制流会经过Master节点，Master的网卡和CPU会成为瓶颈</li>
+</ul>
+<p>虽然 GFS 的设计很经典，但在 100TB 且存在海量小文件的场景下，单机 Master 会面临 内存撑爆 (Memory Bottleneck) 和 写入并发受限 (Write Bottleneck) 的问题。同时，单机 Master 是 SPOF (单点故障)，不符合金融级高可用的要求。因此，我倾向于使用类似 TiKV 的分布式 KV 来存储元数据，利用其 Raft 协议保证强一致性和自动容错，并通过分片机制解决元数据的扩展性问题。</p>
+<h1 id="4-数据切片"><a href="#4-数据切片" class="headerlink" title="4. 数据切片"></a>4. 数据切片</h1><p>对于小对象（比如 &lt; 100MB），客户端发起一个简单的 HTTP PUT 请求，将整个对象作为 Payload 发送。</p>
+<p>当对象很大（比如 10GB 或 1TB）时，一次性 PUT 会面临极高的风险：因此我们需要引入切片。</p>
+<p>Multipart Upload 的具体工作流程（S3 标准）<br>这个过程通常分为三个阶段，按此顺序进行：</p>
+<h2 id="第一阶段：初始化-Initiate"><a href="#第一阶段：初始化-Initiate" class="headerlink" title="第一阶段：初始化 (Initiate)"></a>第一阶段：初始化 (Initiate)</h2><p>客户端告诉服务器：“我要上传对象 movie.mp4，请准备好。”<br>服务器生成一个全局唯一的 Upload ID 并返回给客户端。这个 ID 用于跟踪后续所有分片。</p>
+<h2 id="第二阶段：上传分片-Upload-Parts"><a href="#第二阶段：上传分片-Upload-Parts" class="headerlink" title="第二阶段：上传分片 (Upload Parts)"></a>第二阶段：上传分片 (Upload Parts)</h2><p>客户端将 10GB 文件切成（例如）1000 个 10MB 的分片。<br>并行上传： 客户端可以启动 10 个线程，并发地上传不同的分片。<br>分片标识： 每个分片请求都带上 Upload ID 和一个 Part Number（序号，用于排序）。<br>校验： 每一个分片上传成功，服务器会返回一个 ETag（通常是该分片的 MD5）。</p>
+<h2 id="第三阶段：完成-合并-Complete"><a href="#第三阶段：完成-合并-Complete" class="headerlink" title="第三阶段：完成&#x2F;合并 (Complete)"></a>第三阶段：完成&#x2F;合并 (Complete)</h2><p>当所有分片上传完毕，客户端发送一个“完成”请求，并提交一份清单（包含所有 Part Number 和对应的 ETag）。<br>逻辑合并： 服务器核对清单无误后，宣布对象已创建。</p>
+<hr>
+<p>当你完成 Multipart Upload 后，元数据服务器（如 TiKV）里记录的不再是一个简单的物理地址，而是一个 有序列表：<br>对象：movie.mp4 的元数据</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xl">P<span class="hljs-function"><span class="hljs-title">art</span> 1 -&gt;</span> Node_A, Disk_1, Offset_100 (Replica <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>)<br>P<span class="hljs-function"><span class="hljs-title">art</span> 2 -&gt;</span> Node_B, Disk_5, Offset_500 (Replica <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>)<br>...<br>P<span class="hljs-function"><span class="hljs-title">art</span> N -&gt;</span> Node_Z, Disk_2, Offset_900 (Replica <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>)<br></code></pre></td></tr></table></figure>
+<p>读取时：<br>当用户下载这个 10GB 对象时，网关从元数据中拿到这个分片列表，按顺序从不同的数据节点读取内容，并以 <strong>Stream</strong>（流）的形式返回给用户。用户感觉是在读一个连续的文件，但实际数据分布在全集群的不同机器上。</p>
+<p>这样做：</p>
+<ul>
+<li>支持断点续传：比如任意Chunk下载失败，只需要重新传这个分片，无需全部上传。</li>
+<li>吞吐量大：客户端可以利用 100Gbps 的内网，同时向 50 台不同的数据存储节点（OSD）发送数据，写入性能随集群规模线性增长。</li>
+<li>支持未知文件大小：比如上传数据流Stream，可以一边生成分片一边上传。</li>
+<li>实现Append：虽然对象存储通常不支持原地修改，但通过分片，可以在不改变原有分片的情况下，上传新的分片来重组对象。</li>
+</ul>
+<hr>
+<p>对于每个Chunk的副本分片到不同机架上：<br>采用机架感知（Rack-aware）的放置策略。通过将三个副本分散到三个不同的机架（Rack A, B, C），我们可以有效规避 ToR 交换机或 PDU 掉电引起的单点故障。在实现上，利用类似 CRUSH 的算法进行拓扑映射，并优先保证副本在物理空间上的最大隔离。同时，在读取数据时，利用<strong>拓扑亲和性</strong>（Topology Affinity）优先读取距离客户端最近的副本，以降低跨交换机的网络流量。</p>
+<h1 id="5-Replication-vs-EC"><a href="#5-Replication-vs-EC" class="headerlink" title="5. Replication vs EC"></a>5. Replication vs EC</h1><p>小规模使用3-Replication，特点是</p>
+<ul>
+<li>快速读取</li>
+<li>写简单</li>
+<li>回复简单</li>
+<li>100%可用需要300%物理存储</li>
+</ul>
+<p>大规模使用EC纠删码，比如RS(10,4)，但是10+4方案为了保证机架感知，需要14台机架，确认物理机架可用数量至少14台。10+4意味着10个数据块+4个校验块，空间利用率$\frac{10}{10+4}$，允许最多挂掉4个节点。</p>
+<hr>
+<p>通常来说</p>
+<ul>
+<li>hot objects 采用 replication：如果存热点数据的某台机器挂了，系统直接从另一个副本读，用户完全感知不到延迟增加。</li>
+<li>cold objects 采用 EC：冷数据几乎不被访问，所以 EC 带来的“读解码延迟”是可以接受的。</li>
+</ul>
+<h2 id="动态转储："><a href="#动态转储：" class="headerlink" title="动态转储："></a>动态转储：</h2><p>更深入设计，一个优秀的对象存储可以采用混合容错的方式，热点数据可以转储为冷数据。</p>
+<ul>
+<li>策略 1：基于时间 (TTL)： 对象创建后的前 7 天（热期）用 3 副本；7 天后自动转为 EC。</li>
+<li>策略 2：基于访问频率 (Access Frequency)： 使用LRU策略，系统监控访问次数，如果一个对象在 30 天内访问次数少于 5 次，后台线程自动触发“副本转 EC”的 Job。</li>
+<li>策略 3：写缓冲 (Write Buffer)： 所有新对象先用副本方式快速写入（保证写入低延迟），等凌晨系统负载低时，后台批量异步转换为 EC 存储。</li>
+</ul>
+<h1 id="6-扩容与重平衡"><a href="#6-扩容与重平衡" class="headerlink" title="6. 扩容与重平衡"></a>6. 扩容与重平衡</h1><p>当系统加入新节点后，如何迁移数据：</p>
+<ul>
+<li>设置水位线：磁盘使用率达到80%后自动触发</li>
+<li>不能全量迁移：传统哈希中，由$Hash(key)% N$ 变为$Hash(key)% (N+1)$时，所有桶几乎都要重平衡，这样影响过大</li>
+<li>PG 迁移： 以 Placement Group 为单位进行迁移，而不是单个对象。为了不迁移所有Chunk，我们引入了中间层，这个中间层通常被称为 Placement Group (PG)、Bucket 或 Shard (分片)。当新节点加入时，重平衡器（Rebalancer）只需要计算 PG 的归属变化，而不是每个对象的归属变化。</li>
+<li>流量控制 (Throttling)： 重平衡任务必须是后台低优先级的。需通过令牌桶限制带宽，防止由于数据迁移导致正常 IO 请求（用户请求）的延迟抖动。</li>
+<li>一致性保持： 迁移过程中，利用元数据的版本号或 Proxy 模式，确保读取请求能重定向到新位置。</li>
+<li>虚拟节点：让 1 个物理节点在环上化身为 100 个甚至 1000 个虚拟节点。用于解决数据倾斜的问题，比如一个机架上占用90%，而另一个机架只有1%的数据<br>负载均衡： 虚拟节点越多，环被切分得越碎，数据分布越均匀。<br>异构支持： 性能强的机器（如 64TB 硬盘）可以分配 200 个虚拟节点，性能弱的（如 16TB）只分配 50 个。</li>
+<li>一致性哈希；使用ketama算法，设计一个一致性哈希环，</li>
+<li>令牌桶和调度算法：让迁移的优先级尽可能低，以确保正常访问的带宽足够。</li>
+</ul>
+<h2 id="一致性哈希算法"><a href="#一致性哈希算法" class="headerlink" title="一致性哈希算法"></a>一致性哈希算法</h2><h3 id="Ketama算法"><a href="#Ketama算法" class="headerlink" title="Ketama算法"></a>Ketama算法</h3><ul>
+<li>步骤：<br>哈希空间环化： 将哈希输出范围想象成一个圆环。</li>
+<li>节点映射： 使用相同的哈希算法（如 MurmurHash3，性能高且分布均匀）将服务器节点的 ID 或 IP 映射到环上的多个点（虚拟节点）。</li>
+<li>数据映射： 计算对象的 Key 的哈希值，也映射到环上。</li>
+<li>查找规则： 从对象在环上的位置开始，顺时针行走，遇到的第一个节点就是该数据的归属。</li>
+<li>如何实现不变：<br>当你新增节点 <code>N_new</code> 时，它只会插入到圆环的某个位置。<br>只有在 <code>N_new</code> 逆时针方向到上一个节点之间的那一小段弧线上的对象，其顺时针遇到的第一个节点才变成了 <code>N_new</code>。<br>圆环上其他所有区域的对象，顺时针遇到的节点依然是原来的那个，因此位置完全不变。</li>
+</ul>
+<h3 id="JumpConsistentHash"><a href="#JumpConsistentHash" class="headerlink" title="JumpConsistentHash"></a>JumpConsistentHash</h3><p>原理： 它通过一个随机数生成器（由 Key 作为种子）来模拟“抛硬币”。<br>当节点数量由N变为N+1时，只有$\frac{1}{N+1}$的概率跳转到<br>优点： 内存占用近乎为零，速度极快。<br>缺点： 不支持手动指定某个节点的权重（除非通过虚拟节点变通），且只能按顺序增减节点。</p>
+<h3 id="Google-Maglev"><a href="#Google-Maglev" class="headerlink" title="Google Maglev"></a>Google Maglev</h3><p>这是 Google 的负载均衡器使用的方案，适用于对分布均匀度要求极高的场景。</p>
+<h1 id="7-热点处理"><a href="#7-热点处理" class="headerlink" title="7. 热点处理"></a>7. 热点处理</h1><h2 id="读热点"><a href="#读热点" class="headerlink" title="读热点"></a>读热点</h2><ol>
+<li>增加多级缓存：在Gateway层增加Redis缓存</li>
+<li>动态副本：检测到某个 PG 访问频率极高时，自动在闲置节点上增加临时副本，分担压力。</li>
+<li>使用CDN：边缘分发网络，不要使用从存储系统里面读。</li>
+<li>Key salting：对于热点数据，加盐打散，防止数据倾斜，对某些节点压力过大。</li>
+</ol>
+<h3 id="写热点"><a href="#写热点" class="headerlink" title="写热点"></a>写热点</h3><ol>
+<li>分片拆分 (Split)： 如果某个元数据分片压力过大，触发分片自动拆分。</li>
+<li>异步刷盘与 Buffer： 写入先落到高性能的 WAL（预写日志）或 SSD 缓存层，再异步同步到 HDD 存储层。</li>
+</ol>
+<h1 id="8-失效情景"><a href="#8-失效情景" class="headerlink" title="8. 失效情景"></a>8. 失效情景</h1><ol>
+<li>Node Crash：通过心跳或者故障检测标记dead并触发repair。</li>
+<li>Rack Failure：实现rack-aware placement 保证不丢。</li>
+<li>用 3 &#x2F; 5 node consensus cluster，比如etcd&#x2F;Raft保证线性一致。</li>
+</ol>
+<h1 id="9-优化点"><a href="#9-优化点" class="headerlink" title="9. 优化点"></a>9. 优化点</h1><ol>
+<li>如果是小文件较多的系统，多个小文件合并为一个大文件，采用SSTable存储，减少磁盘 IOPS 压力和元数据数量。</li>
+<li>强一致性保证：写入时采用 Quorum 机制（W+R &gt; N），或者依赖 Raft&#x2F;Paxos 协议同步元数据状态。</li>
+<li>垃圾回收：标记删除。对象删除后并不立即物理删除，而是后台异步扫描删除过期的 Chunk，防止频繁删除导致性能下降。</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" class="category-chain-item">系统设计</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" class="print-no-link">#系统设计</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>100TB分布式存储系统设计</div>
+      <div>https://yicizhang00.github.io/posts/分布式/系统设计/100TB分布式存储设计/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年6月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/GFS/" title="GFS (Google File System)">
+                        <span class="hidden-mobile">GFS (Google File System)</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言CAP 定理中的 $P$（分区容忍性）在完全异步系统里其实就是 FLP 的常态：  在 CAP 的世界里：当发生 $P$ 时，如果你追求 $C$（强一致性），节点就必须死等对端恢复，从而被迫放弃 $A$（可用性&#x2F;终止性）。 在 FLP 的世界里：因为网络完全异步，哪怕没有发生物理分区，仅仅是网络延迟波动，或者节点正在经历 Stop-the-World (STW) 垃圾回收，对于其他节">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FLP不可能性定理与分布式共识理论">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/FLP%E4%B8%8D%E5%8F%AF%E8%83%BD%E6%80%A7/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言CAP 定理中的 $P$（分区容忍性）在完全异步系统里其实就是 FLP 的常态：  在 CAP 的世界里：当发生 $P$ 时，如果你追求 $C$（强一致性），节点就必须死等对端恢复，从而被迫放弃 $A$（可用性&#x2F;终止性）。 在 FLP 的世界里：因为网络完全异步，哪怕没有发生物理分区，仅仅是网络延迟波动，或者节点正在经历 Stop-the-World (STW) 垃圾回收，对于其他节">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-28T06:10:00.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式系统">
+<meta property="article:tag" content="一致性理论">
+<meta property="article:tag" content="FLP不可能性">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>FLP不可能性定理与分布式共识理论 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">FLP不可能性定理与分布式共识理论</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-05-28 14:10" pubdate>
+          2026年5月28日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          72 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">FLP不可能性定理与分布式共识理论</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>CAP 定理中的 $P$（分区容忍性）在完全异步系统里其实就是 FLP 的常态：</p>
+<ul>
+<li><strong>在 CAP 的世界里</strong>：当发生 $P$ 时，如果你追求 $C$（强一致性），节点就必须死等对端恢复，从而被迫放弃 $A$（可用性&#x2F;终止性）。</li>
+<li><strong>在 FLP 的世界里</strong>：因为网络完全异步，哪怕没有发生物理分区，仅仅是网络延迟波动，或者节点正在经历 Stop-the-World (STW) 垃圾回收，对于其他节点而言，此时此刻的观测结果与“发生物理分区”或“对端彻底宕机”是绝对不可区分的。</li>
+</ul>
+<p>所以，FLP 定理用严格的数学证明阐明了：在完全异步的网络下，由于无法区分“慢”与“死”，CAP 中的 $P$ 是随时、随地、无条件存在的。因此，系统绝对无法同时完美获得 $C$ 和 $A$（即 FLP 中的 Agreement 与 Termination），两者的物理本质完全一致。 </p>
+<h2 id="“关键信息”与双稳态的死锁"><a href="#“关键信息”与双稳态的死锁" class="headerlink" title="“关键信息”与双稳态的死锁"></a>“关键信息”与双稳态的死锁</h2><p>在初始双稳态下，系统状态犹如一杆悬空的平衡秤。失联的节点 $B$ 到底掌握了什么初始输入？或者它失联前有没有处理它手里的关键消息？</p>
+<ul>
+<li>如果 $B$ 掌握了走向 $0$ 的关键信息（例如只有它的输入为 $0$），而它此刻因某种原因“失联”了：</li>
+<li><strong>若其他节点选择“一直等 $B$”</strong>：万一 $B$ 是真的彻底宕机，其他节点将会无限期卡死，直接破坏了<strong>终止性（Liveness）</strong>。</li>
+<li><strong>若其他节点选择“不等 $B$”</strong>：直接越过它达成全为 $1$ 的共识，万一 $B$ 仅仅是遭遇了极端的网络延迟或 STW，它其实还活着且保留着决断为 $0$ 的关键信息，等它恢复并带着旧数据醒来时，共识便会被撕裂，直接破坏了<strong>一致性（Safety）</strong>。</li>
+</ul>
+<blockquote>
+<p><strong>核心洞察</strong>：在完全异步系统中，一个节点宕机和一个节点慢到无限久，在其他节点眼里没有本质区别；而只要这种区别无法被确定，共识协议就无法保证在所有情况下都完成决策。</p>
+</blockquote>
+<p><strong>FLP（Fischer–Lynch–Paterson）不可能性定理</strong>是分布式一致性理论的核心基石。其核心结论揭示了分布式计算的本质边界：</p>
+<blockquote>
+<p><strong>在完全异步（Asynchronous）系统模型中，即使仅允许一个进程发生崩溃（Crash）故障，也不存在任何确定性（Deterministic）的分布式共识算法，能够同时保证安全性和确定性终止。</strong></p>
+</blockquote>
+<p>这一定理并非宣告了共识在工程上的不可靠性，而是阐明了在**“理想化异步模型”<strong>与</strong>“确定性算法”**的组合下，强终止性（Termination）与容错性（Fault Tolerance）之间存在不可调和的根本冲突。后续的 Paxos、Raft 等实用共识协议，均是通过放宽异步假设或引入随机化来绕过 FLP 定理的限制。</p>
+<h1 id="背景与系统模型"><a href="#背景与系统模型" class="headerlink" title="背景与系统模型"></a>背景与系统模型</h1><p>本文采用 FLP 原文及其经典文献中的标准模型描述：</p>
+<ul>
+<li><p><strong>完全异步模型（Fully Asynchronous Model）</strong>：</p>
+<ol>
+<li><strong>消息时延无界</strong>：网络传输延迟可能任意长，但不存在丢包（消息最终必达）。</li>
+<li><strong>进程速度无界</strong>：进程的相对执行速度可任意波动，没有已知的上界与下界。</li>
+<li><strong>无时钟同步</strong>：系统缺乏全局时钟或共享的时间步进机制。</li>
+</ol>
+</li>
+<li><p><strong>故障模型（Fail-Stop Model）</strong>：<br>任意时刻最多允许 $1$ 个进程发生<strong>崩溃终止（Crash-Stop）</strong>。崩溃的进程会立即停止运行且不再发送任何消息，但排除发送错误或恶意消息的拜占庭行为（Non-Byzantine）。</p>
+</li>
+</ul>
+<p>在完全异步的语境下，<strong>由于缺乏时间边界，进程无法通过“超时”机制区分“对端崩溃”与“网络极端延迟”</strong>。这种拓扑和逻辑上的不可区分性，正是 FLP 定理证明的核心切入点。</p>
+<h1 id="共识问题的形式化定义"><a href="#共识问题的形式化定义" class="headerlink" title="共识问题的形式化定义"></a>共识问题的形式化定义</h1><p>一个可行的分布式共识算法必须在任意合法的异步调度下，严格满足以下三个形式化性质：</p>
+<ol>
+<li><strong>一致性（Agreement &#x2F; Safety）</strong>：所有非故障进程最终决定（Decide）的达成值必须完全相同。</li>
+<li><strong>有效性（Validity &#x2F; Non-triviality）</strong>：决定的输出值必须源于某个进程的初始输入值，防止算法输出无意义的预设值。</li>
+<li><strong>终止性（Termination &#x2F; Liveness）</strong>：所有非故障进程最终都能在有限步内做出决定。</li>
+</ol>
+<p>FLP 定理证明的核心，在于证实确定性算法无法在最坏的异步调度（Message Delivery Order）和进程速率下，同时完美兼顾这三者。</p>
+<h1 id="FLP-定理（非正式表述）"><a href="#FLP-定理（非正式表述）" class="headerlink" title="FLP 定理（非正式表述）"></a>FLP 定理（非正式表述）</h1><p>在至少包含两个进程的完全异步系统中，只要允许发生单点崩溃故障，就不存在任何确定性共识算法，能够保证在所有可能的执行序列中皆满足一致性、有效性与终止性。</p>
+<h1 id="证明概要与核心逻辑"><a href="#证明概要与核心逻辑" class="headerlink" title="证明概要与核心逻辑"></a>证明概要与核心逻辑</h1><p>FLP 的证明极其精巧，主要利用了**配置价性（Configuration Valency）<strong>与</strong>事件调度（Event Schedules）**的分析技巧。其核心思想分为以下几个关键步骤：</p>
+<h3 id="1-配置与事件系统"><a href="#1-配置与事件系统" class="headerlink" title="1. 配置与事件系统"></a>1. 配置与事件系统</h3><ul>
+<li><strong>配置（Configuration）</strong>：代表系统在某一时刻的全局快照，包含所有进程的本地状态以及网络中尚未送达的消息集合（Message Buffer）。</li>
+<li><strong>事件（Event）</strong>：定义为一个原子步 $e &#x3D; (p, m)$，即进程 $p$ 接收并处理网络中的一条消息 $m$，随后更新自身状态并可能广播新消息。配置通过事件的驱动发生状态转移。</li>
+</ul>
+<h3 id="2-价性的形式化定义"><a href="#2-价性的形式化定义" class="headerlink" title="2. 价性的形式化定义"></a>2. 价性的形式化定义</h3><ul>
+<li><strong>$0$-单稳态（$0$-univalent）</strong>：从当前配置出发，无论后续的事件如何调度，系统最终达成的共识值<strong>只能是 $0$</strong>。</li>
+<li><strong>$1$-单稳态（$1$-univalent）</strong>：从当前配置出发，无论后续的执行路径如何，系统最终达成的共识值<strong>只能是 $1$</strong>。</li>
+<li><strong>双稳态（Bivalent）</strong>：从当前配置出发，系统的最终命运尚未决断。通过某些调度路径可以走向 $0$-单稳态，而通过另一些调度路径则可以走向 $1$-单稳态。</li>
+</ul>
+<h3 id="3-引理一：初始双稳态配置的存在性"><a href="#3-引理一：初始双稳态配置的存在性" class="headerlink" title="3. 引理一：初始双稳态配置的存在性"></a>3. 引理一：初始双稳态配置的存在性</h3><ul>
+<li>根据有效性约束，全 $0$ 输入的配置必为 $0$-单稳态，全 $1$ 输入的配置必为 $1$-单稳态。</li>
+<li>构造一条“平行宇宙链条（Neighboring Chain）”，每次仅改变一个进程的初始输入。在此链条中，必然存在两个相邻的初始配置 $X$ 和 $Y$，它们仅在进程 $P$ 的输入上不同，且分别属于 $0$-单稳态和 $1$-单稳态。</li>
+<li>此时若进程 $P$ 遭遇网络分区或延迟而无法与其他节点通信，剩余的 $N-1$ 个进程在 $X$ 和 $Y$ 两种配置下观测到的局部世界完全相同。由于无法区分，它们在处理相同的消息序列后必然做出相同的决策，这与 $X$ 和 $Y$ 互为不同单稳态的前提产生理论矛盾。</li>
+</ul>
+<h4 id="严密反证过程"><a href="#严密反证过程" class="headerlink" title="严密反证过程"></a>严密反证过程</h4><p>利用反证法。假设系统不存在任何初始双稳态配置，即所有初始配置要么是 $0$-单稳态，要么是 $1$-单稳态。</p>
+<p>构造一个初始输入全为 $[0,0,0,…,0]$ 的配置，根据有效性，其必然属于 $0$-单稳态。随后我们逐位翻转进程的初始输入，构建一组平行初始配置：</p>
+<ul>
+<li>$[1,0,0,0,…,0]$</li>
+<li>$[1,1,0,0,…,0]$</li>
+<li>$[1,1,1,0,…,0]$</li>
+<li>…</li>
+<li>$[1,1,1,1,…,1]$ （此配置必然属于 $1$-单稳态）</li>
+</ul>
+<p>在这条从全 $0$ 到全 $1$ 的初始配置链条中，由于起点命运为 $0$，终点命运为 $1$，且中间不存在任何双稳态，则中间<strong>必然存在某一对相邻的初始配置</strong> $X_i$ 和 $X_{i+1}$，分别代表 $0$-单稳态和 $1$-单稳态，并且两者的输入有且仅差了一个进程 $p$：</p>
+<ul>
+<li>$X_i &#x3D; [1,1,…,1,\mathbf{0},0,…,0]$</li>
+<li>$X_{i+1} &#x3D; [1,1,…,1,\mathbf{1},0,…,0]$</li>
+</ul>
+<p>此时进行反证反击：我们故意让进程 $p$ 在系统启动的瞬间发生崩溃（Crash）或者遭遇极端的网络分区&#x2F;STW。这意味着进程 $p$ 保持绝对的沉默，既不发送消息，也不处理消息。</p>
+<p>对于集群中除了 $p$ 以外的其余 $n-1$ 个非故障进程而言：</p>
+<ol>
+<li><strong>在宇宙 $X_i$ 中</strong>：它们收不到来自进程 $p$ 的任何消息。由于 $X_i$ 是 $0$-单稳态，为了满足容错下的终止性，其余 $n-1$ 个进程即使在缺失 $p$ 的情况下，最终也<strong>必须终止并决定 $0$</strong>。</li>
+<li><strong>在宇宙 $X_{i+1}$ 中</strong>：它们同样无法从进程 $p$ 获得任何消息。由于 $X_{i+1}$ 是 $1$-单稳态，同理，其余 $n-1$ 个进程在缺失 $p$ 的情况下，最终也<strong>必须终止并决定 $1$</strong>。</li>
+</ol>
+<p><strong>关键矛盾爆发</strong>：由于 $X_i$ 和 $X_{i+1}$ 的唯一区别只在于进程 $p$ 的输入，现在进程 $p$ 彻底沉默了。对于其余 $n-1$ 个进程来说，它们在宇宙 $X_i$ 和宇宙 $X_{i+1}$ 中所看到的初始状态、收到的网络消息序列以及它们自身的局部状态变迁<strong>完全是一模一样的</strong>。这 $n-1$ 个节点在两个宇宙中处于完全等价的观测状态，根本无法判断自己究竟置身于哪一个宇宙。</p>
+<p>既然从可观测角度完全无法区分，根据确定性算法的代码必然性，这 $n-1$ 个进程在宇宙 $X_i$ 中做出什么决策，就<strong>必然</strong>在宇宙 $X_{i+1}$ 中做出完全相同的决策：</p>
+<ul>
+<li><p>如果它们最终都决定了 $0$，那么在宇宙 $X_{i+1}$ 里，算法就打破了“从 $1$-单稳态出发只能决定 $1$”的绝对定义；</p>
+</li>
+<li><p>如果它们最终都决定了 $1$，那么在宇宙 $X_i$ 里，算法就打破了“从 $0$-单稳态出发只能决定 $0$”的绝对定义。</p>
+</li>
+<li><p><strong>结论：反证假设破产，系统在初始时，必然存在至少一个双稳态配置。</strong></p>
+</li>
+</ul>
+<h3 id="4-引理二：双稳态配置的无限保持"><a href="#4-引理二：双稳态配置的无限保持" class="headerlink" title="4. 引理二：双稳态配置的无限保持"></a>4. 引理二：双稳态配置的无限保持</h3><p><strong>核心引理陈述</strong>：从任一双稳态（Bivalent）配置出发，总能找到一个特定的下一步事件，使得系统转移后的新配置依然保持双稳态。</p>
+<p><strong>证明方法</strong>：反证法。</p>
+<p><strong>反证假设</strong>：假设从双稳态配置 $C$ 出发，所有可能的单步事件都会导致系统立刻落入单稳态（要么进入 $0$-单稳态，要么进入 $1$-单稳态），即系统必定会从双稳态中“逃逸”。</p>
+<p>设 $e &#x3D; (p, m)$ 是在配置 $C$ 中一个合法且待处理的临界事件（进程 $p$ 接收消息 $m$）。令 $\mathcal{E}$ 为从 $C$ 出发、<strong>不包含事件 $e$</strong> 的所有可达后继配置的集合。由于网络异步模型允许消息被无限期延迟，在走向最终决策的路径上，我们总可以先扣下事件 $e$ 暂不投递。</p>
+<h4 id="步骤一：构建单稳态相邻边界"><a href="#步骤一：构建单稳态相邻边界" class="headerlink" title="步骤一：构建单稳态相邻边界"></a>步骤一：构建单稳态相邻边界</h4><p>根据双稳态的定义，从 $C$ 出发必然存在两条命运分叉的决断路径：</p>
+<ol>
+<li>一条最终决定 $0$，由于消息最终必须送达，事件 $e$ 终究会被应用。因此在走向 $0$ 的路径上，必然能找到一个配置 $D_0 \in \mathcal{E}$，使得 $e(D_0)$ 属于 <strong>$0$-单稳态</strong>。</li>
+<li>另一条最终决定 $1$，同理能找到一个配置 $D_1 \in \mathcal{E}$，使得 $e(D_1)$ 属于 <strong>$1$-单稳态</strong>。</li>
+</ol>
+<p>由于 $\mathcal{E}$ 是一个连通的离散状态空间，从指向 $0$ 的区域走向指向 $1$ 的区域，在思想实验的链条中<strong>必有一个交界点</strong>。也就是说，在 $\mathcal{E}$ 中必然存在两个<strong>相邻</strong>的配置 $F_0$ 和 $F_1$，它们经由某个单步事件 $e’ &#x3D; (p’, m’)$ 相连（即 $F_1 &#x3D; e’(F_0)$），且满足：</p>
+<ul>
+<li>$e(F_0)$ 是 <strong>$0$-单稳态</strong>。</li>
+<li>$e(F_1) &#x3D; e(e’(F_0))$ 是 <strong>$1$-单稳态</strong>。</li>
+</ul>
+<p><em>(注：此处意味着 $F_0$ 处于一个极其微妙的平衡点，如果直接让 $p$ 接收 $m$（执行 $e$），系统锁定为 $0$；如果系统先多走一步让 $p’$ 处理 $m’$（执行 $e’$ 到达 $F_1$），在这个新状态下让 $p$ 再接收 $m$，系统则会戏剧性地骤变成 $1$-单稳态。)</em></p>
+<p>现在，我们通过分析事件 $e$ 与 $e’$ 的拓扑关系（利用独立事件的可交换性引理）来推导矛盾。</p>
+<hr>
+<h4 id="步骤二：分情况讨论与矛盾推导"><a href="#步骤二：分情况讨论与矛盾推导" class="headerlink" title="步骤二：分情况讨论与矛盾推导"></a>步骤二：分情况讨论与矛盾推导</h4><h5 id="Case-1-p-neq-p’-（-e-和-e’-作用于不同的进程）"><a href="#Case-1-p-neq-p’-（-e-和-e’-作用于不同的进程）" class="headerlink" title="Case 1: $p \neq p’$（$e$ 和 $e’$ 作用于不同的进程）"></a><strong>Case 1: $p \neq p’$（$e$ 和 $e’$ 作用于不同的进程）</strong></h5><p>当两个事件作用于不同的进程时，它们在空间上相互独立，执行顺序在物理上完全可交换（Commutativity）。</p>
+<ul>
+<li><strong>路径一</strong>：从 $F_0$ 出发先执行 $e’$ 再执行 $e$，到达的配置为 $e(e’(F_0)) &#x3D; e(F_1)$。根据前文边界选择，该配置为 <strong>$1$-单稳态</strong>。</li>
+<li><strong>路径二</strong>：从 $F_0$ 出发先执行 $e$ 再执行 $e’$，到达的配置为 $e’(e(F_0))$。由于 $e(F_0)$ 已被确认为 <strong>$0$-单稳态</strong>，根据单稳态的不可逆性（一旦锁定，后续任意扩展皆保持同价），$e’(e(F_0))$ 必然仍是 <strong>$0$-单稳态</strong>。</li>
+</ul>
+<p><strong>矛盾</strong>：由于 $p \neq p’$，在拓扑上 $e(e’(F_0))$ 与 $e’(e(F_0))$ <strong>在物理上是完全一模一样的同一个全局配置</strong>。同一个全局配置不可能既是 $0$-单稳态又是 $1$-单稳态，此情况矛盾！</p>
+<h5 id="Case-2-p-p’-（-e-和-e’-作用于同一进程-p-）"><a href="#Case-2-p-p’-（-e-和-e’-作用于同一进程-p-）" class="headerlink" title="Case 2: $p &#x3D; p’$（$e$ 和 $e’$ 作用于同一进程 $p$）"></a><strong>Case 2: $p &#x3D; p’$（$e$ 和 $e’$ 作用于同一进程 $p$）</strong></h5><p>当两封消息都堆在同一个进程 $p$ 面前时，事件顺序不再可交换。此时我们引入“网络分区&#x2F;幽灵节点”的思想来制造不可区分性：</p>
+<ol>
+<li><strong>在宇宙 A 中</strong>：系统处于配置 $e(F_0)$（已知为 $0$-单稳态）。此时让进程 $p$ <strong>立即崩溃（或陷入严重网络分区而彻底沉默）</strong>。由于共识协议必须满足终止性（Termination），其余 $N-1$ 个非故障进程在无法与 $p$ 通信的情况下，最终必须达成某个决定值 $v_0$。因为起点是 $0$-单稳态，这个决定值 $v_0$ <strong>必然等于 $0$</strong>。整个决策过程仅依赖于其余进程的状态、非 $p$ 的消息流通以及“$p$ 已沉默”的事实。</li>
+<li><strong>在宇宙 B 中</strong>：系统处于配置 $e(F_1) &#x3D; e(e’(F_0))$（已知为 $1$-单稳态）。同样在此时让进程 $p$ <strong>立即崩溃并保持沉默</strong>。其余 $N-1$ 个进程在不知情的情况下继续运行并尝试达成共识。</li>
+</ol>
+<p><strong>终极矛盾</strong>：对比宇宙 A 和宇宙 B，进程 $p$ 无论是在宇宙 B 里先后悄悄处理了 $m’$ 和 $m$，还是在宇宙 A 里只处理了 $m$，<strong>由于它处理完后就立刻遭遇分区并闭嘴，它更新后的局部状态根本无法通过网络传递出去</strong>。对于其余 $N-1$ 个进程而言，它们看到的初始状态、网络中剩余的消息、以及非 $p$ 节点的局部行为在两个宇宙中<strong>完全相同</strong>。</p>
+<p>既然观测视角完全无法区分，根据确定性算法的必然性，其余节点在宇宙 B 中也必须做出和宇宙 A 一模一样的决定——即<strong>决定 $0$</strong>。但这与 $e(F_1)$ 属于 <strong>$1$-单稳态</strong>（最终必须决定 $1$）的定义产生了不可调和的理论破产！</p>
+<hr>
+<h4 id="步骤三：最终推论"><a href="#步骤三：最终推论" class="headerlink" title="步骤三：最终推论"></a>步骤三：最终推论</h4><p>无论是 Case 1 还是 Case 2，反证假设都会推导出逻辑层面的彻底崩溃。</p>
+<ul>
+<li><strong>结论</strong>：反证假设不成立，在双稳态配置的可达集合中，必然存在至少一个后继配置，在其上应用事件 $e$ 后系统依然保持双稳态。这意味着，一个拥有最高网络调度权限的恶意攻击者（Adversary），总能通过精准控制关键消息的延迟与送达顺序，无限期地将系统滞留在没有决断力的双稳态中，使其永远无法达成最终共识。</li>
+</ul>
+<h3 id="5-最终推论"><a href="#5-最终推论" class="headerlink" title="5. 最终推论"></a>5. 最终推论</h3><p>因为系统存在一条能够无限保持双稳态的合法调度路径，导致任何确定性共识算法在最坏执行序列下都会陷入无限循环，无法在有限步内“一锤定音”地做出决定（破坏了 Termination 活性）。至此，FLP 不可能性定理成立。</p>
+<h1 id="影响"><a href="#影响" class="headerlink" title="影响"></a>影响</h1><p>尽管理论封死了完全异步下的绝对共识，但现代分布式系统通过放宽模型假设或弱化性质保证，在实际工程中成功实现了高可用的共识：</p>
+<ul>
+<li><strong>部分同步模型（Partial Synchrony）</strong>：引入全局稳定时间（GST, Global Stabilization Time）的概念。在此时间之后，网络时延恢复有界，例如 PBFT、Tendermint 协议。</li>
+<li><strong>随机化机制（Randomization）</strong>：通过引入不确定性来打破恶劣调度器的死锁。例如 Raft 协议采用的<strong>随机选举超时机制</strong>，以及 Paxos 在冲突时的随机退避重试，利用概率性终止绕过 FLP。</li>
+<li><strong>弱化终止性约束</strong>：经典 Paxos 保证了绝对的安全性（Safety），但其活性（Liveness）仅在“网络相对稳定的周期内（Stable Periods）”得到保证，允许在极端冲突下出现活锁。</li>
+<li><strong>概率共识与最终一致性</strong>：如部分区块链协议（POW、POS）允许在短期内存在分叉，通过工作量证明或权重累积实现概率性的最终一致，从而在追求可用性与分区容忍性的同时弱化即时终止性。</li>
+</ul>
+<h1 id="经典共识协议中的双稳态与活锁表现"><a href="#经典共识协议中的双稳态与活锁表现" class="headerlink" title="经典共识协议中的双稳态与活锁表现"></a>经典共识协议中的双稳态与活锁表现</h1><p>根据 FLP 不可能性定理，任何确定性的分布式共识协议在完全异步的网络下，都无法同时保证安全性（Safety）与终止性（Termination）。在实际工程设计中，这些协议为了死守安全性，在遭遇极端恶劣的网络调度（Adversary Schedule）时，都会表现出被无限期滞留在“双稳态（Bivalent）”而无法收敛的现象。</p>
+<hr>
+<h2 id="1-Paxos-中的“双稳态”：提案竞争导致的活锁（Duelling-Proposers）"><a href="#1-Paxos-中的“双稳态”：提案竞争导致的活锁（Duelling-Proposers）" class="headerlink" title="1. Paxos 中的“双稳态”：提案竞争导致的活锁（Duelling Proposers）"></a>1. Paxos 中的“双稳态”：提案竞争导致的活锁（Duelling Proposers）</h2><p>在 Multi-Paxos &#x2F; Basic Paxos 中，所谓“双稳态”并不是协议定义的状态，而是指一种<strong>系统长期无法收敛的活锁现象</strong>：多个提案者不断互相覆盖提案编号，导致决议始终无法进入稳定的 Accept 阶段。</p>
+<h3 id="竞争机制如何导致活锁："><a href="#竞争机制如何导致活锁：" class="headerlink" title="竞争机制如何导致活锁："></a>竞争机制如何导致活锁：</h3><ol>
+<li>系统中存在两个活跃提案者 $Proposer_1$ 与 $Proposer_2$。</li>
+<li>$Proposer_1$ 发起 <code>Prepare(n_1)</code> 并成功获得多数派（Quorum）的 Promise，此时其提案值（例如 0）具有潜在决议基础。</li>
+<li>在 $Proposer_1$ 进入 <code>Accept(n_1, v)</code> 阶段之前，$Proposer_2$ 发起更高编号的 <code>Prepare(n_2)</code>（$n_2 &gt; n_1$），并同样获得 Quorum Promise。</li>
+<li>$Acceptor$ 更新承诺，拒绝所有小于 $n_2$ 的提案编号。</li>
+<li>$Proposer_1$ 迟到的 <code>Accept(n_1, v)</code> 被全部拒绝，原本可能形成的决议被打断。</li>
+<li>$Proposer_1$ 被迫发起更高编号提案 $n_3 &gt; n_2$ 以重新争夺主导权。</li>
+</ol>
+<h3 id="调度导致的无限竞争："><a href="#调度导致的无限竞争：" class="headerlink" title="调度导致的无限竞争："></a>调度导致的无限竞争：</h3><p>在异步调度下，如果网络持续交错延迟两个提案者的 Prepare &#x2F; Accept 阶段：</p>
+<ul>
+<li>提案编号不断递增</li>
+<li>每一轮都有人“抢先一步”</li>
+<li>没有任何一个提案能稳定进入 quorum accept</li>
+</ul>
+<p>系统表现为在不同提案值之间不断摇摆，但始终无法完成一次稳定决议。</p>
+<hr>
+<h2 id="2-Raft-中的“双稳态”：Split-Vote-导致的选举空转"><a href="#2-Raft-中的“双稳态”：Split-Vote-导致的选举空转" class="headerlink" title="2. Raft 中的“双稳态”：Split Vote 导致的选举空转"></a>2. Raft 中的“双稳态”：Split Vote 导致的选举空转</h2><p>Raft 中更常见的“类双稳态现象”发生在<strong>Leader 选举阶段的 split vote（票数均分）</strong>，表现为系统无法产生领导者，从而无法推进日志复制。</p>
+<h3 id="选举卡住的机制："><a href="#选举卡住的机制：" class="headerlink" title="选举卡住的机制："></a>选举卡住的机制：</h3><ol>
+<li>系统初始无 Leader，所有节点处于 Follower 状态。</li>
+<li>多个节点同时发生 election timeout，进入 Candidate 状态，并各自递增 <code>currentTerm</code>。</li>
+<li>Candidate 同时广播 <code>RequestVote</code> 请求。</li>
+<li>在节点数较小或网络调度对称的情况下，投票结果可能被均匀分割。</li>
+<li>没有任何 Candidate 获得多数票（$\lfloor N&#x2F;2 \rfloor + 1$），选举失败。</li>
+<li>当前 Term 内无法产生 Leader，日志复制停止，系统无法前进。</li>
+</ol>
+<h3 id="无限选举循环："><a href="#无限选举循环：" class="headerlink" title="无限选举循环："></a>无限选举循环：</h3><p>在完全异步模型下，如果调度持续保持“近似同步”：</p>
+<ul>
+<li>各节点定时器几乎同时触发</li>
+<li>投票持续被平均分割</li>
+<li>Term 不断递增（$T \rightarrow T+1 \rightarrow T+2$ …）</li>
+<li>每一轮都没有 Leader 产生</li>
+</ul>
+<p>系统表现为持续选举但永远无 Leader 的空转状态。</p>
+<hr>
+<h2 id="3-PBFT-中的“双稳态”：View-Change-震荡"><a href="#3-PBFT-中的“双稳态”：View-Change-震荡" class="headerlink" title="3. PBFT 中的“双稳态”：View Change 震荡"></a>3. PBFT 中的“双稳态”：View Change 震荡</h2><p>在 PBFT 中，“双稳态”表现为系统在多个视图之间不断切换，但始终无法稳定进入共识完成阶段。</p>
+<h3 id="机制链条："><a href="#机制链条：" class="headerlink" title="机制链条："></a>机制链条：</h3><ol>
+<li>系统在 View $v$ 下由 Primary 提议 <code>Pre-prepare</code> 消息。</li>
+<li>网络延迟或恶意节点干扰导致 Prepare &#x2F; Commit 阶段无法达成法定人数（$\frac{2}{3}N + 1$）。</li>
+<li>副本节点触发超时，发起 <code>View-Change</code>，认为主节点失效。</li>
+<li>系统切换到 View $v+1$，产生新的 Primary。</li>
+<li>新 Primary 再次遭遇同样的延迟或调度干扰。</li>
+<li>View Change 被再次触发，进入 View $v+2$。</li>
+</ol>
+<h3 id="无限视图切换："><a href="#无限视图切换：" class="headerlink" title="无限视图切换："></a>无限视图切换：</h3><p>在强异步调度下，如果网络延迟始终大于超时阈值：</p>
+<ul>
+<li>View Change 不断触发</li>
+<li>共识始终停留在准备阶段之前</li>
+<li>系统无法进入稳定的 Commit 阶段</li>
+</ul>
+<p>最终表现为视图在不断变化，但没有任何一个视图能够完成共识。</p>
+<hr>
+<h2 id="4-PoW-中的“双稳态”：等长分叉的持续竞争"><a href="#4-PoW-中的“双稳态”：等长分叉的持续竞争" class="headerlink" title="4. PoW 中的“双稳态”：等长分叉的持续竞争"></a>4. PoW 中的“双稳态”：等长分叉的持续竞争</h2><p>在 PoW（如比特币）中，共识是概率性的，但在最坏异步调度下仍可能出现“类双稳态”：<strong>等长链分叉的长期竞争状态</strong>。</p>
+<h3 id="分叉竞争机制："><a href="#分叉竞争机制：" class="headerlink" title="分叉竞争机制："></a>分叉竞争机制：</h3><ol>
+<li>系统出现两条等长链 $C_0$ 与 $C_1$。</li>
+<li>网络被恶意或自然分区为两个算力相当的子集 $A$ 与 $B$。</li>
+<li>$A$ 在 $C_0$ 上挖出新区块，使其长度变为 $H+1$。</li>
+<li>调度器延迟该区块传播，使 $B$ 不可见。</li>
+<li>$B$ 同时在 $C_1$ 上挖出新区块，使其也变为 $H+1$。</li>
+<li>当消息最终交叉传播时，两条链长度再次对齐。</li>
+</ol>
+<h3 id="无限对称增长："><a href="#无限对称增长：" class="headerlink" title="无限对称增长："></a>无限对称增长：</h3><p>如果调度器持续维持对称性：</p>
+<ul>
+<li>两边轮流挖出新区块</li>
+<li>区块传播始终被延迟到“刚好同步”</li>
+<li>两条链长期保持等长竞争</li>
+</ul>
+<p>尽管现实中 PoW 会快速收敛，但在理论最坏异步模型中，分叉可以被无限维持。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li>Fischer, M. J., Lynch, N. A., &amp; Paterson, M. S. (1985). <em>Impossibility of distributed consensus with one faulty process</em>. Journal of the ACM (JACM), 32(2), 374–382.</li>
+<li>Leslie Lamport. <em>Paxos made simple</em>. 2001.</li>
+<li>Diego Ongaro, John Ousterhout. <em>In Search of an Understandable Consensus Algorithm (Raft)</em>. 2014.</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="category-chain-item">理论基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" class="print-no-link">#分布式系统</a>
+      
+        <a href="/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%90%86%E8%AE%BA/" class="print-no-link">#一致性理论</a>
+      
+        <a href="/tags/FLP%E4%B8%8D%E5%8F%AF%E8%83%BD%E6%80%A7/" class="print-no-link">#FLP不可能性</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>FLP不可能性定理与分布式共识理论</div>
+      <div>https://yicizhang00.github.io/posts/分布式/理论基础/FLP不可能性/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年5月28日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/Feign%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5/" title="Feign异常处理实践">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Feign异常处理实践</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/Quorom/" title="Quorom（多数派）">
+                        <span class="hidden-mobile">Quorom（多数派）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

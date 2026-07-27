@@ -1,0 +1,1117 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="这篇主要梳理分布式一致性领域几篇经典论文。它们回答的是同一类问题：当节点会宕机、网络会延迟甚至丢包时，系统怎样对“某个值”或“某个日志顺序”达成一致。 可以先建立一个总脉络：  事务提交问题关注的是“这次事务到底提交还是回滚” 共识问题关注的是“多个副本最终到底认同哪个值” 状态机复制则是在共识之上更进一步，要求大家对同一串日志顺序达成一致 理论上有 FLP 不可能性约束，工程上则依赖超时、领导者">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式一致性算法">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="这篇主要梳理分布式一致性领域几篇经典论文。它们回答的是同一类问题：当节点会宕机、网络会延迟甚至丢包时，系统怎样对“某个值”或“某个日志顺序”达成一致。 可以先建立一个总脉络：  事务提交问题关注的是“这次事务到底提交还是回滚” 共识问题关注的是“多个副本最终到底认同哪个值” 状态机复制则是在共识之上更进一步，要求大家对同一串日志顺序达成一致 理论上有 FLP 不可能性约束，工程上则依赖超时、领导者">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="分布式一致性算法">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>分布式一致性算法 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">分布式一致性算法</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          37 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">分布式一致性算法</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>这篇主要梳理分布式一致性领域几篇经典论文。它们回答的是同一类问题：当节点会宕机、网络会延迟甚至丢包时，系统怎样对“某个值”或“某个日志顺序”达成一致。</p>
+<p>可以先建立一个总脉络：</p>
+<ul>
+<li>事务提交问题关注的是“这次事务到底提交还是回滚”</li>
+<li>共识问题关注的是“多个副本最终到底认同哪个值”</li>
+<li>状态机复制则是在共识之上更进一步，要求大家对同一串日志顺序达成一致</li>
+<li>理论上有 FLP 不可能性约束，工程上则依赖超时、领导者、重试和部分同步假设来实现可用系统</li>
+</ul>
+<h1 id="A-Brief-History-of-Consensus-2PC-and-Transaction-Commit"><a href="#A-Brief-History-of-Consensus-2PC-and-Transaction-Commit" class="headerlink" title="A Brief History of Consensus, 2PC and Transaction Commit"></a>A Brief History of Consensus, 2PC and Transaction Commit</h1><p>分布式事务的发展。</p>
+<p>这篇文章适合拿来建立背景：一致性问题最早不是直接以 Paxos、Raft 的形式出现，而是从数据库事务提交、主备复制和故障恢复这些工程问题里逐渐抽象出来的。</p>
+<p>2PC（Two-Phase Commit，两阶段提交）的目标是让多个参与者对一笔事务的提交结果保持一致：</p>
+<ol>
+<li>prepare 阶段：协调者询问所有参与者是否可以提交</li>
+<li>commit 阶段：如果所有参与者都返回可以提交，则广播 commit，否则广播 abort</li>
+</ol>
+<p>2PC 的问题在于阻塞：</p>
+<ul>
+<li>协调者一旦在关键时刻宕机，参与者可能长时间卡在“不知道该提交还是回滚”的状态</li>
+<li>它解决的是原子提交问题，不是通用意义上的分布式共识</li>
+<li>2PC 默认更偏向数据库事务语义，不擅长处理长期网络分区和副本领导者切换</li>
+</ul>
+<p>后续 3PC、Paxos Commit 等工作，本质上都是在尝试降低阻塞和单点协调者故障带来的风险。</p>
+<p>可以把它和共识算法的区别理解为：</p>
+<ul>
+<li>2PC：让大家对“某次事务是否提交”达成一致</li>
+<li>共识算法：让大家对“某个提议值”达成一致</li>
+<li>复制状态机：让大家对“一串操作日志”达成一致</li>
+</ul>
+<h1 id="Paxos-Made-Simple"><a href="#Paxos-Made-Simple" class="headerlink" title="Paxos Made Simple"></a>Paxos Made Simple</h1><p>由于 Paxos 初版论文过于晦涩难懂，这篇相当于 Lamport 亲自给 Paxos 写的简化版说明。</p>
+<p>Paxos试图解决的问题是：在一组会出现故障的进程中，选择出一个被多数派接受的值，并保证这个值一旦被选定就不会再被另一个不同的值推翻。</p>
+<p>Paxos 中通常有三类角色：</p>
+<ul>
+<li>Proposer：提出提案</li>
+<li>Acceptor：投票并接受提案</li>
+<li>Learner：学习最终被选中的值</li>
+</ul>
+<p>核心流程分为两个阶段：</p>
+<ol>
+<li>Prepare&#x2F;Promise</li>
+</ol>
+<ul>
+<li>Proposer 发送编号为 n 的 prepare 请求</li>
+<li>Acceptor 如果还没承诺过更大的编号，就承诺不再接受小于 n 的提案</li>
+<li>同时返回自己已经接受过的最大编号提案</li>
+</ul>
+<ol start="2">
+<li>Accept&#x2F;Accepted</li>
+</ol>
+<ul>
+<li>如果 proposer 收到多数派 promise，就可以发 accept 请求</li>
+<li>若返回的历史提案中已经有人接受过某个值，那么 proposer 必须沿用编号最大的那个旧值</li>
+<li>Acceptor 若未承诺过更大的编号，就接受该提案</li>
+</ul>
+<p>Paxos 最关键的安全性思想是：</p>
+<ul>
+<li>编号大的提案会继承编号小但已被多数接受的值</li>
+<li>多数派集合彼此相交，因此一旦某个值被选中，后续提案无法再合法地选出别的值</li>
+</ul>
+<p>难点也很明显：</p>
+<ul>
+<li>论文定义抽象、角色拆分多，初学时不容易建立整体图景</li>
+<li>Basic Paxos 一次只决定一个值，如果直接用来复制日志，成本很高</li>
+<li>活性依赖于“最终只剩一个稳定 proposer”这类工程条件</li>
+</ul>
+<h1 id="Paxos-Made-Practical"><a href="#Paxos-Made-Practical" class="headerlink" title="Paxos Made Practical"></a>Paxos Made Practical</h1><p>Paxos 如何映射到工程上。</p>
+<p>理论版 Paxos 只告诉你“如何保证安全”，但工程系统还需要解决很多现实问题：</p>
+<ul>
+<li>日志如何持久化</li>
+<li>Leader 如何选举</li>
+<li>客户端请求如何重试</li>
+<li>节点恢复后如何追日志</li>
+<li>多条日志如何连续提交</li>
+</ul>
+<p>把 Paxos 真正落到工程里，通常会演化出下面这些设计：</p>
+<ul>
+<li>引入稳定 Leader，减少多个 proposer 竞争</li>
+<li>将“一次共识一个值”扩展成“对一系列日志槽位逐个达成共识”</li>
+<li>把 acceptor 的承诺和已接受值持久化到磁盘，防止重启后破坏安全性</li>
+<li>用批量提交、流水线和日志截断降低性能开销</li>
+</ul>
+<p>这类工作说明了一件事：Paxos 不是不能工程化，而是它的论文形式和工程实现之间存在很长的一段距离。</p>
+<h1 id="Paxos-Made-Live"><a href="#Paxos-Made-Live" class="headerlink" title="Paxos Made Live"></a>Paxos Made Live</h1><p>讲述 Multi-Paxos。</p>
+<p>这篇是 Google Chubby 团队非常经典的工程复盘。它最重要的价值，不是重新证明 Paxos 正确，而是告诉你：把一个“理论上正确”的算法做成可维护的工业系统，真正困难的部分在哪里。</p>
+<p>Multi-Paxos 的核心思想是：</p>
+<ul>
+<li>Basic Paxos 每个日志槽位都要走完整 prepare + accept</li>
+<li>一旦选出稳定 Leader，后续大多数日志项可以跳过重复 prepare</li>
+<li>这样就把两轮消息降低为近似一轮，从而显著提升吞吐与延迟表现</li>
+</ul>
+<p>文章里能看到很多现实问题：</p>
+<ul>
+<li>代码复杂度远高于论文描述</li>
+<li>故障往往不是单一节点宕机，而是磁盘损坏、时钟漂移、运维误操作、网络抖动</li>
+<li>正确性不只是算法正确，还包括实现正确、测试充分、监控完善</li>
+</ul>
+<p>它的一个重要工程结论是：</p>
+<ul>
+<li>一致性系统的难点，往往不是“想出算法”</li>
+<li>而是“让算法在真实世界里长期稳定运行”</li>
+</ul>
+<h1 id="Raft-In-Search-of-An-Understandable-Consensus-Algorithm"><a href="#Raft-In-Search-of-An-Understandable-Consensus-Algorithm" class="headerlink" title="Raft: In Search of An Understandable Consensus Algorithm"></a>Raft: In Search of An Understandable Consensus Algorithm</h1><p>Raft 协议，etcd、Consul 等系统广泛采用；Nacos 在 CP 模式下也使用 Raft 思路。</p>
+<p>Raft 的目标非常明确：在不牺牲安全性的前提下，把共识算法设计得更容易理解和实现。</p>
+<p>Raft 将问题拆成三个相对清晰的子问题：</p>
+<ol>
+<li>Leader election：领导者选举</li>
+<li>Log replication：日志复制</li>
+<li>Safety：安全性保证</li>
+</ol>
+<p>Raft 中节点有三种状态：</p>
+<ul>
+<li>Follower</li>
+<li>Candidate</li>
+<li>Leader</li>
+</ul>
+<p>基本过程如下：</p>
+<ol>
+<li>正常情况下由 Leader 接收客户端写请求</li>
+<li>Leader 把日志复制给 Followers</li>
+<li>当某条日志被多数节点持久化后，就认为该日志 committed</li>
+<li>Leader 再通知 followers 应用到状态机</li>
+</ol>
+<p>Raft 相比 Paxos 更易懂，主要体现在：</p>
+<ul>
+<li>强 Leader 模型更直观，日志流向基本单向</li>
+<li>把日志一致性约束写成了更容易验证的规则</li>
+<li>借助 term、index、commitIndex 这些概念，把状态变化描述得很明确</li>
+</ul>
+<p>Raft 中几个非常关键的点：</p>
+<ul>
+<li>选举限制：候选人的日志必须“足够新”，否则不能当选</li>
+<li>日志匹配性质：如果两个日志在同一个 index、term 上相同，那么此前日志一定相同</li>
+<li>Leader Completeness：已提交日志一定会出现在未来 Leader 的日志中</li>
+</ul>
+<p>Raft 的代价是：</p>
+<ul>
+<li>对强 Leader 依赖更重</li>
+<li>某些成员变更场景处理复杂，因此引入了 Joint Consensus</li>
+<li>理论表达更友好，但实现上依旧不能掉以轻心</li>
+</ul>
+<p>如果把 Raft 当成一句话记忆，就是：</p>
+<ul>
+<li>用“领导者驱动的日志复制”来实现可理解的状态机复制</li>
+</ul>
+<h1 id="Zookeeper-Wait-Free-Coordination-for-Internet-Scale-Systems"><a href="#Zookeeper-Wait-Free-Coordination-for-Internet-Scale-Systems" class="headerlink" title="Zookeeper: Wait-Free Coordination for Internet-Scale Systems"></a>Zookeeper: Wait-Free Coordination for Internet-Scale Systems</h1><p>ZooKeeper 本身不是一个通用数据库，而是一个分布式协调服务。</p>
+<p>它提供的是一套非常适合上层系统构建协调逻辑的抽象：</p>
+<ul>
+<li>配置管理</li>
+<li>命名服务</li>
+<li>分布式锁</li>
+<li>Leader 选举</li>
+<li>Group Membership</li>
+</ul>
+<p>ZooKeeper 的数据模型很像文件系统：</p>
+<ul>
+<li>以 znode 组织成树形结构</li>
+<li>支持临时节点、顺序节点</li>
+<li>支持 watch 机制，客户端可以订阅节点变化</li>
+</ul>
+<p>它背后的核心协议是 ZAB（ZooKeeper Atomic Broadcast），可以理解为一种偏原子广播&#x2F;主从复制风格的一致性协议，目标是保证：</p>
+<ul>
+<li>所有事务请求按全局顺序广播</li>
+<li>已提交事务不会丢失</li>
+<li>Leader 崩溃恢复后，集群还能继续对外提供一致视图</li>
+</ul>
+<p>ZooKeeper 的设计特点是：</p>
+<ul>
+<li>读多写少场景表现好</li>
+<li>强调顺序一致性和协调能力，而不是大规模通用数据存储</li>
+<li>客户端通常通过“临时顺序节点 + watch”组合实现锁、选主、注册发现等功能</li>
+</ul>
+<p>它对工程实践的影响非常大，很多中间件早期都把 ZooKeeper 作为外部协调中心。</p>
+<h1 id="Using-Paxos-to-Build-A-Scalable-Consistent-and-Highly-Available-Datastore"><a href="#Using-Paxos-to-Build-A-Scalable-Consistent-and-Highly-Available-Datastore" class="headerlink" title="Using Paxos to Build A Scalable, Consistent, and Highly Available Datastore"></a>Using Paxos to Build A Scalable, Consistent, and Highly Available Datastore</h1><p>这篇可以和 Google Megastore 联系起来看：作者讨论了如何用 Paxos 构建一个可扩展、强一致、高可用的数据存储系统。</p>
+<p>核心思想是：</p>
+<ul>
+<li>不是把整个数据库放进一个 Paxos 组</li>
+<li>而是按数据分片、实体组或日志段拆分成多个独立的复制单元</li>
+<li>每个复制单元内部通过 Paxos 保证一致性</li>
+</ul>
+<p>这种设计的好处是：</p>
+<ul>
+<li>一致性边界清晰</li>
+<li>故障影响范围有限</li>
+<li>可以把全局系统拆成许多局部共识实例，提高可扩展性</li>
+</ul>
+<p>它也揭示了强一致存储系统的一些现实代价：</p>
+<ul>
+<li>跨分区事务变复杂</li>
+<li>写入延迟受多数派确认影响</li>
+<li>地理多活场景下，跨机房 RTT 直接影响提交时延</li>
+</ul>
+<p>很多后来的分布式数据库都沿着这个方向演进：</p>
+<ul>
+<li>局部强一致</li>
+<li>全局按分片扩展</li>
+<li>通过日志复制和故障转移保证高可用</li>
+</ul>
+<h1 id="Impossibility-of-Distributed-Consensus-With-One-Faulty-Process"><a href="#Impossibility-of-Distributed-Consensus-With-One-Faulty-Process" class="headerlink" title="Impossibility of Distributed Consensus With One Faulty Process"></a>Impossibility of Distributed Consensus With One Faulty Process</h1><p>FLP 定理：在完全异步模型中，只要允许哪怕一个进程发生故障，就不存在一个确定性算法，能够保证分布式共识同时满足安全和活性。</p>
+<p>这里最容易误解的一点是，FLP 不是说“共识做不到”，而是说：</p>
+<ul>
+<li>在最强的异步假设下</li>
+<li>对任意执行过程</li>
+<li>不可能总能保证最终做出决定</li>
+</ul>
+<p>FLP 前提是完全异步系统：</p>
+<ul>
+<li>没有全局时钟</li>
+<li>消息传递延迟可以任意大</li>
+<li>进程执行速度任意，但不会停顿</li>
+</ul>
+<p>因此在这种模型里，你无法区分：</p>
+<ul>
+<li>对方是真的宕机了</li>
+<li>还是只是网络太慢、消息还没到</li>
+</ul>
+<p>这就是分布式系统里“故障检测不可靠”的根源。</p>
+<p>FLP 的工程启示非常重要：</p>
+<ul>
+<li>超时不是数学上准确的故障判断，只是工程上的猜测</li>
+<li>共识算法通常通过随机化、领导者选举、失败重试来争取活性</li>
+<li>实际系统都会引入“部分同步”假设，而不是工作在纯异步模型里</li>
+</ul>
+<h1 id="Consensus-in-the-Presence-of-Partial-Synchrony"><a href="#Consensus-in-the-Presence-of-Partial-Synchrony" class="headerlink" title="Consensus in the Presence of Partial Synchrony"></a>Consensus in the Presence of Partial Synchrony</h1><p>这篇论文的重要意义在于：它给出了介于“完全同步”和“完全异步”之间的模型，也就是部分同步模型。</p>
+<p>部分同步的直觉是：</p>
+<ul>
+<li>系统大多数时候也许很混乱</li>
+<li>但在某个未知时刻之后，消息延迟和处理时间会收敛到某个上界之内</li>
+</ul>
+<p>这比完全同步更现实，也比完全异步更可做工程。</p>
+<p>很多现代共识算法实际上都建立在这个前提上：</p>
+<ul>
+<li>平时允许网络抖动、重试、误判</li>
+<li>只要系统最终进入一段“足够稳定”的时期</li>
+<li>领导者选举和日志复制就能继续推进，系统恢复活性</li>
+</ul>
+<p>这和 FLP 并不矛盾：</p>
+<ul>
+<li>FLP 讨论的是完全异步模型下的绝对不可能性</li>
+<li>部分同步则是在更贴近现实的假设下重新获得可实现性</li>
+</ul>
+<p>所以实际工程可以总结为：</p>
+<ul>
+<li>安全性通常要求在任何时候都不能破坏</li>
+<li>活性则依赖额外条件，例如多数派存活、网络最终稳定、选举超时参数合理</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这一组论文基本串起了分布式一致性的发展路线：</p>
+<ul>
+<li>从 2PC 这样的事务提交协议出发，逐渐走向通用共识</li>
+<li>Paxos 给出了经典的多数派共识框架</li>
+<li>Multi-Paxos 解决了连续日志复制的效率问题</li>
+<li>Raft 进一步强调可理解性和工程可实现性</li>
+<li>ZooKeeper &#x2F; ZAB 则展示了协调服务如何把一致性能力封装成基础设施</li>
+<li>FLP 与部分同步理论解释了为什么这些系统必须依赖超时、选主和现实世界中的“最终稳定”</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E5%9F%BA%E7%A1%80/" class="category-chain-item">分布式基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/" class="print-no-link">#分布式一致性算法</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>分布式一致性算法</div>
+      <div>https://yicizhang00.github.io/posts/分布式/理论基础/分布式一致性算法/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E9%80%BB%E8%BE%91%E6%97%B6%E9%92%9F%E4%B8%8E%E7%89%A9%E7%90%86%E6%97%B6%E9%92%9F/" title="分布式中的逻辑时钟与物理时钟">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">分布式中的逻辑时钟与物理时钟</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0/" title="分布式系统实现">
+                        <span class="hidden-mobile">分布式系统实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

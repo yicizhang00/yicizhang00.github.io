@@ -1,0 +1,1124 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="内存管理运行时数据区运行时数据区包括：方法区、虚拟机栈、本地方法栈、堆、和程序计数器。   程序计数器程序计数器（PC）是 JVM 线程私有的寄存器，用于记录当前线程执行的字节码指令地址。为了让线程切换时，下一线程能够准确回到正确的执行位置，每个线程都有一个独立的程序计数器。    场景 PC 的值 原因    执行 Java 字节码 指向当前字节码指令地址 JVM 正常执行 Java 代码时，P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM自动内存管理">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/JVM/JVM%E8%87%AA%E5%8A%A8%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="内存管理运行时数据区运行时数据区包括：方法区、虚拟机栈、本地方法栈、堆、和程序计数器。   程序计数器程序计数器（PC）是 JVM 线程私有的寄存器，用于记录当前线程执行的字节码指令地址。为了让线程切换时，下一线程能够准确回到正确的执行位置，每个线程都有一个独立的程序计数器。    场景 PC 的值 原因    执行 Java 字节码 指向当前字节码指令地址 JVM 正常执行 Java 代码时，P">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509010119605.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020300294.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020300261.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020215846.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020251366.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030303331.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030310006.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030313058.png">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.837Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509010119605.png">
+  
+  
+  
+  <title>JVM自动内存管理 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">JVM自动内存管理</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          90 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">JVM自动内存管理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="运行时数据区"><a href="#运行时数据区" class="headerlink" title="运行时数据区"></a>运行时数据区</h2><p>运行时数据区包括：方法区、虚拟机栈、本地方法栈、堆、和程序计数器。</p>
+<img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509010119605.png" srcset="/img/loading.gif" lazyload alt="image-20250901011910374" style="zoom: 33%;" />
+
+<h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><p>程序计数器（PC）是 JVM 线程私有的寄存器，用于记录当前线程执行的字节码指令地址。为了让线程切换时，下一线程能够准确回到正确的执行位置，每个线程都有一个独立的程序计数器。</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>场景</strong></th>
+<th align="left"><strong>PC 的值</strong></th>
+<th align="left"><strong>原因</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>执行 Java 字节码</strong></td>
+<td align="left">指向当前字节码指令地址</td>
+<td align="left">JVM 正常执行 Java 代码时，PC 有效。</td>
+</tr>
+<tr>
+<td align="left"><strong>执行 JNI 本地代码</strong></td>
+<td align="left"><strong>可能为 NULL</strong></td>
+<td align="left">当调用 JNI 本地方法时，执行权会从 JVM 托管的代码切换到操作系统直接执行的本地机器码（通常是 C&#x2F;C++ 编译的二进制代码）。此时，程序计数器会转而记录<strong>本地机器码的指令地址</strong>，而非 Java 代码的行号。</td>
+</tr>
+</tbody></table>
+<p><strong>注意</strong>：程序计数器是唯一一个不会出现 <code>OutOfMemoryError</code> 的内存区域，它的生命周期随着线程的创建而创建，随着线程的结束而死亡。</p>
+<h3 id="Java虚拟机栈"><a href="#Java虚拟机栈" class="headerlink" title="Java虚拟机栈"></a>Java虚拟机栈</h3><p>当每个方法被执行时，虚拟机都会创建一个栈帧（Stack Frame），记录当前方法的局部变量表、操作数栈、动态连接、方法出口等信息。</p>
+<table>
+<thead>
+<tr>
+<th align="left">组成部分</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>局部变量表（Local Variable Table）</strong></td>
+<td align="left">存储方法参数和局部变量，按索引访问（从 0 开始）。</td>
+</tr>
+<tr>
+<td align="left"><strong>操作数栈（Operand Stack）</strong></td>
+<td align="left">用于字节码指令计算（如 <code>iadd</code>, <code>invokevirtual</code>）。</td>
+</tr>
+<tr>
+<td align="left"><strong>动态链接（Dynamic Linking）</strong></td>
+<td align="left">支持方法调用时的动态绑定（如虚方法调用）。</td>
+</tr>
+<tr>
+<td align="left"><strong>返回地址（Return Address）</strong></td>
+<td align="left">方法执行完成后返回的地址（用于 <code>return</code> 或异常处理）。</td>
+</tr>
+</tbody></table>
+<p><strong>操作数栈</strong>：主要作为方法调用的中转站使用，用于存放方法执行过程中产生的中间计算结果。另外，计算过程中产生的临时变量也会放在操作数栈中。</p>
+<p><strong>动态连接</strong>：主要服务一个方法需要调用其他方法的场景。Class 文件的常量池里保存有大量的符号引用比如方法引用的符号引用。当一个方法要调用其他方法，需要将常量池中指向方法的符号引用转化为其在内存地址中的直接引用。动态链接的作用就是为了将符号引用转换为调用方法的直接引用，这个过程也被称为 <strong>动态连接</strong> 。</p>
+<p>Java虚拟机栈可能出现两种错误：</p>
+<p><strong><code>StackOverFlowError</code>：</strong> 如果栈的内存大小不允许动态扩展，那么当线程请求栈的深度超过当前 Java 虚拟机栈的最大深度的时候，就抛出 <code>StackOverFlowError</code> 错误。</p>
+<p><strong><code>OutOfMemoryError</code>：</strong> 如果栈的内存大小可以动态扩展， 那么当虚拟机在动态扩展栈时无法申请到足够的内存空间，则抛出<code>OutOfMemoryError</code>异常。</p>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><p>本地方法栈（Native M ethod Stacks）与虚拟机栈所发挥的作用是非常相似的，其区别只是虚拟机栈为虚拟机执行Java方法（也就是字节码）服务，而本地方法栈则是为虚拟机使用到的本地（Native）方法服务，即JNI方法。</p>
+<h3 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h3><h4 id="JDK7"><a href="#JDK7" class="headerlink" title="JDK7"></a>JDK7</h4><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020300294.png" srcset="/img/loading.gif" lazyload alt="image-20250902030014222" style="zoom:50%;" />
+
+<h4 id="JDK8"><a href="#JDK8" class="headerlink" title="JDK8+"></a>JDK8+</h4><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020300261.png" srcset="/img/loading.gif" lazyload alt="image-20250902030031209" style="zoom:50%;" />
+
+<p>Java 虚拟机所管理的内存中最大的一块，Java 堆是所有线程共享的一块内存区域，在虚拟机启动时创建。<strong>此内存区域的唯一目的就是存放对象实例，几乎所有的对象实例以及数组都在这里分配内存。</strong></p>
+<p>堆是GC管理的主要工作区域，堆可以被分为：新生代和老年代；细分为Eden、Survivor、Old等。不同的JDK和JVM版本对于堆的管理有不同的实现。</p>
+<p>JDK7及之前分为：1.新生代，2.老年代，3.永久代</p>
+<p>JDK8机之后的永久代被元空间（MetaSpace）取代</p>
+<img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020215846.png" srcset="/img/loading.gif" lazyload alt="image-20250902021536807" style="zoom:50%;" />
+
+<h4 id="新生代"><a href="#新生代" class="headerlink" title="新生代"></a>新生代</h4><p>新生代一般有两个部分 Eden和Survivor包括To Survivor和From Survivor，其中：</p>
+<p>Eden占约80%，所有新创建的对象都会放在Eden区，当Eden区满时触发Minor GC</p>
+<p>Survivor分为两个部分To Survivor和From Survivor，在部分JVM也被称为S0和S1。当对象经过Minor GC依旧存活时，其进入Survivor区，其中From Survivor和To Survivo每次总有一块是空的，意味着每次GC这两者的关系都会转换：</p>
+<ul>
+<li><p><strong>From Survivor</strong>：存放<strong>上一次GC后存活下来</strong>的对象。</p>
+</li>
+<li><p><strong>To Survivor</strong>：<strong>空的</strong>，准备接收<strong>本次GC后存活</strong>的对象。</p>
+</li>
+</ul>
+<p>工作流程：</p>
+<p>1.对象首次在Eden区创建</p>
+<p>2.Eden区满时触发Minor GC</p>
+<p>3.存活对象被复制到空的Survivor区（To）</p>
+<p>4.对象年龄+1（每经历一次GC年龄+1）</p>
+<p>5.年龄达到阈值（默认15）的对象晋升到老年代</p>
+<p>6.清空Eden区和之前的From区</p>
+<p>7.From和To角色互换</p>
+<p><strong>算法</strong>：标记复制算法，</p>
+<p>对象晋升到老年代的年龄阈值，可以通过参数 <code>-XX:MaxTenuringThreshold</code> 来设置。不过，设置的值应该在 0-15，否则会爆出以下错误：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">MaxTenuringThreshold of 20 is invalid; must be between 0 and 15<br></code></pre></td></tr></table></figure>
+
+<p><strong>为什么年龄是15</strong>：因为记录年龄的区域在对象头中，这个区域的大小通常是 4 位。这 4 位可以表示的最大二进制数字是 1111，即十进制的 15。因此，对象的年龄被限制为 0 到 15。</p>
+<p>在HotSpot虚拟机中，其中，对象头包括两部分：标记字段（Mark Word）和类型指针（Klass Word）。其中，对象头包括两部分：标记字段（Mark Word）和类型指针（Klass Word）。</p>
+<p><strong>动态年龄</strong>：Hotspot 遍历所有对象时，按照年龄从小到大对其所占用的大小进行累加，当累加到某个年龄时，所累加的大小超过了 Survivor 区的一半，则取这个年龄和 <code>MaxTenuringThreshold</code> 中更小的一个值，作为新的晋升年龄阈值。</p>
+<h4 id="老年代"><a href="#老年代" class="headerlink" title="老年代"></a>老年代</h4><p><strong>存储对象</strong>：1.从新生代晋升的长期存活对象，2.大对象</p>
+<p><strong>GC机制</strong>：Major GC（通常伴随Full GC），GC频率低但是耗时长</p>
+<p><strong>算法</strong>：标记-清除或者标记-整理算法</p>
+<h4 id="永久代-元空间"><a href="#永久代-元空间" class="headerlink" title="永久代&#x2F;元空间"></a>永久代&#x2F;元空间</h4><ul>
+<li><strong>Java 7及之前</strong>：永久代（方法区实现）•存储类元数据、常量池、静态变量等•大小通过<code>-XX:PermSize</code>和<code>-XX:MaxPermSize</code>设置</li>
+<li><strong>Java 8+</strong>：元空间（Metaspace）•移出堆内存，使用本地内存•大小通过<code>-XX:MetaspaceSize</code>和<code>-XX:MaxMetaspaceSize</code>设置•动态调整，减少OOM风险</li>
+</ul>
+<h4 id="线程私有的分配缓冲区-Thread-Local-Allocation-Buffer-TLAB"><a href="#线程私有的分配缓冲区-Thread-Local-Allocation-Buffer-TLAB" class="headerlink" title="线程私有的分配缓冲区(Thread Local Allocation Buffer,TLAB)"></a>线程私有的分配缓冲区(Thread Local Allocation Buffer,TLAB)</h4><p>  <strong>线程私有的分配缓冲区（TLAB）</strong> 是 Java 虚拟机（JVM）在堆内存中为每个线程分配的一小块<strong>私有内存区域</strong>。</p>
+<ul>
+<li><strong>目的</strong>：它的唯一目的就是让线程在创建新对象时，可以在自己的这块“自留地”里进行分配，从而<strong>避免多个线程同时在同一块堆内存上分配对象而引发的性能开销和竞争</strong>。<ul>
+<li>1.<strong>锁竞争</strong>（Lock Contention）<strong>：JVM 必须通过加锁（如使用</strong>全局锁**）来保证同一时刻只有一个线程可以操作堆内存，进行内存分配。频繁的加锁、解锁操作会严重降低性能。</li>
+<li>2.<strong>缓存失效（Cache Thrashing）</strong>：多个线程在内存的不同地址上分配对象，会导致 CPU 缓存（Cache）中的数据频繁失效和刷新，降低缓存命中率。</li>
+</ul>
+</li>
+<li>1.<strong>初始化</strong>：当线程启动时，JVM 会为其在 Eden 区分配一个新的 TLAB。</li>
+<li>2.<strong>分配对象</strong>：线程要分配新对象（如 <code>new Object()</code>），首先检查对象大小是否小于当前 TLAB 的剩余空间。如果够用，就在当前 TLAB 的顶部移动指针，完成分配。<strong>此操作无锁，速度极快。</strong></li>
+<li>3.<strong>TLAB 耗尽</strong>：如果当前 TLAB 剩余空间不足，线程会丢弃当前的 TLAB。向 JVM 申请一个新的 TLAB（这个过程需要同步锁）。在新的 TLAB 中重新尝试分配对象。</li>
+<li>4.<strong>垃圾回收</strong>：发生 Minor GC 时，Eden 区（包括所有的 TLAB）会被清空。存活的对象被复制到 Survivor 区或老年代。GC 之后，线程会获得新的 TLAB。</li>
+</ul>
+<h3 id="方法区（非堆）"><a href="#方法区（非堆）" class="headerlink" title="方法区（非堆）"></a>方法区（非堆）</h3><p>方法区会存储已被虚拟机加载的 <strong>类信息、字段信息、方法信息、常量、静态变量、即时编译器编译后的代码缓存等数据</strong>。</p>
+<p>方法区是一个抽象的规定，但是具体到JVM有不同的方法区的实现，在JDK7及之前是永久代，在JDK8及之后是元空间。</p>
+<img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509020251366.png" srcset="/img/loading.gif" lazyload alt="image-20250902025124256" style="zoom:33%;" />
+
+<p><strong>为什么用元空间取代永久代</strong>：</p>
+<p>1.解决永久代的内存溢出问题：</p>
+<ul>
+<li><strong>永久代的固定大小限制</strong>：永久代是堆内存的一部分，其大小在 JVM 启动时通过 <code>-XX:MaxPermSize</code> 参数设定。如果加载的类过多、常量池过大或 JIT 编译的代码太多，很容易遇到臭名昭著的 <code>java.lang.OutOfMemoryError: PermGen space</code> 错误。这在频繁进行热部署的应用服务器（如 Tomcat）中尤其常见，因为每次重新部署都会生成新的类加载器并加载新的类，而旧的类又可能因为引用问题无法被完全卸载，导致永久代被“撑爆”。</li>
+<li><strong>元空间的动态扩展</strong>：元空间不再使用 Java 堆内存，而是使用<strong>本地内存（Native Memory）</strong>。这意味着它的理论上限是可用的系统内存总量（取决于操作系统），而不再是固定的 JVM 参数。元空间默认只受本地内存大小限制，虽然也可以通过 <code>-XX:MaxMetaspaceSize</code> 来设置上限以防止无限膨胀，但相比永久代，其默认行为大大降低了 <code>OOM</code> 的风险。</li>
+</ul>
+<p>2.提升元数据的管理灵活性和性能</p>
+<ul>
+<li><strong>简化内存管理</strong>：永久代的内存管理由 JVM 的垃圾收集器负责，这与管理 Java 对象堆的逻辑混杂在一起，实现复杂且效率不高。</li>
+<li><strong>元空间的自主管理</strong>：元空间的内存管理改由 Java 虚拟机<strong>自行在本地内存中完成</strong>。它根据需要从操作系统申请内存，并由一套专门的、更高效的算法进行管理。类元数据的内存分配和释放都变得更加高效。</li>
+<li><strong>高效的垃圾收集</strong>：对于元空间的垃圾收集，其触发条件也得到了优化。当某个类加载器被卸载时（这是垃圾收集的基本单位），元空间会一次性回收该加载器对应的所有类元数据，这个操作非常高效。这避免了永久代中复杂的、容易产生碎片的垃圾回收过程。</li>
+</ul>
+<p>3.为函数式编程做准备</p>
+<p>Java 8 引入了 Lambda 表达式和方法引用等新特性。这些特性在底层大量使用了动态生成类（如 <code>Lambda</code> 表达式会生成实现函数式接口的匿名类）和字节码技术。</p>
+<ul>
+<li><strong>动态类生成的挑战</strong>：如果仍然使用永久代，这种动态、大量生成类的行为会极大地加剧永久代的内存压力和碎片化，导致 <code>PermGen OOM</code> 变得更加频繁。</li>
+<li><strong>元空间的天然优势</strong>：元空间的动态扩展能力和更高效的内存管理机制，正好为这些动态生成类的语言特性提供了理想的“土壤”，使得 JVM 能够更顺畅地支持现代编程范式。</li>
+</ul>
+<h4 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h4><p>常量池的内容就两大类，分别是常量(对应.class文件常量池的字面量)和符号引用。</p>
+<p><strong>符号引用</strong>：类或接口的符号引用，类字段的符号引用，类或接口方法的符号引用，还有method handle符号引用，method type符号引用，*dynamically-computed constant符号引用，dynamically-computed call site符号引用。*包括：</p>
+<ul>
+<li>类和接⼝的全限定名</li>
+<li>字段的名称和描述符</li>
+<li>⽅法的名称和描述符</li>
+</ul>
+<p><strong>字面量:</strong>  String，被final修饰的字段对应的值，包括int，long，float，double类型。</p>
+<p>其中String不管有没有final修饰的，都会被放到字符串常量池(String的不可变性)，其它得被final修饰值才会进入常量池。</p>
+<h4 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h4><p><strong>字符串常量池</strong> 是 JVM 为了提升性能和减少内存消耗针对字符串（String 类）专门开辟的一块区域，主要目的是为了避免字符串的重复创建。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 在字符串常量池中创建字符串对象 ”ab“</span><br><span class="hljs-comment">// 将字符串对象 ”ab“ 的引用赋值给给 aa</span><br><span class="hljs-type">String</span> <span class="hljs-variable">aa</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;ab&quot;</span>;<br><span class="hljs-comment">// 直接返回字符串常量池中字符串对象 ”ab“，赋值给引用 bb</span><br><span class="hljs-type">String</span> <span class="hljs-variable">bb</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;ab&quot;</span>;<br>System.out.println(aa==bb); <span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
+
+<p>在HotSpot VM⾥实现的string pool功能的是⼀个StringTable类，它是⼀个<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=358714089&content_type=Answer&match_order=1&q=%E5%93%88%E5%B8%8C%E8%A1%A8&zhida_source=entity">哈希表</a>，⾥⾯存的是驻留字符串（也就是我们常说的 ⽤双引号括起来的）的引⽤（⽽不是驻留字符串实例本身），也就是说在堆中的某些字符串实例被这个StringTable引⽤之后就 等同被赋予了”驻留字符串”的身份。这个StringTable在每个HotSpot VM的实例只有⼀份，被所有的类共享</p>
+<h4 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a>直接内存</h4><p>它是堆外内存的一个<strong>子集</strong>，特指通过 <code>Java.nio</code> 包中的 <code>ByteBuffer.allocateDirect()</code> 方法所分配的内存。</p>
+<ul>
+<li><strong>避免复制</strong>：在传统的 Java I&#x2F;O 中，数据从磁盘读到<strong>内核空间的缓冲区</strong>，然后需要<strong>复制</strong>到<strong>用户空间的 Java 堆</strong>内的一个字节数组中，然后 Java 程序才能处理。处理完后，如果要写回磁盘，又需要从堆内复制到内核缓冲区。这个过程有两次不必要的复制。</li>
+<li><strong>零拷贝</strong>：使用直接内存（<code>DirectByteBuffer</code>），Java 程序可以直接操作<strong>内核空间的缓冲区</strong>（或者由 JVM 在用户空间分配的、与内核缓冲区格式对齐的内存），省去了来回复制的开销，极大提升了 I&#x2F;O 效率。这对于网络通信、文件处理等场景性能提升巨大。</li>
+</ul>
+<p>传统的BIO（阻塞式IO）：</p>
+<ol>
+<li>磁盘 -&gt; 内核缓冲区 (DMA Copy): 应用程序发起read()调用，导致一次用户态-&gt;内核态的上下文切换。DMA引擎将数据从磁盘读取到内核空间的PageCache中。</li>
+<li>内核缓冲区 -&gt; JVM堆 (CPU Copy): 数据从内核缓冲区完整地拷贝到用户空间（即JVM堆内的byte[]数组）。这导致一次内核态-&gt;用户态的上下文切换。</li>
+<li>JVM堆 -&gt; Socket缓冲区 (CPU Copy): 应用程序发起write()调用，导致又一次用户态-&gt;内核态的上下文切换。数据从JVM堆内的byte[]数组再次拷贝到内核空间的Socket缓冲区。</li>
+<li>Socket缓冲区 -&gt; 网卡 (DMA Copy): 数据从Socket缓冲区由DMA引擎拷贝到网卡，进行网络传输。完成后，又一次内核态-&gt;用户态的上下文切换。</li>
+</ol>
+<p>JDK1.4之后的NIO（非阻塞IO）：</p>
+<ol>
+<li><strong>磁盘 -&gt; 内核缓冲区 (DMA Copy)</strong>: 应用程序调用<code>transferTo()</code>，导致一次上下文切换。DMA引擎将数据从磁盘读取到内核缓冲区（PageCache）。</li>
+<li><strong>内核缓冲区 -&gt; 网卡 (DMA Copy)</strong>: <strong>这是最关键的一步</strong>。数据<strong>不再拷贝到用户空间</strong>，而是直接从内核缓冲区（PageCache）<strong>DMA拷贝</strong>到目标Socket缓冲区（甚至在某些优化下，如<code>scatter/gather</code>，只需要传递一个文件描述符和长度信息即可）。</li>
+</ol>
+<p><strong>堆外内存</strong>：包括</p>
+<ul>
+<li><p><strong>元空间 (Metaspace)</strong>：存储类的元信息。</p>
+</li>
+<li><p><strong>代码缓存 (Code Cache)</strong>：存储 JIT 编译器编译后的本地代码。</p>
+</li>
+<li><p><strong>线程栈 (Thread Stacks)</strong>：每个线程私有的栈内存。</p>
+</li>
+<li><p><strong>GC 相关数据</strong>：垃圾收集器本身需要的一些数据结构（如卡表 Card Table）。</p>
+</li>
+<li><p><strong>直接内存 (Direct Memory)</strong>：就是我们下面要讲的部分。</p>
+</li>
+<li><p><strong>内存映射文件 (Memory-Mapped Files)</strong>：通过 <code>FileChannel.map</code> 映射到虚拟地址空间的文件内容。</p>
+</li>
+</ul>
+<blockquote>
+<p>-Xmx设置了JVM的最大内存，这是JVM的上限，如-Xmx8g</p>
+<p>-Xms设置了JVM的初始内存，JVM启动时立即分配的内存大小，如-Xms8g </p>
+<p>一般将Xms和Xmx设置为相同的值，能够避免内存的<strong>频繁扩容</strong>，Xmx不应当超过物理内存的大小，并为系统和其他进程预留足够的内存，不然操作系统会使用交换（Swap Space，虚拟内存）来保证内存地址可分配，这会导致磁盘抖动，频繁的IO和缺页等因素会拖累应用程序。</p>
+</blockquote>
+<h1 id="HOTSPOT的对象管理"><a href="#HOTSPOT的对象管理" class="headerlink" title="HOTSPOT的对象管理"></a>HOTSPOT的对象管理</h1><h2 id="对象的生命周期"><a href="#对象的生命周期" class="headerlink" title="对象的生命周期"></a>对象的生命周期</h2><h3 id="1-类加载检查"><a href="#1-类加载检查" class="headerlink" title="1.类加载检查"></a>1.类加载检查</h3><p>当JVM遇到<code>new</code>指令或者类的静态方法时，首先会去检查这个参数的指令的<code>符号引用</code>是否已经在运行时常量池中出现，并且检查这个符号引用代表的类是否已经被加载过、解析过和初始化过。如果没有则先进行类加载过程。</p>
+<hr>
+<h3 id="2-分配内存"><a href="#2-分配内存" class="headerlink" title="2.分配内存"></a>2.分配内存</h3><p>在<strong>类加载检查</strong>通过后，接下来虚拟机将为新生对象<strong>分配内存</strong>。对象所需的内存大小在类加载完成后便可确定，为对象分配空间的任务等同于把一块确定大小的内存从 Java 堆中划分出来。<strong>分配方式</strong>有 <strong>“指针碰撞”</strong> 和 <strong>“空闲列表”</strong> 两种，<strong>选择哪种分配方式由 Java 堆是否规整决定，而 Java 堆是否规整又由所采用的垃圾收集器是否带有压缩整理功能决定</strong>。</p>
+<ul>
+<li>指针碰撞：假设Java堆中内存是绝对规整的，所有被使用过的内存都被放在一边，空闲的内存被放在另一边，中间放着一个指针作为分界点的指示器，那所分配内存就仅仅是把那个指针向空闲空间方向挪动一段与对象大小相等的距离，这种分配方式称为“指针碰撞”（Bump The Pointer）。</li>
+<li>空闲列表：但如果Java堆中的内存并不是规整的，已被使用的内存和空闲的内存相互交错在一起，那就没有办法简单地进行指针碰撞了，虚拟机就必须维护一个列表，记录上哪些内存块是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例，并更新列表上的记录，这种分配方式称为“空闲列表”（Free List）。</li>
+</ul>
+<p>采用有标记-整理的GC收集器时可以采用指针碰撞，如Serial、ParNew；而CMS基于标记-清除的算法会导致已分配的内存和未分配的内存交织，就必须采用空闲列表。</p>
+<p><strong>内存分配的并发问题</strong>：在创建对象的时候有一个很重要的问题，就是线程安全，因为在实际开发过程中，创建对象是很频繁的事情，作为虚拟机来说，必须要保证线程是安全的，通常来讲，虚拟机采用两种方式来保证线程安全：</p>
+<p><strong>CAS+失败重试：</strong> CAS 是乐观锁的一种实现方式。所谓乐观锁就是，每次不加锁而是假设没有冲突而去完成某项操作，如果因为冲突失败就重试，直到成功为止。<strong>虚拟机采用 CAS 配上失败重试的方式保证更新操作的原子性。</strong></p>
+<p><strong>TLAB：</strong> 为每一个线程预先在 Eden 区分配一块儿内存，JVM 在给线程中的对象分配内存时，首先在 TLAB 分配，当对象大于 TLAB 中的剩余内存或 TLAB 的内存已用尽时，再采用上述的 CAS 进行内存分配。</p>
+<p>虚拟机是否使用TLAB，可以通过<code>-XX：+/-UseTLAB</code>参数来设定。</p>
+<hr>
+<h3 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3.初始化"></a>3.初始化</h3><p>内存分配完成后，JVM将除对象头之外的内存空间都赋值为零值，这一步操作保证了对象的实例字段在 Java 代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。</p>
+<hr>
+<h3 id="4-对象设置"><a href="#4-对象设置" class="headerlink" title="4.对象设置"></a>4.对象设置</h3><p>Java虚拟机还要对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码（实际上对象的哈希码会延后到真正调用Object::hashCode()方法时才计算）、对象的GC分代年龄等信息。这些信息存放在对象的对象头（Object Header）之中。根据虚拟机当前运行状态的不同，如是否启用偏向锁等，对象头会有不同的设置方式。</p>
+<hr>
+<h3 id="5-执行init方法"><a href="#5-执行init方法" class="headerlink" title="5.执行init方法"></a>5.执行init方法</h3><p>在上面工作都完成之后，从虚拟机的视角来看，一个新的对象已经产生了，但从 Java 程序的视角来看，对象创建才刚开始，<code>&lt;init&gt;</code> 方法还没有执行，所有的字段都还为零。所以一般来说，执行 new 指令之后会接着执行 <code>&lt;init&gt;</code> 方法，即在字节码中<code>new</code>指令后面会跟随<code>invokespecial</code>指令码，把对象按照程序员的意愿进行初始化，这样一个真正可用的对象才算完全产生出来。</p>
+<h2 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h2><p>在HotSpot虚拟机里，对象在堆内存中的存储布局可以划分为三个部分：对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）。</p>
+<h4 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h4><p>对象头包括两个部分：标记字段和类型指针</p>
+<ol>
+<li>标记字段：用于存储对象自身的运行时数据，如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等，这部分数据的长度在32位和64位的虚拟机（未开启压缩指针）中分别为32个比特和64个比特，官方称它为“Mark Word”。</li>
+<li>类型指针：对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030303331.png" srcset="/img/loading.gif" lazyload alt="image-20250903030305124"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">// Bit-format of an object header (most significant first, big endian layout below):<br>//<br>// 32 bits:<br>// --------<br>// <span class="hljs-built_in">hash</span>:25 ------------&gt;| age:4 biased_lock:1 lock:2 (normal object)<br>// JavaThread*:23 epoch:2 age:4 biased_lock:1 lock:2 (biased object)<br>// size:32 ------------------------------------------&gt;| (CMS free block)<br>// PromotedObject*:29 ----------&gt;| promo_bits:3 -----&gt;| (CMS promoted object)<br></code></pre></td></tr></table></figure>
+
+<p>偏向锁<sup id="fnref:1" class="footnote-ref"><a href="#fn:1" rel="footnote"><span class="hint--top hint--rounded" aria-label="偏向锁在JDK15之后逐渐被废弃（JEP374），主要在于1）复杂性增加：偏向锁的实现非常复杂，它引入了额外的代码路径，使得 JVM 的代码库变得臃肿且难以维护；2）启动时性能开销：在应用程序启动初期，许多对象都会经历偏向锁的获取、撤销和升级过程。这个过程本身会引入一定的性能开销，抵消了偏向锁本应带来的好处；3）现代 JVM 的优化：现代 JVM（如 HotSpot）在处理轻量级锁（Lightweight Locking）和自旋锁（Spin Locking）时已经非常高效。这些优化在大多数情况下足以应对并发场景，使得偏向锁的必要性大大降低。">[1]</span></a></sup>：<strong>如果一把锁在大多数情况下总是被同一个线程所获得，那么就可以消除这个线程后续加锁和解锁的开销</strong>。当第一个线程第一次访问同步块时，JVM 会将对象头中的标记设置为“偏向模式”，并记录下这个线程的 ID。此时，锁就“偏向”了这个线程。以后同一个线程再次进入这个同步块时，<strong>无需执行任何昂贵的原子操作（如CAS）</strong>，只需要检查对象头中的线程ID是否是自己即可，速度极快。<strong>目的</strong>：减少同一线程重入锁的开销，提升单线程重复访问同步块的性能。</p>
+<p>偏向线程ID：一个<strong>具体的数据</strong>，存储在 Java 对象头（Mark Word）的特定字段中。当偏向锁启用时，这个字段用于<strong>记录当前持有偏向锁的线程ID</strong>。当一个线程第一次获得偏向锁时，JVM 会将它的线程 ID 写入对象头的“偏向线程ID”字段。后续任何线程尝试获取锁时，都会先比较对象头中的线程ID是否与自己的ID一致。<strong>如果一致</strong>，直接顺利进入，开销极小。<strong>如果不一致</strong>，说明发生了竞争，需要升级为更高级的锁（轻量级锁或重量级锁）。</p>
+<p>偏向时间戳：<strong>用于批量重偏向（Bulk Rebiasing）和批量撤销（Bulk Revocation）的优化</strong>，解决“偏向锁不适合竞争场景”的问题。假设一个对象被线程A创建并偏向，但后来被多个其他线程（B, C, D）竞争访问。每次竞争都会导致<strong>撤销偏向锁（Revoke Bias）</strong>，这个操作成本很高。如果有一类对象（比如某个Class的所有实例）都被频繁地撤销偏向，说明它们的模式不适合偏向锁。JVM 为每个类维护一个 <strong>“偏向时间戳 epoch”</strong>。当一个对象被偏向时，对象头中也会记录当前类的 epoch 值。当JVM检测到某个类的对象发生大量撤销时，它会<strong>递增该类的 epoch</strong>，并执行<strong>批量重偏向</strong>。所有仍然存活的、属于这个类的对象，在下次被访问时，会检查自己的 epoch 是否与当前类的 epoch 一致。如果不一致，说明这个对象的偏向状态是“过时”的，可以很廉价地将其<strong>重偏向</strong>给当前正在竞争的线程，而不是直接升级为更重的锁。</p>
+<h4 id="实例数据"><a href="#实例数据" class="headerlink" title="实例数据"></a>实例数据</h4><p><strong>实例数据部分是对象真正存储的有效信息</strong>，也是在程序中所定义的各种类型的字段内容。这部分的数据受到虚拟机分配策略参数（-XX FieldsAllocationStyle参数）和字段在Java源码中定义顺序的影响，相同宽度的字段总是被分配到一起存放，在满足这个前提条件的情况下，在父类中定义的变量会出现在子类之前。</p>
+<h4 id="对齐填充部分"><a href="#对齐填充部分" class="headerlink" title="对齐填充部分"></a>对齐填充部分</h4><p><strong>对齐填充部分不是必然存在的，也没有什么特别的含义，仅仅起占位作用。</strong> 因为 Hotspot 虚拟机的自动内存管理系统要求对象起始地址必须是 8 字节的整数倍，换句话说就是对象的大小必须是 8 字节的整数倍。而对象头部分正好是 8 字节的倍数（1 倍或 2 倍），因此，当对象实例数据部分没有对齐时，就需要通过对齐填充来补全。</p>
+<h2 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h2><h3 id="句柄"><a href="#句柄" class="headerlink" title="句柄"></a>句柄</h3><p>句柄实际上是资源的抽象标识符&#x2F;索引，与指针类似但不同于指针，<strong>它本身不是一个直接的内存地址，而是一个中间层的、不透明的令牌（Token），系统通过这个令牌可以安全地找到和管理真正的资源（如内存块、文件、窗口等）</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><strong>指针 (Pointer)</strong></th>
+<th align="left"><strong>句柄 (Handle)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>本质</strong></td>
+<td align="left"><strong>直接内存地址</strong></td>
+<td align="left"><strong>资源的抽象标识符&#x2F;索引</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>安全性</strong></td>
+<td align="left">低。程序可以直接通过指针修改内存，非常危险，容易导致崩溃或安全漏洞。</td>
+<td align="left">高。程序无法通过句柄直接操作资源，必须通过系统API，系统可以进行安全检查。</td>
+</tr>
+<tr>
+<td align="left"><strong>灵活性</strong></td>
+<td align="left">低。资源地址固定后，指针就固定了。如果系统移动了资源（如垃圾回收），所有指向它的指针都会失效（成为“野指针”）。</td>
+<td align="left"><strong>极高</strong>。系统可以在不改变句柄值的情况下，在背后自由地移动、管理、压缩资源。只需要更新句柄表即可。</td>
+</tr>
+<tr>
+<td align="left"><strong>抽象层级</strong></td>
+<td align="left">底层，接近硬件。</td>
+<td align="left">高层，是操作系统或运行时环境提供的一种服务。</td>
+</tr>
+</tbody></table>
+<p>如果使用句柄访问对象，那么 Java 堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与对象类型数据各自的具体地址信息。</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030310006.png" srcset="/img/loading.gif" lazyload alt="image-20250903031022918"></p>
+<h3 id="直接指针"><a href="#直接指针" class="headerlink" title="直接指针"></a>直接指针</h3><p><strong>引用（Reference）</strong>：Java 使用<strong>引用</strong>来代替指针。引用可以看作是对象的句柄，它指向对象在堆中的位置，但你不能对它进行任何算术运算（比如 <code>myObject + 1</code>），也无法通过引用直接访问对象的底层内存地址。这有效地避免了大多数与指针相关的安全漏洞。</p>
+<p><strong>垃圾回收（Garbage Collection）</strong>：JVM 自动管理内存的分配和释放，当一个对象不再被任何引用指向时，垃圾回收器会自动回收其占用的内存。开发者无需手动管理内存，从而避免了内存泄漏的风险。</p>
+<p>java中并没有指针的设计，因此该处的指针是JVM中的对象访问设计方式。如果JVM设计为使用直接指针访问对象，Java堆中对象的内存布局就必须考虑如何放置访问类型数据的相关信息，reference中存储的直接就是对象地址，如果只是访问对象本身的话，就不需要多一次间接访问的开销。</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202509030313058.png" srcset="/img/loading.gif" lazyload alt="image-20250903031342961"></p>
+<p>这两种对象访问方式各有优势。使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销。</p>
+<p>HotSpot 虚拟机主要使用的就是直接指针的方式来进行对象访问。</p>
+<section class="footnotes"><div class="footnote-list"><ol><li><span id="fn:1" class="footnote-text"><span>偏向锁在JDK15之后逐渐被废弃（JEP374），主要在于1）复杂性增加：偏向锁的实现非常复杂，它引入了额外的代码路径，使得 JVM 的代码库变得臃肿且难以维护；2）启动时性能开销：在应用程序启动初期，许多对象都会经历偏向锁的获取、撤销和升级过程。这个过程本身会引入一定的性能开销，抵消了偏向锁本应带来的好处；3）现代 JVM 的优化：现代 JVM（如 HotSpot）在处理轻量级锁（Lightweight Locking）和自旋锁（Spin Locking）时已经非常高效。这些优化在大多数情况下足以应对并发场景，使得偏向锁的必要性大大降低。
+<a href="#fnref:1" rev="footnote" class="footnote-backref"> ↩</a></span></span></li></ol></div></section>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/JVM/" class="category-chain-item">JVM</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+        <a href="/tags/JVM/" class="print-no-link">#JVM</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>JVM自动内存管理</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/JVM/JVM自动内存管理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/" title="系统调用">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">系统调用</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E5%9F%BA%E7%A1%80/LRU/" title="LRU的Java简易实现">
+                        <span class="hidden-mobile">LRU的Java简易实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

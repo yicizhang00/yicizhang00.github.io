@@ -1,0 +1,1136 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="拜占庭将军问题（Byzantine Generals Problem）前言拜占庭将军问题由 Lamport、Shostak 和 Pease 于 1982 年提出，描述了分布式系统中存在恶意节点（拜占庭故障）时，如何在参与方之间就一个共同决策达成一致的问题。该问题奠定了对抗任意错误（Arbitrary Failures &#x2F; Byzantine Failures）容错理论的基础，并直接影响了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拜占庭将军问题">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E6%8B%9C%E5%8D%A0%E5%BA%AD%E5%B0%86%E5%86%9B%E9%97%AE%E9%A2%98/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="拜占庭将军问题（Byzantine Generals Problem）前言拜占庭将军问题由 Lamport、Shostak 和 Pease 于 1982 年提出，描述了分布式系统中存在恶意节点（拜占庭故障）时，如何在参与方之间就一个共同决策达成一致的问题。该问题奠定了对抗任意错误（Arbitrary Failures &#x2F; Byzantine Failures）容错理论的基础，并直接影响了">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-28T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="理论基础">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>拜占庭将军问题 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">拜占庭将军问题</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-05-28 10:00" pubdate>
+          2026年5月28日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          28 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">拜占庭将军问题</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="拜占庭将军问题（Byzantine-Generals-Problem）"><a href="#拜占庭将军问题（Byzantine-Generals-Problem）" class="headerlink" title="拜占庭将军问题（Byzantine Generals Problem）"></a>拜占庭将军问题（Byzantine Generals Problem）</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>拜占庭将军问题由 Lamport、Shostak 和 Pease 于 1982 年提出，描述了分布式系统中存在恶意节点（拜占庭故障）时，如何在参与方之间就一个共同决策达成一致的问题。该问题奠定了对抗任意错误（Arbitrary Failures &#x2F; Byzantine Failures）容错理论的基础，并直接影响了后续共识算法、分布式数据库以及区块链等领域的发展。</p>
+<p>与仅考虑节点宕机（Crash Fault）的传统容错模型不同，拜占庭故障允许节点表现出任意行为，例如发送错误消息、向不同节点发送相互矛盾的信息、伪造消息、恶意篡改协议执行过程等。因此，拜占庭容错被认为是最强、最困难的故障模型之一。</p>
+<hr>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>经典的拜占庭将军问题采用一个指挥官（Commander）和若干副将（Lieutenants）的模型。</p>
+<p>想象若干将军包围一座城市，他们只能通过信使通信。所有忠诚将军必须在以下两个命令中做出统一选择：</p>
+<ul>
+<li>Attack（进攻）</li>
+<li>Retreat（撤退）</li>
+</ul>
+<p>若所有将军同时进攻，则能够取胜；若所有将军同时撤退，则能够安全撤离；但若部分进攻、部分撤退，则可能被敌军逐个击破。因此系统需要满足：</p>
+<ul>
+<li><strong>一致性（Agreement）</strong>：所有忠诚将军最终执行相同命令；</li>
+<li><strong>有效性（Validity）</strong>：如果指挥官是忠诚的，则所有忠诚副将必须执行指挥官发出的命令。</li>
+</ul>
+<p>系统中最多允许存在 $f$ 个拜占庭节点。目标是在存在最多 $f$ 个拜占庭故障的情况下，仍然满足一致性与有效性。</p>
+<hr>
+<h2 id="系统模型与假设"><a href="#系统模型与假设" class="headerlink" title="系统模型与假设"></a>系统模型与假设</h2><p>论文讨论了同步分布式系统（Synchronous Distributed System）中的两种通信模型：</p>
+<ul>
+<li>同步系统：消息能够在已知有限时间内送达；</li>
+<li>点对点通信：任意两个进程之间都可以直接通信；</li>
+<li>节点可能出现拜占庭故障。</li>
+</ul>
+<p>两种消息模型分别为：</p>
+<h3 id="口头消息模型（Oral-Messages）"><a href="#口头消息模型（Oral-Messages）" class="headerlink" title="口头消息模型（Oral Messages）"></a>口头消息模型（Oral Messages）</h3><p>消息没有认证机制。</p>
+<p>拜占庭节点可以：</p>
+<ul>
+<li>发送错误信息；</li>
+<li>向不同节点发送不同内容；</li>
+<li>伪造消息来源；</li>
+<li>丢弃收到的消息。</li>
+</ul>
+<p>这是最困难的模型。</p>
+<h3 id="签名消息模型（Signed-Messages）"><a href="#签名消息模型（Signed-Messages）" class="headerlink" title="签名消息模型（Signed Messages）"></a>签名消息模型（Signed Messages）</h3><p>签名消息模型增加了三个非常强的假设：</p>
+<p>SM1:签名无法伪造。</p>
+<p>SM2:任何人都能验证签名。</p>
+<p>SM3：签名内容不可修改。</p>
+<p>每条消息都带有不可伪造的数字签名。</p>
+<p>拜占庭节点仍然可以：</p>
+<ul>
+<li>拒绝发送消息；</li>
+<li>转发错误信息；</li>
+</ul>
+<p>但不能：</p>
+<ul>
+<li>伪造其他节点的签名；</li>
+<li>篡改已经签名的内容。</li>
+</ul>
+<p>因此问题会显著简化。</p>
+<hr>
+<h2 id="基本结论"><a href="#基本结论" class="headerlink" title="基本结论"></a>基本结论</h2><h3 id="口头消息模型"><a href="#口头消息模型" class="headerlink" title="口头消息模型"></a>口头消息模型</h3><p>若系统允许最多 $f$ 个拜占庭节点，则必须满足：</p>
+<p>$$<br>n \ge 3f + 1<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$n$ 为系统总节点数；</li>
+<li>$f$ 为最多允许的拜占庭节点数。</li>
+</ul>
+<p>同时需要至少：</p>
+<p>$$<br>f+1<br>$$</p>
+<p>轮消息传播才能完成共识。</p>
+<p>例如：</p>
+<table>
+<thead>
+<tr>
+<th>最大故障数 $f$</th>
+<th>最少节点数 $n$</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>7</td>
+</tr>
+<tr>
+<td>3</td>
+<td>10</td>
+</tr>
+<tr>
+<td>10</td>
+<td>31</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="签名消息模型"><a href="#签名消息模型" class="headerlink" title="签名消息模型"></a>签名消息模型</h3><p>若消息带有不可伪造签名，则只需：</p>
+<p>$$<br>n \ge f + 1<br>$$</p>
+<p>即可达成一致。</p>
+<p>数字签名使得节点无法伪造他人的消息，因此大幅降低了问题难度。</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>知道发送者是谁</th>
+<th>能证明发送内容未被篡改</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OM</td>
+<td>Y</td>
+<td>N</td>
+</tr>
+<tr>
+<td>SM</td>
+<td>Y</td>
+<td>N</td>
+</tr>
+</tbody></table>
+<h2 id="为什么必须满足-n-ge-3f-1"><a href="#为什么必须满足-n-ge-3f-1" class="headerlink" title="为什么必须满足 $n \ge 3f+1$"></a>为什么必须满足 $n \ge 3f+1$</h2><p>这是拜占庭将军问题最著名的结论。</p>
+<p>设系统中最多存在：</p>
+<p>$$<br>f<br>$$</p>
+<p>个恶意节点。</p>
+<p>那么至少需要：</p>
+<p>$$<br>2f+1<br>$$</p>
+<p>个忠诚节点。</p>
+<p>即：</p>
+<p>$$<br>n-f &gt; 2f<br>$$</p>
+<p>整理得到：</p>
+<p>$$<br>n &gt; 3f<br>$$</p>
+<p>因此：</p>
+<p>$$<br>n \ge 3f+1<br>$$</p>
+<p>直观理解为：</p>
+<blockquote>
+<p>忠诚节点数量必须严格超过恶意节点数量的两倍。</p>
+</blockquote>
+<p>这样即使所有恶意节点联合撒谎，忠诚节点之间仍然能够形成稳定多数派。</p>
+<p>例如当：</p>
+<p>$$<br>f&#x3D;1<br>$$</p>
+<p>时，</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">A（可能是叛徒）<br>B<br>C<br>D<br></code></pre></td></tr></table></figure>
+
+<p>若 A 向不同副将发送不同命令：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">A→B：进攻<br>A→C：撤退<br>A→D：撤退<br></code></pre></td></tr></table></figure>
+
+<p>B 可以通过向 C、D 询问其收到的信息来形成多数意见：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">进攻：1<br>撤退：2<br></code></pre></td></tr></table></figure>
+
+<p>最终选择撤退。</p>
+<p>重要的是：</p>
+<blockquote>
+<p>B 并不需要确定谁是叛徒。</p>
+</blockquote>
+<p>事实上 B 无法判断究竟是 A 在撒谎，还是 C、D 中某个节点在撒谎。</p>
+<p>拜占庭容错的目标并不是找出恶意节点，而是在无法识别恶意节点的情况下，仍然让所有忠诚节点得到相同结论。</p>
+<hr>
+<h2 id="不可达性证明（缩略）"><a href="#不可达性证明（缩略）" class="headerlink" title="不可达性证明（缩略）"></a>不可达性证明（缩略）</h2><p>当：</p>
+<p>$$<br>n \le 3f<br>$$</p>
+<p>时，不可能同时满足一致性和有效性。</p>
+<p>证明思路基于不可区分性（Indistinguishability）。</p>
+<p>将系统划分为三组，每组最多包含<code>f</code>个节点。</p>
+<p>拜占庭节点可以向不同组发送不同信息，使得两个忠诚节点观察到的系统状态完全不同，但又无法判断究竟是谁在撒谎。</p>
+<p>因此会出现：</p>
+<ul>
+<li>某些忠诚节点认为应该进攻；</li>
+<li>某些忠诚节点认为应该撤退。</li>
+</ul>
+<p>从而违反一致性条件。</p>
+<hr>
+<h2 id="经典算法：OM-m"><a href="#经典算法：OM-m" class="headerlink" title="经典算法：OM(m)"></a>经典算法：OM(m)</h2><p>在口头消息模型下，Lamport 等人提出了递归算法 OM(m)（Oral Messages）。</p>
+<p>其中：</p>
+<ul>
+<li>OM(0)：容忍 0 个拜占庭节点；</li>
+<li>OM(1)：容忍 1 个拜占庭节点；</li>
+<li>OM(2)：容忍 2 个拜占庭节点；</li>
+<li>…</li>
+</ul>
+<p>一般情况下：</p>
+<p>$$<br>OM(f)<br>$$</p>
+<p>能够容忍：</p>
+<p>$$<br>f<br>$$</p>
+<p>个拜占庭节点。</p>
+<hr>
+<h3 id="OM-0"><a href="#OM-0" class="headerlink" title="OM(0)"></a>OM(0)</h3><p>指挥官向所有副将发送命令。</p>
+<p>每个副将直接采用收到的命令。</p>
+<p>若未收到消息，则采用默认值。</p>
+<hr>
+<h3 id="OM-m"><a href="#OM-m" class="headerlink" title="OM(m)"></a>OM(m)</h3><p>当：</p>
+<p>$$<br>m &gt; 0<br>$$</p>
+<p>时：</p>
+<ol>
+<li>指挥官向每个副将发送命令；</li>
+<li>每个副将把自己收到的命令转发给其他副将；</li>
+<li>其他副将继续递归执行 OM(m−1)；</li>
+<li>每个节点收集所有收到的信息；</li>
+<li>对收集到的信息进行多数投票（Majority Voting）。</li>
+</ol>
+<p>最终结果作为自己的决策。</p>
+<hr>
+<h3 id="为什么多数投票有效"><a href="#为什么多数投票有效" class="headerlink" title="为什么多数投票有效"></a>为什么多数投票有效</h3><p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">A→B：进攻<br>A→C：进攻<br>A→D：撤退<br></code></pre></td></tr></table></figure>
+
+<p>交换消息后：</p>
+<p>B 看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">B收到：进攻<br>C收到：进攻<br>D收到：撤退<br></code></pre></td></tr></table></figure>
+
+<p>统计结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">进攻：2<br>撤退：1<br></code></pre></td></tr></table></figure>
+
+<p>因此 B 选择进攻。</p>
+<p>同理：</p>
+<p>C 和 D 最终也会得到相同统计结果。</p>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">B = C = D = 进攻<br></code></pre></td></tr></table></figure>
+
+<p>系统仍然达成一致。</p>
+<p>注意：</p>
+<p>这里达成一致的原因不是因为大家找出了叛徒，而是因为忠诚节点形成了多数派。</p>
+<hr>
+<h3 id="正确性结论"><a href="#正确性结论" class="headerlink" title="正确性结论"></a>正确性结论</h3><p>OM(m) 能够保证：</p>
+<ul>
+<li>一致性（Agreement）</li>
+<li>有效性（Validity）</li>
+</ul>
+<p>其成立条件为：</p>
+<p>$$<br>n \ge 3m+1<br>$$</p>
+<p>令：</p>
+<p>$$<br>m&#x3D;f<br>$$</p>
+<p>即可得到经典结论：</p>
+<p>$$<br>n \ge 3f+1<br>$$</p>
+<hr>
+<h2 id="签名消息的情形"><a href="#签名消息的情形" class="headerlink" title="签名消息的情形"></a>签名消息的情形</h2><p>若消息带有不可伪造签名，则可以使用签名链（Signature Chain）传播消息。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">Commander<br>↓<br>A<br>↓<br>B<br>↓<br>C<br></code></pre></td></tr></table></figure>
+
+<p>每次转发都附带已有签名。</p>
+<p>由于任何节点都无法伪造其他节点的签名，因此消息来源可以被验证。</p>
+<p>此时拜占庭节点无法制造多个互相矛盾的“合法消息”，从而显著降低问题难度。</p>
+<p>因此只需：</p>
+<p>$$<br>n \ge f+1<br>$$</p>
+<p>即可实现一致性。</p>
+<hr>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>当：</p>
+<p>$$<br>f&#x3D;1<br>$$</p>
+<p>时，</p>
+<p>根据：</p>
+<p>$$<br>n \ge 3f+1<br>$$</p>
+<p>需要至少：</p>
+<p>$$<br>n&#x3D;4<br>$$</p>
+<p>个节点。</p>
+<p>此时运行 OM(1)：</p>
+<ol>
+<li>指挥官发送命令；</li>
+<li>副将交换自己收到的命令；</li>
+<li>所有副将对结果进行多数投票。</li>
+</ol>
+<p>即使存在一个恶意节点，也能够保证所有忠诚节点最终做出相同决定。</p>
+<blockquote>
+<p>为什么 OM 中“可以谎报自己收到的内容”会导致必须要 3f+1，而 SM 中一旦禁止这种谎报，条件立刻下降到 f+1？</p>
+<p>OM 里，节点传播的是“声称（claim）”；SM 里，节点传播的是“证据（evidence）”。<br>诚实节点不再需要靠“人数优势”去盲目投票。只要系统里有 $f+1$ 个节点，扣除掉最多 $f$ 个坏人，至少能保证有 1 个诚实节点。只要这一个诚实节点把带有正确签名的真实消息在网络中广播出去，其他诚实节点由于能验证签名，就一定会采纳这个真实消息。</p>
+</blockquote>
+<hr>
+<h2 id="讨论与应用"><a href="#讨论与应用" class="headerlink" title="讨论与应用"></a>讨论与应用</h2><p>拜占庭将军问题是现代分布式系统容错理论的基石，对后续研究产生了深远影响。</p>
+<p>典型应用包括：</p>
+<ul>
+<li>BFT 共识协议（PBFT、HotStuff 等）；</li>
+<li>区块链系统中的节点共识；</li>
+<li>分布式数据库复制协议；</li>
+<li>高可靠分布式服务。</li>
+</ul>
+<p>需要注意的是，现代系统中的共识协议通常不再采用“永久指挥官”模型，而是使用轮换主节点（Leader &#x2F; Primary）机制。例如 PBFT 中的 Primary 本质上对应原问题中的 Commander，但可以通过 View Change 被替换。</p>
+<p>此外，实际工程系统往往会利用：</p>
+<ul>
+<li>数字签名；</li>
+<li>消息认证码（MAC）；</li>
+<li>超时机制；</li>
+<li>概率性共识；</li>
+</ul>
+<p>等技术降低通信复杂度，提高可扩展性，从而使拜占庭容错理论能够应用于大规模分布式环境。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li>Lamport, L., Shostak, R., &amp; Pease, M. (1982). The Byzantine Generals Problem. ACM Transactions on Programming Languages and Systems (TOPLAS).</li>
+</ul>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="category-chain-item">理论基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="print-no-link">#理论基础</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>拜占庭将军问题</div>
+      <div>https://yicizhang00.github.io/posts/分布式/理论基础/拜占庭将军问题/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年5月28日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/Quorom/" title="Quorom（多数派）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Quorom（多数派）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86%E6%B3%95/" title="二分法">
+                        <span class="hidden-mobile">二分法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

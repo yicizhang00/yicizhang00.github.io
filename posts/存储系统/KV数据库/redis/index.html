@@ -1,0 +1,1447 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="Redis基础Redis （REmote DIctionary Server）是一个基于 C 语言开发的开源 NoSQL 数据库（BSD 许可）。与传统数据库不同的是，Redis 的数据是保存在内存中的（内存数据库，支持持久化），因此读写速度非常快，被广泛应用于分布式缓存方向。并且，Redis 存储的是 KV 键值对数据。 为了满足不同的业务场景，Redis 内置了多种数据类型实现（比如 Stri">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/KV%E6%95%B0%E6%8D%AE%E5%BA%93/redis/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="Redis基础Redis （REmote DIctionary Server）是一个基于 C 语言开发的开源 NoSQL 数据库（BSD 许可）。与传统数据库不同的是，Redis 的数据是保存在内存中的（内存数据库，支持持久化），因此读写速度非常快，被广泛应用于分布式缓存方向。并且，Redis 存储的是 KV 键值对数据。 为了满足不同的业务场景，Redis 内置了多种数据类型实现（比如 Stri">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150145645.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150219950.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150446605.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150815811.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150828183.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151053014.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151141865.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151910361.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014161710528.webp">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014163041375.jpeg">
+<meta property="article:published_time" content="2025-09-21T17:44:36.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.835Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="存储系统">
+<meta property="article:tag" content="KV数据库">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150145645.png">
+  
+  
+  
+  <title>redis - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">redis</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-22 01:44" pubdate>
+          2025年9月22日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          10k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          86 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">redis</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Redis基础"><a href="#Redis基础" class="headerlink" title="Redis基础"></a>Redis基础</h1><p><a target="_blank" rel="noopener" href="https://redis.io/">Redis</a> （<strong>RE</strong>mote <strong>DI</strong>ctionary <strong>S</strong>erver）是一个基于 C 语言开发的开源 NoSQL 数据库（BSD 许可）。与传统数据库不同的是，Redis 的数据是保存在内存中的（内存数据库，支持持久化），因此读写速度非常快，被广泛应用于分布式缓存方向。并且，Redis 存储的是 KV 键值对数据。</p>
+<p>为了满足不同的业务场景，Redis 内置了多种数据类型实现（比如 String、Hash、Sorted Set、Bitmap、HyperLogLog、GEO）。并且，Redis 还支持事务、持久化、Lua 脚本、发布订阅模型、多种开箱即用的集群方案（Redis Sentinel、Redis Cluster）。</p>
+<h2 id="Redis的数据类型"><a href="#Redis的数据类型" class="headerlink" title="Redis的数据类型"></a>Redis的数据类型</h2><ol>
+<li><p><strong>String（字符串）</strong></p>
+<ul>
+<li>二进制安全，可以存储任意数据：字符串、数字、甚至图片或序列化数据。</li>
+<li>最大容量：单个 value 最多 512MB。</li>
+<li>常见操作：<code>SET</code>、<code>GET</code>、<code>INCR</code>、<code>DECR</code>、<code>APPEND</code>。</li>
+<li>使用场景：缓存对象、计数器、分布式锁。</li>
+</ul>
+</li>
+<li><p><strong>List（列表）</strong></p>
+<ul>
+<li>一个有序的双向链表，可以从两端插入和弹出元素。</li>
+<li>保持插入顺序，支持重复元素。</li>
+<li>常见操作：<code>LPUSH</code>、<code>RPUSH</code>、<code>LPOP</code>、<code>RPOP</code>、<code>LRANGE</code>。</li>
+<li>使用场景：消息队列、任务队列、最新列表展示（如微博时间线）。</li>
+</ul>
+</li>
+<li><p><strong>Hash（哈希表）</strong></p>
+<ul>
+<li>存储键值对（field-value），适合存储对象。</li>
+<li>常见操作：<code>HSET</code>、<code>HGET</code>、<code>HMGET</code>、<code>HDEL</code>。</li>
+<li>使用场景：用户信息表（id → {name, age, email}）。</li>
+</ul>
+</li>
+<li><p><strong>Set（集合）</strong></p>
+<ul>
+<li>无序集合，不允许重复。</li>
+<li>底层实现：哈希表，查找和去重效率高。</li>
+<li>常见操作：<code>SADD</code>、<code>SMEMBERS</code>、<code>SINTER</code>、<code>SUNION</code>、<code>SDIFF</code>。</li>
+<li>使用场景：去重、好友关系（交集求共同好友，差集求可能认识的人）。</li>
+</ul>
+</li>
+<li><p><strong>Sorted Set（有序集合，Zset）</strong></p>
+<ul>
+<li>每个成员（member）关联一个分数（score），按分数排序。</li>
+<li>分数可以相同，但成员不能重复。</li>
+<li>常见操作：<code>ZADD</code>、<code>ZRANGE</code>、<code>ZREVRANGE</code>、<code>ZRANK</code>、<code>ZREM</code>。</li>
+<li>使用场景：排行榜（按分数、时间排序）、带权重的数据。</li>
+</ul>
+</li>
+<li><p><strong>Bitmap（位图）</strong></p>
+</li>
+</ol>
+<ul>
+<li>基于 String 的位操作，节省存储空间。</li>
+<li>常见操作：<code>SETBIT</code>、<code>GETBIT</code>、<code>BITCOUNT</code>。</li>
+<li>使用场景：签到打卡、用户在线状态统计、布隆过滤器底层。</li>
+</ul>
+<ol start="7">
+<li><strong>HyperLogLog</strong></li>
+</ol>
+<ul>
+<li>用于基数统计（去重计数），占用空间固定（12KB）。</li>
+<li>常见操作：<code>PFADD</code>、<code>PFCOUNT</code>、<code>PFMERGE</code>。</li>
+<li>使用场景：网站 UV 统计、活跃用户数。</li>
+</ul>
+<ol start="8">
+<li><strong>Geospatial（地理空间数据）</strong></li>
+</ol>
+<ul>
+<li>基于 Zset 实现，可以存储经纬度并进行范围查询。</li>
+<li>常见操作：<code>GEOADD</code>、<code>GEODIST</code>、<code>GEORADIUS</code>。</li>
+<li>使用场景：附近的人、地图服务。</li>
+</ul>
+<ol start="9">
+<li><strong>Stream（流，Redis 5.0 引入）</strong></li>
+</ol>
+<ul>
+<li>消息队列结构，支持持久化和消费组。</li>
+<li>常见操作：<code>XADD</code>、<code>XREAD</code>、<code>XGROUP</code>、<code>XREADGROUP</code>。</li>
+<li>使用场景：消息队列、日志系统、实时数据处理。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>是否有序</th>
+<th>是否允许重复</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>String</td>
+<td>否</td>
+<td>否</td>
+<td>缓存、计数器、锁</td>
+</tr>
+<tr>
+<td>List</td>
+<td>有序</td>
+<td>允许</td>
+<td>队列、时间线</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td>无序</td>
+<td>field 唯一</td>
+<td>存储对象信息</td>
+</tr>
+<tr>
+<td>Set</td>
+<td>无序</td>
+<td>否</td>
+<td>去重、集合运算</td>
+</tr>
+<tr>
+<td>Sorted Set</td>
+<td>有序</td>
+<td>否</td>
+<td>排行榜</td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td>位序列</td>
+<td>位唯一</td>
+<td>签到、状态标记</td>
+</tr>
+<tr>
+<td>HyperLogLog</td>
+<td>N&#x2F;A</td>
+<td>概率去重</td>
+<td>UV 统计</td>
+</tr>
+<tr>
+<td>Geo</td>
+<td>按距离</td>
+<td>否</td>
+<td>地理位置服务</td>
+</tr>
+<tr>
+<td>Stream</td>
+<td>有序</td>
+<td>允许</td>
+<td>消息队列</td>
+</tr>
+</tbody></table>
+<h2 id="redis效能"><a href="#redis效能" class="headerlink" title="redis效能"></a>redis效能</h2><ol>
+<li>纯内存操作：所有读写发生在内存中，而非持久化到磁盘上。</li>
+<li>高效的IO模型：采用了单线程事件以及IO多路复用。</li>
+<li>优化的内部数据结构：如ziplist，quicklist，skiplist，hashtable</li>
+<li>采用了自定义的通信协议：RESP</li>
+</ol>
+<h2 id="其他的分布式缓存技术"><a href="#其他的分布式缓存技术" class="headerlink" title="其他的分布式缓存技术"></a>其他的分布式缓存技术</h2><h3 id="Memcached"><a href="#Memcached" class="headerlink" title="Memcached"></a>Memcached</h3><h2 id="Tendis"><a href="#Tendis" class="headerlink" title="Tendis"></a>Tendis</h2><h2 id="Dragonfly"><a href="#Dragonfly" class="headerlink" title="Dragonfly"></a>Dragonfly</h2><h2 id="keyDB"><a href="#keyDB" class="headerlink" title="keyDB"></a>keyDB</h2><h2 id="Faster"><a href="#Faster" class="headerlink" title="Faster"></a>Faster</h2><h1 id="Redis常见问题"><a href="#Redis常见问题" class="headerlink" title="Redis常见问题"></a>Redis常见问题</h1><h2 id="问什么要用分布式缓存"><a href="#问什么要用分布式缓存" class="headerlink" title="问什么要用分布式缓存"></a>问什么要用分布式缓存</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>本地缓存</th>
+<th>Redis</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据一致性</td>
+<td>多服务器部署时存在数据不一致问题</td>
+<td>数据一致</td>
+</tr>
+<tr>
+<td>内存限制</td>
+<td>受限于单台服务器内存</td>
+<td>独立部署，内存空间更大</td>
+</tr>
+<tr>
+<td>数据丢失风险</td>
+<td>服务器宕机数据丢失</td>
+<td>可持久化，数据不易丢失</td>
+</tr>
+<tr>
+<td>管理维护</td>
+<td>分散，管理不便</td>
+<td>集中管理，提供丰富的管理工具</td>
+</tr>
+<tr>
+<td>功能丰富性</td>
+<td>功能有限，通常只提供简单的键值对存储</td>
+<td>功能丰富，支持多种数据结构和功能</td>
+</tr>
+</tbody></table>
+<h2 id="常见的缓存更新策略有哪些"><a href="#常见的缓存更新策略有哪些" class="headerlink" title="常见的缓存更新策略有哪些"></a>常见的缓存更新策略有哪些</h2><h3 id="Cache-Aside-旁路缓存"><a href="#Cache-Aside-旁路缓存" class="headerlink" title="Cache Aside(旁路缓存)"></a>Cache Aside(旁路缓存)</h3><p>写流程：</p>
+<ol>
+<li>更新DB</li>
+<li>删除缓存</li>
+</ol>
+<p>读流程：</p>
+<ol>
+<li>查缓存，命中直接返回，未命中转2</li>
+<li>查数据库</li>
+<li>更新缓存</li>
+</ol>
+<p><strong>为什么写流程不能先删除后更新？</strong></p>
+<h4 id="场景复现（先删除后写）"><a href="#场景复现（先删除后写）" class="headerlink" title="场景复现（先删除后写）"></a>场景复现（先删除后写）</h4><ol>
+<li><strong>线程 A</strong>：删除缓存。</li>
+<li><strong>线程 B</strong>：读取数据，发现缓存没了，去查数据库，读到的是旧值。</li>
+<li><strong>线程 A</strong>：更新数据库。</li>
+<li><strong>线程 B</strong>：把旧值写回缓存。</li>
+</ol>
+<p>👉 结果：<strong>缓存里是旧值</strong>，数据库里是新值，缓存和数据库不一致。</p>
+<h4 id="场景复现（先写后删除）"><a href="#场景复现（先写后删除）" class="headerlink" title="场景复现（先写后删除）"></a>场景复现（先写后删除）</h4><ol>
+<li><strong>线程 A</strong>：更新数据库。</li>
+<li><strong>线程 B</strong>：读取数据，发现缓存存在，直接返回旧值。</li>
+<li><strong>线程 A</strong>：删除缓存。</li>
+<li><strong>线程 C</strong>：读取数据，发现缓存不存在，去数据库里面查数据库，然后更新缓存。</li>
+</ol>
+<p>👉 结果：到线程B时<strong>缓存为空</strong>，数据库里是新值，缓存和数据库<strong>短暂</strong>不一致，短暂不一致在后续线程C时会更新缓存保证<strong>最终一致性</strong>。</p>
+<h4 id="场景复现（先写后删除依旧有问题）"><a href="#场景复现（先写后删除依旧有问题）" class="headerlink" title="场景复现（先写后删除依旧有问题）"></a>场景复现（先写后删除依旧有问题）</h4><ol>
+<li><strong>线程 A</strong>：读取数据，但数据不在缓存中，去数据库中读取到旧数据。</li>
+<li><strong>线程 B</strong>：写数据库。</li>
+<li><strong>线程 B</strong>：删除缓存。</li>
+<li><strong>线程 A</strong>：更新缓存为旧数据。</li>
+</ol>
+<p>👉 结果：此时仍然会出现缓存和DB数据不一致的情况。</p>
+<h4 id="优化手段"><a href="#优化手段" class="headerlink" title="优化手段"></a>优化手段</h4><p>延迟双删：为了解决短暂的不一致性，更新数据库后：先写数据库→ 删缓存 → sleep 一段时间 → 再删一次缓存，能够解决并发读写导致的脏数据。确保第二次删除能够覆盖所有旧数据的缓存。</p>
+<ul>
+<li><p>优点：</p>
+<ul>
+<li>适合缓存一致性要求高，但无法满足完全实时一致性。</li>
+</ul>
+</li>
+<li><p>缺点：</p>
+<ul>
+<li>增加系统复杂度。</li>
+<li>无法满足会完全实时一致性的场景。</li>
+</ul>
+</li>
+</ul>
+<p><strong>缺点1</strong>：<strong>解决首次请求数据一定不在 cache 的问题</strong>，将热点数据提前放入redis中。</p>
+<p><strong>缺点2</strong>：</p>
+<p>数据库和缓存数据强一致场景：更新 db 的时候同样更新 cache，不过我们需要加一个锁&#x2F;分布式锁来保证更新 cache 的时候不存在线程安全问题。</p>
+<p>可以短暂地允许数据库和缓存数据不一致的场景：更新 db 的时候同样更新 cache，但是给缓存加一个比较短的过期时间，这样的话就可以保证即使数据不一致的话影响也比较小。</p>
+<h3 id="Read-Through-Pattern-读穿透"><a href="#Read-Through-Pattern-读穿透" class="headerlink" title="Read Through Pattern 读穿透"></a>Read Through Pattern 读穿透</h3><p>读：</p>
+<ol>
+<li>查缓存，命中直接返回，未命中转2</li>
+<li>查数据库，更新缓存，返回数据库</li>
+</ol>
+<h3 id="Write-Through-Pattern（写穿透）"><a href="#Write-Through-Pattern（写穿透）" class="headerlink" title="Write Through Pattern（写穿透）"></a>Write Through Pattern（写穿透）</h3><p>写：</p>
+<ol>
+<li>先查cache，cache不存在，直接更新db</li>
+<li>cache中存在，先更新cache，<strong>同步</strong>更新DB（缓存和DB在同一事务中写）</li>
+</ol>
+<p>Read-Through Pattern 实际只是在 Cache-Aside Pattern 之上进行了封装。在 Cache-Aside Pattern 下，发生读请求的时候，如果 cache 中不存在对应的数据，是由客户端自己负责把数据写入 cache，而 Read Through Pattern 则是 cache 服务自己来写入缓存的，这对客户端是透明的。</p>
+<blockquote>
+<p>实际上redis并不提供读写穿透的策略，redis自己无法去写DB</p>
+</blockquote>
+<h3 id="Read-Back-（写回）"><a href="#Read-Back-（写回）" class="headerlink" title="Read Back （写回）"></a>Read Back （写回）</h3><p>写：</p>
+<ol>
+<li>先查cache，cache不存在，直接更新db</li>
+<li>cache中存在，先更新cache，<strong>异步</strong>更新DB</li>
+</ol>
+<p>优点：</p>
+<p>​	减少数据库压力</p>
+<p>缺点：</p>
+<p>​	数据丢失风险（缓存宕机，数据没落库）。</p>
+<p>​	一致性较弱，适合对一致性要求不高的场景。</p>
+<h1 id="Redis底层结构以及实现"><a href="#Redis底层结构以及实现" class="headerlink" title="Redis底层结构以及实现"></a>Redis底层结构以及实现</h1><p>Redis是<strong>单线程事件驱动</strong>的内存数据库，主要框架</p>
+<figure class="highlight bnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bnf">客户端 <span class="hljs-attribute">&lt;-&gt;</span> 网络事件模块 <span class="hljs-attribute">&lt;-&gt;</span> 命令解析模块 <span class="hljs-attribute">&lt;-&gt;</span> 数据结构模块 <span class="hljs-attribute">&lt;-&gt;</span> 持久化模块<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>网络 I&#x2F;O</strong></td>
+<td>基于 epoll 的 Reactor 模型，非阻塞 I&#x2F;O</td>
+</tr>
+<tr>
+<td><strong>命令解析器</strong></td>
+<td>解析客户端请求（RESP 协议）</td>
+</tr>
+<tr>
+<td><strong>数据结构模块</strong></td>
+<td>实现各种类型的键值对</td>
+</tr>
+<tr>
+<td><strong>持久化模块</strong></td>
+<td>RDB &#x2F; AOF</td>
+</tr>
+<tr>
+<td><strong>内存管理</strong></td>
+<td>自定义内存分配（jemalloc）</td>
+</tr>
+<tr>
+<td><strong>多线程模块（I&#x2F;O）</strong></td>
+<td>只在读写网络时用多线程，核心逻辑仍单线程</td>
+</tr>
+</tbody></table>
+<h2 id="底层结构"><a href="#底层结构" class="headerlink" title="底层结构"></a>底层结构</h2><p>Redis的所有<code>key-value</code>都保存在全局哈希表里面：</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs excel">dict *<span class="hljs-built_in">db</span><br></code></pre></td></tr></table></figure>
+
+<p>每个<code>key-value</code>都是一个<code>dictEntry</code>：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs fsharp">typedef <span class="hljs-keyword">struct</span> <span class="hljs-keyword">dictEntry</span> &#123;<br>    <span class="hljs-keyword">void</span> <span class="hljs-operator">*</span>key;<br>    <span class="hljs-keyword">void</span> <span class="hljs-operator">*</span><span class="hljs-keyword">val</span>;<br>    <span class="hljs-keyword">struct</span> dictEntry <span class="hljs-operator">*</span>next;<br>&#125; dictEntry;<br><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>当出现哈希冲突时，形成链表</p>
+</blockquote>
+<p><code>val</code>是一个<code>redisObject</code>结构，有不同的编码方式：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs verilog"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> redisObject &#123;<br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">type</span>:<span class="hljs-number">4</span>;  <span class="hljs-comment">// 数据类型 (string/list/set/zset/hash)</span><br>    <span class="hljs-keyword">unsigned</span> encoding:<span class="hljs-number">4</span>; <span class="hljs-comment">// 编码方式</span><br>    <span class="hljs-keyword">void</span> *ptr;        <span class="hljs-comment">// 指向底层数据结构</span><br>&#125; robj;<br><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Redis 类型</th>
+<th>底层结构（encoding）</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>String</strong></td>
+<td>SDS（简单动态字符串）</td>
+<td>类似 <code>char*</code>，但有 length、预分配空间，支持二进制安全</td>
+</tr>
+<tr>
+<td><strong>List</strong></td>
+<td><code>ziplist</code>（旧） &#x2F; <code>quicklist</code>（新）</td>
+<td>双端链表 + 压缩块，兼顾随机访问和内存效率</td>
+</tr>
+<tr>
+<td><strong>Hash</strong></td>
+<td><code>ziplist</code>（小） &#x2F; <code>hashtable</code>（大）</td>
+<td>小数据紧凑存储，大数据用哈希表</td>
+</tr>
+<tr>
+<td><strong>Set</strong></td>
+<td><code>intset</code>（小） &#x2F; <code>hashtable</code>（大）</td>
+<td>小集合用整数数组，大集合用哈希表</td>
+</tr>
+<tr>
+<td><strong>ZSet（有序集合）</strong></td>
+<td><code>ziplist</code>（小） &#x2F; <code>skiplist</code> + <code>dict</code>（大）</td>
+<td>跳表 + 哈希表，支持按分数范围查询</td>
+</tr>
+<tr>
+<td>Stream</td>
+<td>radix tree+list pack</td>
+<td></td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td>String</td>
+<td>位操作在String上实现</td>
+</tr>
+<tr>
+<td>HyperLog Log</td>
+<td>稀疏&#x2F;稠密数组 + hash</td>
+<td></td>
+</tr>
+<tr>
+<td>Geo</td>
+<td>Zset+GeoHash</td>
+<td></td>
+</tr>
+<tr>
+<td>Bloom Filter（布隆过滤器）</td>
+<td>bitmap+hash</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="String-SDS"><a href="#String-SDS" class="headerlink" title="String(SDS)"></a>String(SDS)</h3><p>Redis的字符串不是char*而是</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">sdshdr</span> &#123;<br>    <span class="hljs-type">int</span> len;       <span class="hljs-comment">// 实际长度</span><br>    <span class="hljs-type">int</span> alloc;     <span class="hljs-comment">// 分配空间</span><br>    <span class="hljs-type">char</span> buf[];    <span class="hljs-comment">// 内容</span><br>&#125;;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="List双端链表"><a href="#List双端链表" class="headerlink" title="List双端链表"></a>List双端链表</h3><h4 id="ZipList"><a href="#ZipList" class="headerlink" title="ZipList"></a>ZipList</h4><p>在Redis&lt;3.2：使用<code>ziplist</code>压缩表</p>
+<p>ZipList划分为多个字段</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150145645.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<ul>
+<li>1、<strong>zlbytes</strong>：压缩列表的字节长度，占4个字节，因此压缩列表最长(2^32)-1字节；</li>
+<li>2、<strong>zltail</strong>：压缩列表尾元素相对于压缩列表起始地址的偏移量，占4个字节；</li>
+<li>3、<strong>zllen</strong>：压缩列表的元素数目，占两个字节；那么当压缩列表的元素数目超过(2^16)-1怎么处理呢？此时通过zllen字段无法获得压缩列表的元素数目，必须遍历整个压缩列表才能获取到元素数目；</li>
+<li>4、<strong>entryX</strong>：压缩列表存储的若干个元素，可以为字节数组或者整数；entry的编码结构后面详述；</li>
+<li>5、<strong>zlend</strong>：压缩列表的结尾，占一个字节，恒为<strong>0xFF</strong>。</li>
+</ul>
+<p>例如</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150219950.jpeg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>代表这个ziplist的总空间大小为0x50，到尾部的偏移量为0x3c(0d60)，即最后一个entry3的地址为p+60，数组长度为0x3，最后一个字节默认为0xFF。</p>
+<p>每个压缩列表节点的具体构成为</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150446605.jpeg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<ul>
+<li>previous_entry_length：这个属性记录了压缩列表前一个节点的长度，<strong>该属性根据前一个节点的大小不同可以是1个字节或者5个字节。</strong><ul>
+<li>如果前一个节点的长度小于254个字节，那么previous_entry_length的大小为1个字节，<strong>即前一个节点的长度可以使用1个字节表示。</strong></li>
+<li>如果前一个节点的长度大于等于254个字节，那么previous_entry_length的大小为5个字节**，第一个字节会被设置为0xFE(十进制的254），之后的四个字节则用于保存前一个节点的长度。**</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150815811.jpeg" srcset="/img/loading.gif" lazyload>、<img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014150828183.jpeg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>该字段设计主要是为了查找前一个节点，使用当前节点的地址减去前一个节点的长度即可获得前一个节点的开始地址。</p>
+<ul>
+<li>encoding：表示content的编码方式以及长度，<ul>
+<li>一字节、两字节或者五字节长， 值的最高位为 00 、 01 或者 10 的是字节数组编码： 这种编码表示节点的 content 属性保存着字节数组， 数组的长度由编码除去最高两位之后的其他位记录</li>
+<li>一字节长， 值的最高位以 11 开头的是整数编码： 这种编码表示节点的 content 属性保存着整数值， 整数值的类型和长度由编码除去最高两位之后的其他位记录；</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151053014.png" srcset="/img/loading.gif" lazyload alt="image-20251014151052722"></p>
+<ul>
+<li>content：内容根据encoding部分决定。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151141865.png" srcset="/img/loading.gif" lazyload alt="image-20251014151141782"></p>
+<h4 id="连锁更新"><a href="#连锁更新" class="headerlink" title="连锁更新"></a>连锁更新</h4><p>由于previous_entry_lenth的长度是动态变化的，因此添加节点或者删除节点时可能会导致后一个节点的长度变化</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014151910361.png" srcset="/img/loading.gif" lazyload alt="image-20251014151910166"><strong>即使存在这种情况，但是并不影响我们使用压缩列表</strong></p>
+<p>压缩列表里要恰好有多个<strong>连续的、长度介于 250 字节至 253 字节之间的节点， 连锁更新才有可能被引发， 这种情况就和连中彩票一样，很少见 (yes 懂了)</strong></p>
+<p>即使出现连锁更新， 但只要被更新的节点数量不多， 就不会对性能造成任何影响： 比如说， 对三五个节点进行连锁更新是绝对不会影响性能的；</p>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>结构紧凑：一整块连续内存，没有多余的内存碎片，更新会导致内存 realloc 与内存复制，平均时间复杂度为 <code>O(N)</code></li>
+<li><strong>逆向遍历：从表尾开始向表头进行遍历(注意了！，但是插入还是在表头)</strong></li>
+<li>连锁更新：对前一条数据的更新，可能导致后一条数据的 prev_entry_length 与 encoding 所需长度变化，产生连锁反应，更新操作最坏时间为 <code>O(N^2)</code></li>
+</ul>
+<h4 id="QuickList"><a href="#QuickList" class="headerlink" title="QuickList"></a>QuickList</h4><p>在较早版本的 redis 中，list 有两种底层实现：</p>
+<ul>
+<li><strong>当列表对象中元素的长度比较小或者数量比较少的时候，采用压缩列表 ziplist 来存储</strong></li>
+<li><strong>当列表对象中元素的长度比较大或者数量比较多的时候，则会转而使用双向列表 linkedlist 来存储</strong></li>
+</ul>
+<p>两者各有优缺点：</p>
+<ul>
+<li><strong>ziplist 的优点是内存紧凑，访问效率高，缺点是更新效率低，并且数据量较大时，可能导致大量的内存复制</strong></li>
+<li><strong>linkedlist 的优点是节点修改的效率高，但是需要额外的内存开销，并且节点较多时，会产生大量的内存碎片</strong></li>
+</ul>
+<p>为了结合两者的优点，<strong>在 redis 3.2 之后，list 的底层实现变为快速列表 quicklist</strong>。<br>快速列表是 linkedlist 与 ziplist 的结合: quicklist 包含多个内存不连续的节点，但每个节点本身就是一个 ziplist。</p>
+<p>在Redis＞3.2：使用链表和<code>ziplist</code>结合的<code>quickList</code></p>
+<h4 id="quickListNode结构"><a href="#quickListNode结构" class="headerlink" title="quickListNode结构"></a>quickListNode结构</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">quicklistNode</span> &#123;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">quicklistNode</span> *<span class="hljs-title">prev</span>;</span>  <span class="hljs-comment">//前一个quicklistNode</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">quicklistNode</span> *<span class="hljs-title">next</span>;</span>  <span class="hljs-comment">//后一个quicklistNode</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> *zl;           <span class="hljs-comment">//quicklistNode指向的ziplist</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> sz;             <span class="hljs-comment">//ziplist的字节大小</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> count : <span class="hljs-number">16</span>;     <span class="hljs-comment">//ziplist中的元素个数</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> encoding : <span class="hljs-number">2</span>;   <span class="hljs-comment">//编码格式，原生字节数组或压缩存储</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> container : <span class="hljs-number">2</span>;  <span class="hljs-comment">//存储方式</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> recompress : <span class="hljs-number">1</span>; <span class="hljs-comment">//数据是否被压缩</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> attempted_compress : <span class="hljs-number">1</span>; <span class="hljs-comment">//数据能否被压缩</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> extra : <span class="hljs-number">10</span>;     <span class="hljs-comment">//预留的bit位</span><br>&#125; quicklistNode;<br><br></code></pre></td></tr></table></figure>
+
+<p>prev、next指向该节点的前后节点；</p>
+<p>zl指向该节点对应的ziplist结构；</p>
+<p>sz代表整个ziplist结构的大小；</p>
+<p>encoding代表采用的编码方式：1代表是原生的，2代表使用LZF进行压缩；</p>
+<p>container为quicklistNode节点zl指向的容器类型：1代表none,2代表使用ziplist存储数据</p>
+<p>recompress代表这个节点之前是否是压缩节点，若是，则在使用压缩节点前先进行解压缩，使用后需要重新压缩，此外为1，代表是压缩节点；</p>
+<p>attempted_compress测试时使用；</p>
+<p>extra为预留</p>
+<h4 id="quickList"><a href="#quickList" class="headerlink" title="quickList"></a>quickList</h4><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">quicklist</span> &#123;<br>    quicklistNode *head;   <span class="hljs-comment">// quicklist的链表头</span><br>    quicklistNode *tail;   <span class="hljs-comment">// quicklist的链表尾</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> count;   <span class="hljs-comment">// 所有ziplist中的总元素个数</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> len;     <span class="hljs-comment">// quicklistNodes的个数</span><br>    <span class="hljs-type">int</span> fill : QL_FILL_BITS;  <span class="hljs-comment">// 单独解释</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> compress : QL_COMP_BITS; <span class="hljs-comment">// 具体含义是两端各有compress个节点不压缩</span><br>    ...<br>&#125; quicklist;<br><br></code></pre></td></tr></table></figure>
+
+<p>fill用来指明每个quicklistNode中ziplist长度，当fill为正数时，表明每个ziplist最多含有的数据项数，当fill为负数时，如下：</p>
+<ul>
+<li>Length -1: 4k，即ziplist节点最大为4KB</li>
+<li>Length -2: 8k，即ziplist节点最大为8KB</li>
+<li>Length -3: 16k …</li>
+<li>Length -4: 32k</li>
+<li>Length -5: 64k</li>
+</ul>
+<p>fill取负数时，必须大于等于-5。可以通过Redis修改参数list-max-ziplist-size配置节点所占内存大小。实际上每个ziplist节点所占的内存会在该值上下浮动。</p>
+<p>考虑quicklistNode节点个数较多时，我们经常访问的是两端的数据，为了进一步节省空间，Redis允许对中间的quicklistNode节点进行压缩，通过修改参数list-compress-depth进行配置，即设置compress参数，该项的具体含义是两端各有compress个节点不压缩。</p>
+<h4 id="quicklist总体结构"><a href="#quicklist总体结构" class="headerlink" title="quicklist总体结构"></a>quicklist总体结构</h4><p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014161710528.webp" srcset="/img/loading.gif" lazyload alt="img"></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs css">QuickList<br> ├── quicklistNode1 → ziplist1 <span class="hljs-selector-attr">[a, b, c, d, e]</span><br> ├── quicklistNode2 → ziplist2 <span class="hljs-selector-attr">[f, g, h, i, j]</span><br> └── quicklistNode3 → ziplist3 <span class="hljs-selector-attr">[k, l, m, n]</span><br><br></code></pre></td></tr></table></figure>
+
+<p><strong>只有当前 quicklistNode 的 ziplist 已满</strong>（超过设定阈值）时，才会新建一个 quicklistNode（及其 ziplist）；<br> 否则就直接往当前节点的 ziplist 里追加。</p>
+<h4 id="分裂机制"><a href="#分裂机制" class="headerlink" title="分裂机制"></a>分裂机制</h4><p>如果在 ziplist <strong>中间插入</strong> 元素，导致超出容量上限，<br> Redis 会将该 ziplist 一分为二：</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs prolog">原 ziplist: [a, b, c, d, e]<br>插入新元素 <span class="hljs-string">&#x27;X&#x27;</span> 中间后过大：<br>分裂为：<br>ziplist1: [a, b, <span class="hljs-symbol">X</span>]<br>ziplist2: [c, d, e]<br></code></pre></td></tr></table></figure>
+
+<p>于是会新建一个 <code>quicklistNode</code> 用于第二个 ziplist。<br> 这样避免某个 ziplist 太大影响性能。</p>
+<h4 id="合并机制"><a href="#合并机制" class="headerlink" title="合并机制"></a>合并机制</h4><p>当某个ziplist因为删除过小时，其会和相邻的ziplist合并，以减少内存使用。</p>
+<h4 id="listpack"><a href="#listpack" class="headerlink" title="listpack"></a>listpack</h4><p>由于使用ziplist可能会导致：</p>
+<ul>
+<li><p>每个 entry 的长度字段（prevlen）需要更新；</p>
+</li>
+<li><p>可能引发整个 ziplist 内存重分配；</p>
+</li>
+<li><p>在极端情况下是 <strong>O(n²)</strong> 的复杂度，所有节点都需要更新。</p>
+</li>
+</ul>
+<p>因此在redis7.0之后使用了listpack彻底代替了ziplist</p>
+<p>其结构如下：</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20251014163041375.jpeg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>相对比ziplist，去除了zltail节点，意味着没法通过O(1)找到列表结尾。其主要改进在ListPackEntry中。</p>
+<h4 id="ListPackEntry"><a href="#ListPackEntry" class="headerlink" title="ListPackEntry"></a>ListPackEntry</h4><h2 id="Redis的功能"><a href="#Redis的功能" class="headerlink" title="Redis的功能"></a>Redis的功能</h2><h3 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h3><h3 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h3><h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h3><h3 id="延时队列"><a href="#延时队列" class="headerlink" title="延时队列"></a>延时队列</h3><h3 id="分布式Session"><a href="#分布式Session" class="headerlink" title="分布式Session"></a>分布式Session</h3><h3 id="其他业务场景"><a href="#其他业务场景" class="headerlink" title="其他业务场景"></a>其他业务场景</h3><h1 id="Redis的性能"><a href="#Redis的性能" class="headerlink" title="Redis的性能"></a>Redis的性能</h1><h2 id="单线程"><a href="#单线程" class="headerlink" title="单线程"></a>单线程</h2><p>Redis使用了多路复用IO来处理请求，</p>
+<p>Redis 的核心命令执行逻辑仍是<strong>单线程</strong>的：</p>
+<ul>
+<li>所有 <code>GET</code>, <code>SET</code>, <code>ZADD</code>, <code>HGET</code> 等命令都在主线程顺序执行；</li>
+<li>不存在锁竞争，也不需要上下文切换；</li>
+<li>因此非常快（内存操作 + 事件循环）。</li>
+</ul>
+<p>💡 这正是 Redis 能在百万 QPS 场景下仍然稳定的原因。</p>
+<h2 id="为什么使用单线程？"><a href="#为什么使用单线程？" class="headerlink" title="为什么使用单线程？"></a>为什么使用单线程？</h2><p>因为</p>
+<p>Redis 的数据结构（hash、zset、list、dict）操作需要保持原子性；</p>
+<p>多线程同时操作相同 key 会产生锁竞争；</p>
+<p>多线程下难以保证命令间顺序一致性；</p>
+<p>单线程 + I&#x2F;O 多线程 是一个性能与一致性的最佳平衡点。</p>
+<h2 id="网络IO多线程"><a href="#网络IO多线程" class="headerlink" title="网络IO多线程"></a>网络IO多线程</h2><p>Redis6.0前，完全单线程循环的事件</p>
+<pre><code class=" mermaid">graph TD
+    subgraph SingleThread [单线程事件循环]
+        A[epoll_wait 等待事件] --&gt; B[处理读事件]
+        B --&gt; C[执行命令 内存操作]
+        C --&gt; D[处理写事件]
+    end
+
+    %% 样式调整，让它看起来更像一个整体
+    style SingleThread fill:#f9f9f9,stroke:#333,stroke-width:2px
+
+</code></pre>
+
+<p>也就是说：</p>
+<ul>
+<li>Redis 主线程通过 <strong>epoll_wait()</strong> 获取活跃连接；</li>
+<li>然后顺序执行所有的读、命令、写逻辑；</li>
+<li>整个过程全在一个 CPU 核上完成。</li>
+</ul>
+<p>💡 高效是因为：</p>
+<ul>
+<li>不用加锁</li>
+<li>不用上下文切换</li>
+<li>内存操作极快</li>
+</ul>
+<p>而在Redis6.0之后，引入了IO多线程，epoll 仍然负责事件监听；<br> 但网络读写由多个线程并发完成。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs css">flowchart <span class="hljs-selector-tag">TD</span><br>    subgraph main_thread<span class="hljs-selector-attr">[<span class="hljs-string">&quot;主线程&quot;</span>]</span><br>        <span class="hljs-selector-tag">A</span><span class="hljs-selector-attr">[<span class="hljs-string">&quot;epoll_wait() 获取活跃 socket&quot;</span>]</span> --&gt; <span class="hljs-selector-tag">B</span><span class="hljs-selector-attr">[<span class="hljs-string">&quot;将 socket 分发给 I/O 线程池&quot;</span>]</span><br>    end<br><br>    subgraph io_pool<span class="hljs-selector-attr">[<span class="hljs-string">&quot;I/O 线程池&quot;</span>]</span><br>        <span class="hljs-attribute">direction</span> TB<br>        IO1<span class="hljs-selector-attr">[<span class="hljs-string">&quot;I/O 线程1\n(读取 socket 数据)&quot;</span>]</span><br>        IO2<span class="hljs-selector-attr">[<span class="hljs-string">&quot;I/O 线程2\n(解析请求包)&quot;</span>]</span><br>        IO3<span class="hljs-selector-attr">[<span class="hljs-string">&quot;I/O 线程3\n(写回响应结果)&quot;</span>]</span><br>    end<br><br>    <span class="hljs-selector-tag">B</span> --&gt; IO1<br>    <span class="hljs-selector-tag">B</span> --&gt; IO2<br>    <span class="hljs-selector-tag">B</span> --&gt; IO3<br><br>    classDef thread <span class="hljs-attribute">fill</span>:<span class="hljs-number">#e6f3ff</span>,stroke:<span class="hljs-number">#333</span>,stroke-width:<span class="hljs-number">1px</span>;<br>    classDef pool <span class="hljs-attribute">fill</span>:<span class="hljs-number">#f0f0f0</span>,stroke:<span class="hljs-number">#666</span>;<br>    class main_thread,io_pool pool;<br>    class IO1,IO2,IO3,main_thread thread;<br><br><br><br></code></pre></td></tr></table></figure>
+
+<p>epoll 仍然在主线程中使用；</p>
+<p>主线程收集活跃连接后，将这些连接分配给多个 I&#x2F;O 线程；</p>
+<p>各线程负责并行 read()&#x2F;write()；</p>
+<p>命令解析与执行仍然在主线程完成。</p>
+<h2 id="异步删除多线程（懒删除lazy-free）"><a href="#异步删除多线程（懒删除lazy-free）" class="headerlink" title="异步删除多线程（懒删除lazy free）"></a>异步删除多线程（懒删除lazy free）</h2><p><strong>场景：</strong><br> 命令如 <code>UNLINK</code>, <code>FLUSHDB ASYNC</code>, <code>FLUSHALL ASYNC</code> 删除大量键时，如果在主线程中执行，会阻塞整个实例。</p>
+<p><strong>解决：</strong><br> Redis 使用<strong>后台线程池</strong>异步释放内存。</p>
+<p>避免主线程阻塞</p>
+<h2 id="AOF-RDB"><a href="#AOF-RDB" class="headerlink" title="AOF&#x2F;RDB"></a>AOF&#x2F;RDB</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>线程</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AOF 重写（BGREWRITEAOF）</td>
+<td>子进程 + I&#x2F;O 线程</td>
+<td>异步重写日志文件</td>
+</tr>
+<tr>
+<td>RDB 快照（BGSAVE）</td>
+<td>子进程</td>
+<td>异步写入 RDB 文件</td>
+</tr>
+<tr>
+<td>AOF fsync</td>
+<td>后台线程</td>
+<td>定期将 AOF buffer flush 到磁盘</td>
+</tr>
+</tbody></table>
+<h2 id="集群和复制线程"><a href="#集群和复制线程" class="headerlink" title="集群和复制线程"></a>集群和复制线程</h2><ul>
+<li><p>Redis Cluster 节点之间的 <strong>gossip 消息</strong>、<strong>replica 同步</strong> 等网络通信也通过独立线程处理；</p>
+</li>
+<li><p>复制时，<strong>主节点发送 RDB 文件</strong> 是在后台子进程中完成；</p>
+</li>
+<li><p>在 Redis 7+ 中引入了 <strong>I&#x2F;O thread per connection</strong> 的复制机制。</p>
+</li>
+</ul>
+<h1 id="哨兵模式"><a href="#哨兵模式" class="headerlink" title="哨兵模式"></a>哨兵模式</h1><h1 id="集群模式"><a href="#集群模式" class="headerlink" title="集群模式"></a>集群模式</h1><h1 id="Redisson"><a href="#Redisson" class="headerlink" title="Redisson"></a>Redisson</h1><p>Redisson 是一款基于 Redis 的 Java 客户端，专注于为分布式应用提供丰富的分布式对象和服务。它不仅仅是 Redis 的简单操作 API，更封装了分布式锁、分布式集合（如分布式 Map、Set、List）、队列、Semaphore、CountDownLatch 等，并支持自动重连、连接池、序列化、自定义编解码等多种特性，非常适合 Java 分布式应用对 Redis 的高阶需求。</p>
+<p>常用场景包括：</p>
+<ul>
+<li>分布式锁（可重入锁、公平锁、读写锁等）</li>
+<li>分布式限流</li>
+<li>分布式对象存储（如 RMap&#x2F;RList）</li>
+<li>定时任务 &amp; 延迟队列</li>
+<li>发布订阅</li>
+</ul>
+<h2 id="Redis-过期机制"><a href="#Redis-过期机制" class="headerlink" title="Redis 过期机制"></a>Redis 过期机制</h2><p>Redis 的 key 支持设置过期时间（TTL），到期后自动删除。过期机制分为三种删除策略：</p>
+<ol>
+<li><strong>定时删除</strong>：为每个 key 设置定时器，到达过期时间立刻删除。内存释放最及时，但对 CPU 消耗较大。</li>
+<li><strong>惰性删除</strong>：访问 key 时先检查是否过期，过期则删除。不访问则不会主动删除，可能造成内存浪费。</li>
+<li><strong>定期删除</strong>（默认策略）：周期性随机抽取一批 key 检查过期并删除。Redis 默认每 100 毫秒随机采样一定数量的带过期时间的 key，发现过期就删除。</li>
+</ol>
+<p>同时，Redis 有 maxmemory 策略，当内存达到上限，触发淘汰策略（LRU&#x2F;LFU&#x2F;随机）。所以最终住于 Redis 的 key，不会无限增长。</p>
+<p>常见命令：</p>
+<ul>
+<li><code>EXPIRE key seconds</code> 设置键过期</li>
+<li><code>TTL key</code> 查看剩余过期时间</li>
+</ul>
+<h2 id="看门狗机制（Watchdog）"><a href="#看门狗机制（Watchdog）" class="headerlink" title="看门狗机制（Watchdog）"></a>看门狗机制（Watchdog）</h2><p>Redis 本身没有像 Redisson 那样的“看门狗”。但在 Redisson（客户端实现分布式锁）中，有 Watchdog 机制：</p>
+<ul>
+<li>Redisson 的分布式锁默认有 30 秒过期时间，防止死锁。</li>
+<li>只要持有锁的线程还活着，Redisson 会自动定期延长锁的过期时间（即 Watchdog）。</li>
+<li>Watchdog 的核心作用：如果业务执行时间不可控，锁不会意外失效；但如果进程宕机，锁会自动释放，避免死锁。</li>
+</ul>
+<p>原理：后台有个 watchdog 线程，每 10 秒检测一次所有锁，剩余时间不足 30 秒则延长持有时间。</p>
+<p>适用于“自动续租型”锁需求，无需手动指定锁时长，降低死锁&#x2F;超时风险。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/" class="category-chain-item">存储系统</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/KV%E6%95%B0%E6%8D%AE%E5%BA%93/" class="category-chain-item">KV数据库</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F/" class="print-no-link">#存储系统</a>
+      
+        <a href="/tags/KV%E6%95%B0%E6%8D%AE%E5%BA%93/" class="print-no-link">#KV数据库</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>redis</div>
+      <div>https://yicizhang00.github.io/posts/存储系统/KV数据库/redis/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E4%B8%8E%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/Eureka/" title="Eureka">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Eureka</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E6%95%B0%E8%AE%BA%E5%9F%BA%E7%A1%80/" title="GCD基础">
+                        <span class="hidden-mobile">GCD基础</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

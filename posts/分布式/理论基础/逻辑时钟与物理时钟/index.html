@@ -1,0 +1,933 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="分布式基础理论：时间、时钟与事件顺序  前言分布式系统的核心挑战之一在于缺乏全局统一的共享内存和绝对参考时间。本文基于 Lamport 的经典奠基论文 《Time, Clocks, and the Ordering of Events in a Distributed System》，深入探讨分布式系统中的基础时钟理论，包括逻辑时钟（Logical Clock）、物理时钟同步（Physical C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式中的逻辑时钟与物理时钟">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E9%80%BB%E8%BE%91%E6%97%B6%E9%92%9F%E4%B8%8E%E7%89%A9%E7%90%86%E6%97%B6%E9%92%9F/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="分布式基础理论：时间、时钟与事件顺序  前言分布式系统的核心挑战之一在于缺乏全局统一的共享内存和绝对参考时间。本文基于 Lamport 的经典奠基论文 《Time, Clocks, and the Ordering of Events in a Distributed System》，深入探讨分布式系统中的基础时钟理论，包括逻辑时钟（Logical Clock）、物理时钟同步（Physical C">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.833Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="分布式因果关系">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>分布式中的逻辑时钟与物理时钟 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">分布式中的逻辑时钟与物理时钟</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          28 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">分布式中的逻辑时钟与物理时钟</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="分布式基础理论：时间、时钟与事件顺序">分布式基础理论：时间、时钟与事件顺序</h1>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>分布式系统的核心挑战之一在于缺乏全局统一的共享内存和绝对参考时间。本文基于 Lamport 的经典奠基论文 《Time, Clocks, and the Ordering of Events in a Distributed System》，深入探讨分布式系统中的基础时钟理论，包括<strong>逻辑时钟（Logical Clock）</strong>、<strong>物理时钟同步（Physical Clock Synchronization）<strong>以及用于捕获完备因果关系的</strong>向量时钟（Vector Clock）</strong>。</p>
+<hr>
+<h1 id="一、-分布式系统的本质与时钟困境"><a href="#一、-分布式系统的本质与时钟困境" class="headerlink" title="一、 分布式系统的本质与时钟困境"></a>一、 分布式系统的本质与时钟困境</h1><h3 id="1-什么是分布式系统？"><a href="#1-什么是分布式系统？" class="headerlink" title="1. 什么是分布式系统？"></a>1. 什么是分布式系统？</h3><p>Lamport 提出，判定一个系统是否是分布式系统，<strong>不取决于物理距离，而取决于延迟（Latency）</strong>。</p>
+<blockquote>
+<p>如果消息传输延迟（Message Delay）与单个进程内事件发生的时间间隔（Event Interval）相比不可忽略，那么该系统就是分布式的。</p>
+</blockquote>
+<p>基于该定义，单台服务器内部（CPU、Memory、I&#x2F;O 通道作为独立进程交互）也可以被视为一个微型的分布式系统。</p>
+<h3 id="2-传统物理时钟的失效"><a href="#2-传统物理时钟的失效" class="headerlink" title="2. 传统物理时钟的失效"></a>2. 传统物理时钟的失效</h3><p>在单机环境中，我们依赖物理时间（Wall-clock Time，如通过 NTP 同步的时钟）来判定事件 $a$ 是否发生于 $b$ 之前。然而在分布式系统中，物理时钟存在以下不可避免的问题：</p>
+<ul>
+<li><strong>时钟漂移（Clock Drift）</strong>：受晶振物理特性影响，不同机器的时钟运行速度不一致。</li>
+<li><strong>时钟偏差（Clock Skew）</strong>：由于相对论效应及初始环境差异，机器间的绝对时间存在初始差值。</li>
+<li><strong>网络延迟的不确定性</strong>：导致无法通过简单的网络对时消除误差。</li>
+</ul>
+<p>因此，<strong>物理时钟无法在分布式系统中可靠地用于确定事件的因果关系</strong>。系统的规范必须根据系统内<strong>可观测</strong>的事件来给出。</p>
+<hr>
+<h1 id="二、-偏序、全序与逻辑时钟"><a href="#二、-偏序、全序与逻辑时钟" class="headerlink" title="二、 偏序、全序与逻辑时钟"></a>二、 偏序、全序与逻辑时钟</h1><h3 id="1-偏序关系（Partial-Order）"><a href="#1-偏序关系（Partial-Order）" class="headerlink" title="1. 偏序关系（Partial Order）"></a>1. 偏序关系（Partial Order）</h3><p>为了建模事件间的因果关系，Lamport 定义了 <strong>Happens-Before 关系</strong>（记作 $\rightarrow$）：</p>
+<ul>
+<li><strong>进程内规则</strong>：如果事件 $a$ 和 $b$ 在同一进程中，且 $a$ 在 $b$ 之前发生，则 $a \rightarrow b$。</li>
+<li><strong>消息传递规则</strong>：如果事件 $a$ 是一个进程发送消息，$b$ 是另一个进程接收该消息，则 $a \rightarrow b$。</li>
+<li><strong>传递性</strong>：如果 $a \rightarrow b$ 且 $b \rightarrow c$，则 $a \rightarrow c$。</li>
+</ul>
+<p>偏序关系无法比较所有事件对。若既没有 $a \rightarrow b$ 也没有 $b \rightarrow a$，则称事件 $a$ 和 $b$ 是<strong>并发的（Concurrent）</strong>，记作 $a \parallel b$。</p>
+<h3 id="2-全序关系（Total-Order）"><a href="#2-全序关系（Total-Order）" class="headerlink" title="2. 全序关系（Total Order）"></a>2. 全序关系（Total Order）</h3><p>偏序无法比较并发事件，而全序关系要求任意两个事件都能比较大小。在分布式系统中，可以通过在逻辑时间戳后拼接进程 ID（PID）来强制将偏序转换为全序（例如：当 $C(a) &#x3D; C(b)$ 时，若 $PID_a &lt; PID_b$，则认为 $a$ 发生于 $b$ 之前）。全序关系是实现总序广播（Total Order Broadcast）及状态机复制协议的基础。</p>
+<h3 id="3-逻辑时钟（Logical-Clock）"><a href="#3-逻辑时钟（Logical-Clock）" class="headerlink" title="3. 逻辑时钟（Logical Clock）"></a>3. 逻辑时钟（Logical Clock）</h3><p>为了不依赖物理时间建立因果序，Lamport 提出了逻辑时钟。每个进程维护一个单调递增的计数器 $C$，更新算法如下：</p>
+<ul>
+<li><strong>本地事件</strong>：$C &#x3D; C + 1$</li>
+<li><strong>发送消息</strong>：$C &#x3D; C + 1$，并将当前时间戳 $C$ 附带在消息中发送。</li>
+<li><strong>接收消息</strong>：$C &#x3D; \max(C, \text{接收的时间戳}) + 1$</li>
+</ul>
+<h4 id="时钟条件（Clock-Condition）"><a href="#时钟条件（Clock-Condition）" class="headerlink" title="时钟条件（Clock Condition）"></a>时钟条件（Clock Condition）</h4><p>逻辑时钟满足强一致性时钟条件：<br>$$a \rightarrow b \Longrightarrow C(a) &lt; C(b)$$</p>
+<blockquote>
+<p><strong>致命缺陷</strong>：该命题的<strong>逆命题不成立</strong>。即如果 $C(a) &lt; C(b)$，我们<strong>无法</strong>推导出 $a \rightarrow b$。因为对于两个并发事件，它们的时间戳虽然可以比较大小，但在物理现实中并没有因果关系。</p>
+</blockquote>
+<h3 id="4-向量时钟（Vector-Clock）"><a href="#4-向量时钟（Vector-Clock）" class="headerlink" title="4. 向量时钟（Vector Clock）"></a>4. 向量时钟（Vector Clock）</h3><p>为了解决逻辑时钟“无法通过时间戳反推因果关系（不能识别并发）”的缺陷，后续学者提出了<strong>向量时钟（Vector Clock）</strong>。它将单一的标量计数器扩展为维度等于进程总数的向量。</p>
+<ul>
+<li>只有当向量时钟满足 $\vec{V}(a) &lt; \vec{V}(b)$ 时，才能确凿判定 $a \rightarrow b$。</li>
+<li>如果向量时钟互不小于对方，则能准确识别出事件为并发关系 ($a \parallel b$)。</li>
+</ul>
+<hr>
+<h1 id="三、-物理时钟同步与强时钟条件"><a href="#三、-物理时钟同步与强时钟条件" class="headerlink" title="三、 物理时钟同步与强时钟条件"></a>三、 物理时钟同步与强时钟条件</h1><p>虽然逻辑时钟解决了因果序问题，但依然存在两个无法解决的物理现实问题：</p>
+<ol>
+<li><strong>无法回答绝对时间</strong>：系统不知道当前客观现实是“几点几分”。</li>
+<li><strong>外部因果冲突（外部通道漏洞）</strong>：如果用户在计算机 A 上发起请求 $A$，随后通过**电话（系统外通道）**告知另一个城市的程序员，对方听闻后在计算机 B 上发起请求 $B$。由于该因果信息通过系统外部传递，逻辑时钟无法捕捉，请求 $B$ 极有可能获得一个比 $A$ 更小的逻辑时间戳，导致时序颠倒。</li>
+</ol>
+<p>因此，系统仍需引入<strong>物理时钟同步</strong>来约束强时钟条件，将整个系统的物理时间误差控制在有限的、可接受的边界 $\delta$ 内。</p>
+<h3 id="1-两台机器间的误差数学推导"><a href="#1-两台机器间的误差数学推导" class="headerlink" title="1. 两台机器间的误差数学推导"></a>1. 两台机器间的误差数学推导</h3><p>假设存在一个宇宙绝对参考时间 $t$，每台机器 $P_i$ 的物理时钟读取值为 $C_i(t)$。</p>
+<h4 id="核心假设（晶振漂移率上限）："><a href="#核心假设（晶振漂移率上限）：" class="headerlink" title="核心假设（晶振漂移率上限）："></a>核心假设（晶振漂移率上限）：</h4><p>$$\left| \frac{dC_i(t)}{dt} - 1 \right| &lt; \kappa$$<br>其中 $\kappa$ 为物理时钟的最大漂移率（Drift Rate）。</p>
+<h4 id="漂移发散过程："><a href="#漂移发散过程：" class="headerlink" title="漂移发散过程："></a>漂移发散过程：</h4><p>经过绝对时间 $T$ 秒后：</p>
+<ul>
+<li>跑得最快的时钟走过了：$(1 + \kappa)T$ 秒</li>
+<li>跑得最慢的时钟走过了：$(1 - \kappa)T$ 秒</li>
+<li>两者自然产生的最大物理时钟差距为：$2\kappa T$ 秒</li>
+</ul>
+<h4 id="结合网络同步："><a href="#结合网络同步：" class="headerlink" title="结合网络同步："></a>结合网络同步：</h4><p>假设同步消息在网络中的最大传输延迟为 $\mu$。由于需要保证系统整体的物理时钟误差存在一个绝对上界 $\delta$，即：<br>$$\left| C_i(t) - C_j(t) \right| &lt; \delta$$</p>
+<p>那么，网络延迟加上两台机器在同步周期内的最大漂移发散值，必须小于允许的最大误差 $\delta$：<br>$$\mu + 2\kappa T &lt; \delta$$</p>
+<p><strong>解出同步周期 $T$ 的上限：</strong><br>$$T &lt; \frac{\delta - \mu}{2\kappa}$$</p>
+<blockquote>
+<p><strong>结论</strong>：若已知硬件时钟漂移率 $\kappa$、最大网络延迟 $\mu$ 以及系统容忍的误差上界 $\delta$，则机器<strong>至少每隔 $T$ 秒必须进行一次物理对时</strong>。</p>
+</blockquote>
+<h3 id="2-集群系统与多级误差放大（Network-Diameter）"><a href="#2-集群系统与多级误差放大（Network-Diameter）" class="headerlink" title="2. 集群系统与多级误差放大（Network Diameter）"></a>2. 集群系统与多级误差放大（Network Diameter）</h3><p>真实分布式系统往往由多台机器构成集群，机器间通信呈现拓扑图结构。假设集群网络拓扑图的<strong>直径（Diameter）为 $d$</strong>（即任意两点间连通图的最长最短路径跳数）。</p>
+<p>例如以下线性拓扑（直径 $d &#x3D; 3$）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">P1 &lt;---(δ)---&gt; P2 &lt;---(δ)---&gt; P3 &lt;---(δ)---&gt; P4<br></code></pre></td></tr></table></figure>
+
+<p>由于相邻节点的误差满足 $|C_i - C_{i+1}| &lt; \delta$，根据三角不等式，边缘节点 $P_1$ 与 $P_4$ 的最大误差将被放大：<br>$$ |C_1 - C_4| \leq |C_1 - C_2| + |C_2 - C_3| + |C_3 - C_4| &#x3D; 3\delta $$<br>推广到任意直径为 $d$ 的集群系统，其全系统的全局物理时间误差上限（Global Bound）满足：<br>$$ \epsilon &#x3D; d \cdot (2\kappa T + \mu) $$<br>即：<br>$$ \text{Global Bound} &#x3D; \text{Local Bound} \times \text{Network Diameter} $$</p>
+<h1 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h1><p>如果我们能采购到满足漂移率 $\kappa$ 假设的硬件，并且如果机器之间能严格按照周期 $T$ 进行物理同步，那么就能“推导并证明”出——全分布式系统的物理时间差存在一个绝对的最大上限 $\epsilon$。</p>
+<p>或者说</p>
+<p>要想在分布式系统中实现系统误差$\epsilon$，那么各个机器同步的时间周期是存在一个最大上限$T$的。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="category-chain-item">理论基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%9B%A0%E6%9E%9C%E5%85%B3%E7%B3%BB/" class="print-no-link">#分布式因果关系</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>分布式中的逻辑时钟与物理时钟</div>
+      <div>https://yicizhang00.github.io/posts/分布式/理论基础/逻辑时钟与物理时钟/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="分布式数据结构">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">分布式数据结构</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/" title="分布式一致性算法">
+                        <span class="hidden-mobile">分布式一致性算法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

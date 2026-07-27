@@ -1,0 +1,1020 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞在介绍IO前，首先需要了解同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞的区别。 同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。 同步 发起调用后，必须主动轮询获取返回结果。 执行流程是 调用方主动等待结果。  异步 发起调用后，不用等结果，立刻返回。 结果准备好后，系统会通过 回调&#x2F;事件&#x2F;通知 告诉你">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java IO模型">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/IO/JavaIO%E6%A8%A1%E5%9E%8B/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞在介绍IO前，首先需要了解同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞的区别。 同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。 同步 发起调用后，必须主动轮询获取返回结果。 执行流程是 调用方主动等待结果。  异步 发起调用后，不用等结果，立刻返回。 结果准备好后，系统会通过 回调&#x2F;事件&#x2F;通知 告诉你">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163321.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163344.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163408.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163428.jpg">
+<meta property="article:published_time" content="2025-09-26T19:29:29.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.836Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="IO">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163321.jpg">
+  
+  
+  
+  <title>Java IO模型 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Java IO模型</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-27 03:29" pubdate>
+          2025年9月27日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          55 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Java IO模型</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="同步-异步-阻塞-非阻塞"><a href="#同步-异步-阻塞-非阻塞" class="headerlink" title="同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞"></a>同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞</h1><p>在介绍IO前，首先需要了解同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞的区别。</p>
+<p>同步与异步是事件的调用方式，而阻塞与非阻塞是线程的执行方式。</p>
+<h3 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h3><ul>
+<li>发起调用后，<strong>必须主动轮询</strong>获取返回结果。</li>
+<li>执行流程是 <strong>调用方主动等待结果</strong>。</li>
+</ul>
+<h3 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h3><ul>
+<li>发起调用后，<strong>不用等结果，立刻返回</strong>。</li>
+<li>结果准备好后，系统会通过 <strong>回调&#x2F;事件&#x2F;通知</strong> 告诉你。</li>
+</ul>
+<h3 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h3><ul>
+<li>调用时，如果没结果，<strong>线程会停在那里，不能干别的</strong>。</li>
+<li>一直等到有结果才能返回。</li>
+</ul>
+<h3 id="非阻塞"><a href="#非阻塞" class="headerlink" title="非阻塞"></a>非阻塞</h3><ul>
+<li>调用时，如果没结果，<strong>立刻返回错误码&#x2F;状态</strong>，不会卡住线程。</li>
+<li>应用程序可以 <strong>再次尝试</strong> 或 <strong>去干别的事</strong>。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>同步&#x2F;异步</th>
+<th>阻塞&#x2F;非阻塞</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同步阻塞</td>
+<td>同步</td>
+<td>阻塞</td>
+<td>最传统，简单，但性能差</td>
+</tr>
+<tr>
+<td>同步非阻塞</td>
+<td>同步</td>
+<td>非阻塞</td>
+<td>需要轮询，多次调用，效率低</td>
+</tr>
+<tr>
+<td>异步阻塞</td>
+<td>异步</td>
+<td>阻塞</td>
+<td>等待通知时线程挂起</td>
+</tr>
+<tr>
+<td>异步非阻塞</td>
+<td>异步</td>
+<td>非阻塞</td>
+<td>最优，事件驱动模型</td>
+</tr>
+</tbody></table>
+<h1 id="Unix-IO模型"><a href="#Unix-IO模型" class="headerlink" title="Unix IO模型"></a>Unix IO模型</h1><p>Unix IO 模型有5种模型</p>
+<h2 id="同步阻塞IO"><a href="#同步阻塞IO" class="headerlink" title="同步阻塞IO"></a>同步阻塞IO</h2><p><strong>调用方式</strong>：<code>read()</code> 等用户发起系统调用会 <strong>阻塞</strong>当前线程，直到有数据到达并拷贝到用户缓冲区。</p>
+<p><strong>特点</strong>：简单易用，但一个线程只能处理一个连接。</p>
+<p><img src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163321.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h2 id="同步非阻塞IO"><a href="#同步非阻塞IO" class="headerlink" title="同步非阻塞IO"></a>同步非阻塞IO</h2><p><strong>调用方式</strong>：把 socket 设置为 <strong>O_NONBLOCK</strong>，系统调用立即返回：</p>
+<ul>
+<li>如果没有数据，立刻返回 <code>EWOULDBLOCK</code> 错误码，并且不断调用<code>read()</code>轮询；</li>
+<li>如果有数据，拷贝到用户空间后返回。</li>
+<li>直到数据到了内核空间，这一次 read 调用后，在等待数据从内核空间拷贝到用户空间这段时间里，线程还是阻塞的，等数据到了用户空间再把线程叫醒。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163344.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>非阻塞IO一般配合轮询使用，如果没有数据返回，线程可以先去干别的事，但是需要轮询保证下一轮可以继续获取数据。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-type">int</span> n = read(fd, buf, <span class="hljs-keyword">sizeof</span>(buf));<br>    <span class="hljs-keyword">if</span> (n &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">if</span> (errno == EAGAIN) &#123;<br>            <span class="hljs-comment">// 没数据，继续轮询（CPU 忙等）</span><br>            <span class="hljs-keyword">continue</span>;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            perror(<span class="hljs-string">&quot;read error&quot;</span>);<br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n == <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-comment">// 对方关闭连接</span><br>        <span class="hljs-keyword">break</span>;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// 读到数据</span><br>        handle(buf, n);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="IO多路复用"><a href="#IO多路复用" class="headerlink" title="IO多路复用"></a>IO多路复用</h2><ul>
+<li><p><strong>代表</strong>：<code>select</code>、<code>poll</code>、<code>epoll</code>（Linux）、<code>kqueue</code>（BSD、macOS）。</p>
+</li>
+<li><p><strong>原理</strong>：把多个 socket 注册到一个多路复用器，内核帮你监听，哪个 socket 可读&#x2F;可写再通知你。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>一个线程就能管理成千上万个连接；</li>
+<li>常用于高并发服务器（Redis、Nginx、Netty）。</li>
+</ul>
+</li>
+<li><p><strong>典型 API</strong>：</p>
+<ul>
+<li><code>select</code>：FD 数量有限（通常 1024）。</li>
+<li><code>poll</code>：用链表存储 FD，数量无限制，但性能随连接数线性下降。</li>
+<li><code>epoll</code>：Linux 特有，事件驱动，性能好。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163408.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>    <span class="hljs-type">ssize_t</span> n = read(fd, buf, size);<br>    <span class="hljs-keyword">if</span> (n &gt; <span class="hljs-number">0</span>) &#123;<br>        process(buf, n);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (errno == EAGAIN) &#123;<br>        <span class="hljs-comment">// 没有数据，继续下一轮</span><br>        <span class="hljs-keyword">continue</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="信号驱动IO"><a href="#信号驱动IO" class="headerlink" title="信号驱动IO"></a>信号驱动IO</h2><p><strong>调用方式</strong>：进程给 socket 注册一个信号处理函数，内核数据就绪时，发送 <code>SIGIO</code> 信号通知进程，再调用 <code>recvfrom()</code> 读取。</p>
+<p><strong>特点</strong>：比较少用，代码复杂。</p>
+<p><strong>典型场景</strong>：需要中断通知的特殊应用。</p>
+<h2 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h2><p><strong>调用方式</strong>：进程发起 <code>aio_read()</code> 后立即返回，内核在数据准备好并拷贝到用户缓冲区后，通知进程（回调&#x2F;事件）。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>真正的 <strong>异步</strong>，应用层不需要关心拷贝过程。</li>
+<li>但在 Linux 中 AIO 支持有限，很多库用线程池模拟。</li>
+</ul>
+<p><strong>典型场景</strong>：Windows IOCP，Linux libaio。</p>
+<p><img src="https://raw.githubusercontent.com/dunwu/images/master/snap/20201121163428.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h1 id="Java-IO模型"><a href="#Java-IO模型" class="headerlink" title="Java IO模型"></a>Java IO模型</h1><h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>BIO是blocking IO，主要在<code>java.io</code>包中，采用流模型实现。</p>
+<p><code>java.io</code>包提供了我们最熟知的一些 IO 功能，比如 File 抽象、输入输出流等。交互方式是同步、阻塞的方式，也就是说，在读取输入流或者写入输出流时，在读、写动作完成之前，线程会一直阻塞在那里，它们之间的调用是可靠的线性顺序。</p>
+<p>采用 BIO 的服务端，通常由一个独立的 Acceptor 线程负责监听客户端连接。服务端一般在<code>while(true)</code> 循环中调用 <code>accept()</code> 方法等待客户端的连接请求，一旦接收到一个连接请求，就可以建立 Socket，并基于这个 Socket 进行读写操作。此时，不能再接收其他客户端连接请求，只能等待当前连接的操作执行完成。</p>
+<h3 id="BIO缺陷"><a href="#BIO缺陷" class="headerlink" title="BIO缺陷"></a>BIO缺陷</h3><p>如果要让 <strong>BIO 通信模型</strong> 能够同时处理多个客户端请求，就必须使用多线程（主要原因是<code>socket.accept()</code>、<code>socket.read()</code>、<code>socket.write()</code> 涉及的三个主要函数都是同步阻塞的），但会造成不必要的线程开销。不过可以通过 <strong>线程池机制</strong> 改善，线程池还可以让线程的创建和回收成本相对较低。</p>
+<p><strong>即使可以用线程池略微优化，但是会消耗宝贵的线程资源，并且在百万级并发场景下也撑不住</strong>。如果并发访问量增加会导致线程数急剧膨胀可能会导致线程堆栈溢出、创建新线程失败等问题，最终导致进程宕机或者僵死，不能对外提供服务。</p>
+<h3 id="BIO-多线程"><a href="#BIO-多线程" class="headerlink" title="BIO+多线程"></a>BIO+多线程</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.io.*;<br><span class="hljs-keyword">import</span> java.net.*;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BioMultiThreadServer</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        <span class="hljs-type">ServerSocket</span> <span class="hljs-variable">serverSocket</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ServerSocket</span>(<span class="hljs-number">8080</span>);<br>        System.out.println(<span class="hljs-string">&quot;BIO 多线程服务器启动，端口 8080&quot;</span>);<br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>            <span class="hljs-comment">// 阻塞等待客户端连接</span><br>            <span class="hljs-type">Socket</span> <span class="hljs-variable">socket</span> <span class="hljs-operator">=</span> serverSocket.accept();<br>            System.out.println(<span class="hljs-string">&quot;客户端连接：&quot;</span> + socket.getRemoteSocketAddress());<br><br>            <span class="hljs-comment">// 每来一个连接，就开一个新线程去处理</span><br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ClientHandler</span>(socket)).start();<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ClientHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span> &#123;<br>        <span class="hljs-keyword">private</span> Socket socket;<br><br>        <span class="hljs-keyword">public</span> <span class="hljs-title function_">ClientHandler</span><span class="hljs-params">(Socket socket)</span> &#123;<br>            <span class="hljs-built_in">this</span>.socket = socket;<br>        &#125;<br><br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>            <span class="hljs-keyword">try</span> (<span class="hljs-type">BufferedReader</span> <span class="hljs-variable">reader</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(socket.getInputStream()));<br>                 <span class="hljs-type">PrintWriter</span> <span class="hljs-variable">writer</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">PrintWriter</span>(socket.getOutputStream(), <span class="hljs-literal">true</span>)) &#123;<br><br>                String line;<br>                <span class="hljs-keyword">while</span> ((line = reader.readLine()) != <span class="hljs-literal">null</span>) &#123;<br>                    System.out.println(<span class="hljs-string">&quot;收到消息：&quot;</span> + line);<br>                    writer.println(<span class="hljs-string">&quot;Echo: &quot;</span> + line); <span class="hljs-comment">// 回显</span><br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>                e.printStackTrace();<br>            &#125; <span class="hljs-keyword">finally</span> &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    socket.close();<br>                &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>多线程 BIO</strong>：简单粗暴，但线程数不受控，适合小规模并发。</p>
+<h3 id="BIO-线程池"><a href="#BIO-线程池" class="headerlink" title="BIO+线程池"></a>BIO+线程池</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.io.*;<br><span class="hljs-keyword">import</span> java.net.*;<br><span class="hljs-keyword">import</span> java.util.concurrent.*;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BioThreadPoolServer</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        <span class="hljs-type">ServerSocket</span> <span class="hljs-variable">serverSocket</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ServerSocket</span>(<span class="hljs-number">8080</span>);<br>        System.out.println(<span class="hljs-string">&quot;BIO 线程池服务器启动，端口 8080&quot;</span>);<br><br>        <span class="hljs-comment">// 固定大小的线程池，避免无限创建线程</span><br>        <span class="hljs-type">ExecutorService</span> <span class="hljs-variable">threadPool</span> <span class="hljs-operator">=</span> Executors.newFixedThreadPool(<span class="hljs-number">10</span>);<br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>            <span class="hljs-type">Socket</span> <span class="hljs-variable">socket</span> <span class="hljs-operator">=</span> serverSocket.accept();<br>            System.out.println(<span class="hljs-string">&quot;客户端连接：&quot;</span> + socket.getRemoteSocketAddress());<br><br>            <span class="hljs-comment">// 把任务交给线程池执行</span><br>            threadPool.execute(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ClientHandler</span>(socket));<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ClientHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span> &#123;<br>        <span class="hljs-keyword">private</span> Socket socket;<br><br>        <span class="hljs-keyword">public</span> <span class="hljs-title function_">ClientHandler</span><span class="hljs-params">(Socket socket)</span> &#123;<br>            <span class="hljs-built_in">this</span>.socket = socket;<br>        &#125;<br><br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>            <span class="hljs-keyword">try</span> (<span class="hljs-type">BufferedReader</span> <span class="hljs-variable">reader</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(socket.getInputStream()));<br>                 <span class="hljs-type">PrintWriter</span> <span class="hljs-variable">writer</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">PrintWriter</span>(socket.getOutputStream(), <span class="hljs-literal">true</span>)) &#123;<br><br>                String line;<br>                <span class="hljs-keyword">while</span> ((line = reader.readLine()) != <span class="hljs-literal">null</span>) &#123;<br>                    System.out.println(<span class="hljs-string">&quot;收到消息：&quot;</span> + line);<br>                    writer.println(<span class="hljs-string">&quot;Echo: &quot;</span> + line);<br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>                e.printStackTrace();<br>            &#125; <span class="hljs-keyword">finally</span> &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    socket.close();<br>                &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>线程池 BIO</strong>：线程数可控，性能更稳，但依旧受限于阻塞 IO 的效率瓶颈。</p>
+<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO即Non-blocking IO，在jdk1.4中引入<code>java.nio</code>包中。</p>
+<p><code>java.nio</code> 包提供了 <code>Channel</code>、<code>Selector</code>、<code>Buffer</code> 等新的抽象，可以构建多路复用的、同步非阻塞 IO 程序，同时提供了更接近操作系统底层的高性能数据操作方式。</p>
+<p><strong>Channel</strong>：可读写的双向通道，如 <code>SocketChannel</code>、<code>ServerSocketChannel</code>、<code>FileChannel</code>。</p>
+<p><strong>ByteBuffer</strong>：数据容器，带 <code>position/limit/capacity</code>。操作前后要调用 <code>flip()</code>、<code>clear()</code>、<code>compact()</code> 等方法正确转换读写状态。</p>
+<ul>
+<li><p>在 <strong>Java NIO</strong> 里，所有的 I&#x2F;O（无论是 <code>SocketChannel</code> 还是 <code>FileChannel</code>）都必须通过 <strong>Buffer</strong> 作为中转站。</p>
+</li>
+<li><p><strong>Channel 并不会直接返回原始字节数组</strong>，而是把数据写入你提供的 <code>ByteBuffer</code>；同样，写数据时你要先把数据放进 <code>ByteBuffer</code>，再由 <code>Channel.write()</code> 把 buffer 里的数据送到内核&#x2F;网络。</p>
+</li>
+<li><p>所以，<strong>ByteBuffer 就是线程和 Channel 之间的数据暂存区</strong>。</p>
+</li>
+</ul>
+<p><strong>Selector</strong>：事件复用器，线程调用 <code>select()</code> 阻塞等待多个 Channel 的就绪（可读、可写、可接受连接等），返回一组 <code>SelectionKey</code>。</p>
+<p><strong>非阻塞模式</strong>：<code>channel.configureBlocking(false)</code> 后，<code>read()</code>&#x2F;<code>write()</code> 等不会阻塞，若无法完成会返回特定值（读：0&#x2F;-1，写：写入字节数可能为 0）。</p>
+<p><strong>注册&#x2F;兴趣集合</strong>：通过 <code>channel.register(selector, SelectionKey.OP_READ|OP_WRITE, attachment)</code> 把 channel 注册到 selector，并可附带 <code>attachment</code>（比如缓冲区或连接上下文）。</p>
+<h3 id="使用ByteBuffer"><a href="#使用ByteBuffer" class="headerlink" title="使用ByteBuffer"></a>使用ByteBuffer</h3><p>NIO 与传统 I&#x2F;O 不同，它是基于块（Block）的，它以块为基本单位处理数据。在 NIO 中，最为重要的两个组件是缓冲区（<code>Buffer</code>）和通道（<code>Channel</code>）。</p>
+<p><code>Buffer</code> 是一块连续的内存块，是 NIO 读写数据的缓冲。<code>Buffer</code> 可以将文件一次性读入内存再做后续处理，而传统的方式是边读文件边处理数据。<code>Channel</code> 表示缓冲数据的源头或者目的地，它用于读取缓冲或者写入数据，是访问缓冲的接口。</p>
+<h3 id="使用直接内存"><a href="#使用直接内存" class="headerlink" title="使用直接内存"></a>使用直接内存</h3><p>NIO 还提供了一个可以直接访问物理内存的类 <code>DirectBuffer</code>。普通的 <code>Buffer</code> 分配的是 JVM 堆内存，而 <code>DirectBuffer</code> 是直接分配物理内存。</p>
+<p>数据要输出到外部设备，必须先从用户空间复制到内核空间，再复制到输出设备，而 <code>DirectBuffer</code> 则是直接将步骤简化为从内核空间复制到外部设备，减少了数据拷贝。</p>
+<p>这里拓展一点，由于 <code>DirectBuffer</code> 申请的是非 JVM 的物理内存，所以创建和销毁的代价很高。<code>DirectBuffer</code> 申请的内存并不是直接由 JVM 负责垃圾回收，但在 <code>DirectBuffer</code> 包装类被回收时，会通过 Java 引用机制来释放该内存块。</p>
+<h3 id="传统-IO"><a href="#传统-IO" class="headerlink" title="传统 IO"></a>传统 IO</h3><ul>
+<li>通过 <code>InputStream</code> &#x2F; <code>OutputStream</code> 进行读写。</li>
+<li><strong>单向流</strong>：只能读或只能写。</li>
+<li>每次调用 <code>read()</code> 或 <code>write()</code> 都会触发 <strong>用户空间 ↔ 内核空间的数据复制</strong>。</li>
+<li>是阻塞的：比如 <code>read()</code> 时，如果没有数据，线程就会挂起。</li>
+</ul>
+<h3 id="NIO-Channel"><a href="#NIO-Channel" class="headerlink" title="NIO Channel"></a>NIO Channel</h3><ul>
+<li><code>Channel</code> 是 <strong>双向的</strong>：同一个对象既能读也能写。</li>
+<li>底层依赖操作系统的 <strong>文件描述符（fd）</strong>。</li>
+<li>与 <code>ByteBuffer</code> 搭配使用，可以做到 <strong>非阻塞 I&#x2F;O</strong>。</li>
+<li>支持 <strong>零拷贝</strong> 技术，避免多次用户态&#x2F;内核态数据复制，提高性能。</li>
+</ul>
+<h2 id="AIO"><a href="#AIO" class="headerlink" title="AIO"></a>AIO</h2><p>AIO即NIO2，在JDK1.7中引入：</p>
+<p>Java 7+ 引入 <code>AsynchronousSocketChannel</code>、<code>AsynchronousServerSocketChannel</code>，基于回调或 Future：</p>
+<ul>
+<li><code>AsynchronousSocketChannel.read(ByteBuffer, attachment, CompletionHandler)</code>：IO 完成后回调 <code>CompletionHandler</code>。</li>
+<li>异步模型让操作更贴近 OS 的真正异步（在 Windows 是 IOCP，在 Linux 早期可能用线程池做模拟，现代内核可借助 io_uring 更高效）。</li>
+<li>与 Selector 模型相比：异步模型更易写出“事件回调”风格代码，但也要处理并发回调、资源竞争。</li>
+</ul>
+<h1 id="传统IO流"><a href="#传统IO流" class="headerlink" title="传统IO流"></a>传统IO流</h1>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/IO/" class="category-chain-item">IO</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+        <a href="/tags/IO/" class="print-no-link">#IO</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Java IO模型</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/IO/JavaIO模型/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月27日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/encrypt/" title="勒索软件最佳实践">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">勒索软件最佳实践</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E6%95%85%E9%9A%9C%E6%A3%80%E6%B5%8B/Phi%20Accrual%20Failure%20Detector/" title="Phi Accrual Failure Detector">
+                        <span class="hidden-mobile">Phi Accrual Failure Detector</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

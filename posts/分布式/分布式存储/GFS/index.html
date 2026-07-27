@@ -1,0 +1,1082 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="前言：Google 分布式三驾马车本篇笔记重点梳理 Google 在分布式领域的奠基性论文——GFS (Google File System)。作为大数据时代的开山之作，它不仅是开源社区 Hadoop HDFS 的前身，更与另外两篇独立论文共同构成了早期分布式计算的技术起源：  GFS (Google File System)：高吞吐的分布式文件存储系统，解决海量数据的“存”问题。 BigTabl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GFS (Google File System)">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/GFS/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="前言：Google 分布式三驾马车本篇笔记重点梳理 Google 在分布式领域的奠基性论文——GFS (Google File System)。作为大数据时代的开山之作，它不仅是开源社区 Hadoop HDFS 的前身，更与另外两篇独立论文共同构成了早期分布式计算的技术起源：  GFS (Google File System)：高吞吐的分布式文件存储系统，解决海量数据的“存”问题。 BigTabl">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260622163317902.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260622182515836.png">
+<meta property="article:published_time" content="2026-06-21T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.832Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="分布式存储">
+<meta property="article:tag" content="GFS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260622163317902.png">
+  
+  
+  
+  <title>GFS (Google File System) - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">GFS (Google File System)</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-06-22 01:55" pubdate>
+          2026年6月22日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">GFS (Google File System)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="前言：Google-分布式三驾马车"><a href="#前言：Google-分布式三驾马车" class="headerlink" title="前言：Google 分布式三驾马车"></a>前言：Google 分布式三驾马车</h1><p>本篇笔记重点梳理 Google 在分布式领域的奠基性论文——<strong>GFS (Google File System)</strong>。作为大数据时代的开山之作，它不仅是开源社区 Hadoop HDFS 的前身，更与另外两篇独立论文共同构成了早期分布式计算的技术起源：</p>
+<ul>
+<li><strong>GFS (Google File System)</strong>：高吞吐的分布式文件存储系统，解决海量数据的“存”问题。</li>
+<li><strong>BigTable</strong>：构建在 GFS 之上的分布式结构化稀疏数据库，解决海量数据的“随机读写与检索”问题。</li>
+<li><strong>MapReduce</strong>：分布式大规模并行离线计算框架，解决海量数据的“算”问题。</li>
+</ul>
+<hr>
+<h1 id="背景：为何需要-GFS？"><a href="#背景：为何需要-GFS？" class="headerlink" title="背景：为何需要 GFS？"></a>背景：为何需要 GFS？</h1><p>2000 年左右，随着互联网网页数量和多媒体数据的爆炸式增长，Google 面临着超越传统存储极限的严峻挑战：</p>
+<ul>
+<li><strong>数据规模剧增</strong>：全网爬取的网页索引达 PB 级别，单机存储与传统商业存储（如大型机、SAN&#x2F;NAS）无论在容量还是扩展成本上都无法承受。</li>
+<li><strong>硬件故障常态化</strong>：由成千上万个低成本、廉价通用 PC（Commodity Hardware）组成的集群中，磁盘损坏、内存错误、网络抖动、电源故障是<strong>必然发生的日常事件</strong>，而非异常。</li>
+<li><strong>经典吞吐瓶颈</strong>：传统文件系统（POSIX）设计之初主要面向单机、小文件、频繁随机读写，在高并发的大数据流式处理场景下，内核态切换与并发锁争用会导致性能急剧雪崩。</li>
+</ul>
+<p><strong>核心目标</strong>：如何利用成千上万台廉价 PC 组成集群，实现海量大文件存储、结构化数据管理及海量计算？这便是 GFS、BigTable 和 MapReduce 诞生的背景。</p>
+<hr>
+<h1 id="GFS-架构概览"><a href="#GFS-架构概览" class="headerlink" title="GFS 架构概览"></a>GFS 架构概览</h1><h2 id="设计假设与权衡哲学"><a href="#设计假设与权衡哲学" class="headerlink" title="设计假设与权衡哲学"></a>设计假设与权衡哲学</h2><p>GFS 的架构并非盲目追求完美的通用性，而是基于特定工业场景做出了极其克制且激进的<strong>折中与假设（Trade-offs）</strong>：</p>
+<ol>
+<li><strong>组件失效（Component Failures）是常态</strong>：系统必须将“自动容错与快速恢复”作为核心逻辑内嵌到文件系统的骨架中，而非作为外挂补丁。</li>
+<li><strong>大文件（Large Files）优化</strong>：文件规模通常在 GB 级别。系统虽兼容小文件，但无需为其特意优化（避免元数据膨胀）。</li>
+<li><strong>特异化的写负载（Append-Only）</strong>：工作负载以**大规模顺序追加写（Append）**为主，文件一旦生成则极少或基本不发生随机覆盖写（Random Write）。</li>
+<li><strong>吞吐量优先（Throughput over Latency）</strong>：在核心指标上，系统极力追求<strong>高持续带宽（High Sustained Bandwidth）</strong>，为此不惜牺牲部分单次读写的低延迟（Low Latency）。</li>
+<li><strong>高效的并发控制（Concurrent Appends）</strong>：必须保证数十个客户端并发向同一个文件进行末尾追加时，具备明确、原子且性能损耗极低的语义。</li>
+</ol>
+<h2 id="接口设计：对-POSIX-标准的改良"><a href="#接口设计：对-POSIX-标准的改良" class="headerlink" title="接口设计：对 POSIX 标准的改良"></a>接口设计：对 POSIX 标准的改良</h2><p>GFS 没有完全遵循标准的 <strong>POSIX 语义</strong>，而是为了分布式环境下的性能释放进行了精简和裁剪：</p>
+<table>
+<thead>
+<tr>
+<th align="left">特性维度</th>
+<th align="left">POSIX 标准</th>
+<th align="left">GFS 设计</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>一致性模型</strong></td>
+<td align="left">强一致性（任一写操作后全球立即可见）</td>
+<td align="left">宽松一致性（依靠应用层容错拉平）</td>
+</tr>
+<tr>
+<td align="left"><strong>原子性保障</strong></td>
+<td align="left">字节级严格原子性限制</td>
+<td align="left">仅在特定的**记录追加（Record Append）**上保证原子性</td>
+</tr>
+<tr>
+<td align="left"><strong>写入模式支持</strong></td>
+<td align="left">支持无限制的细粒度覆盖写、随机写</td>
+<td align="left">仅支持高效追加写（Append），不支持或弱化随机写</td>
+</tr>
+<tr>
+<td align="left"><strong>文件模型</strong></td>
+<td align="left">可变字节数组</td>
+<td align="left">追加写为主</td>
+</tr>
+<tr>
+<td align="left"><strong>目录语义</strong></td>
+<td align="left">严格（Rename 原子，Del 立即生效）</td>
+<td align="left">相对宽松</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="系统架构与拓扑"><a href="#系统架构与拓扑" class="headerlink" title="系统架构与拓扑"></a>系统架构与拓扑</h2><p>GFS 集群采用了经典的 <strong>单 Master（主节点）- 多 Chunkserver（数据节点）</strong> 的中心化主从架构。</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260622163317902.png" srcset="/img/loading.gif" lazyload alt="GFS Architecture"></p>
+<h3 id="核心组件职责"><a href="#核心组件职责" class="headerlink" title="核心组件职责"></a>核心组件职责</h3><h4 id="1-Master-主节点"><a href="#1-Master-主节点" class="headerlink" title="1. Master (主节点)"></a>1. Master (主节点)</h4><ul>
+<li><strong>元数据控制面（Control Plane）</strong>：统一维护文件系统的全局命名空间（Namespace）、访问控制列表（ACL）、文件到数据块（Chunk）的逻辑映射、以及各个 Chunk 副本（Replica）的物理存放位置。</li>
+<li><strong>集群状态机协调</strong>：全局管理 Chunk 租约（Lease）、后台垃圾回收（GC）、异常节点的副本重复制（Re-replication）与集群负载重平衡（Rebalance）。</li>
+<li><strong>控制流通信</strong>：通过定期的 <code>HeartBeat</code>（心跳机制）与各个 Chunkserver 保持通信，收集节点状态并下发控制指令。</li>
+</ul>
+<h4 id="2-Chunkserver-数据节点"><a href="#2-Chunkserver-数据节点" class="headerlink" title="2. Chunkserver (数据节点)"></a>2. Chunkserver (数据节点)</h4><ul>
+<li><strong>数据存储面（Data Plane）</strong>：负责将文件切分为固定大小的物理块（Chunk）。每个 Chunk直接以 Linux 本地文件系统的原生文件形式保存在磁盘上。</li>
+<li><strong>读写服务响应</strong>：直接与客户端（Client）对接，提供基于底层磁盘 I&#x2F;O 的高并发读写。</li>
+<li><strong>高可用冗余</strong>：每个 Chunk 默认采用 3 副本冗余策略，跨不同机架（Rack）进行分布式存放以抗击物理故障。</li>
+</ul>
+<h4 id="3-Client-客户端"><a href="#3-Client-客户端" class="headerlink" title="3. Client (客户端)"></a>3. Client (客户端)</h4><ul>
+<li><strong>API 与 POSIX 仿真</strong>：对上层应用程序暴露类文件系统的操作接口。</li>
+<li><strong>轻量级交互</strong>：读写数据前，仅向 Master 调取所需的 Chunk 路由信息（元数据），随后绕过 Master，<strong>直接与 Chunkserver 进行高带宽的数据流传输</strong>。</li>
+<li><strong>激进的元数据缓存</strong>：客户端在内存中建立元数据缓存，大大降低对单点 Master 的并发请求压力；同时，客户端不缓存实际文件数据（由于流式大数据量极高，缓存文件不仅无意义，还会导致严重的内存倒腾，因此直接依赖 Linux 操作系统页缓存 Page Cache）。</li>
+</ul>
+<hr>
+<h3 id="关键技术工程细节"><a href="#关键技术工程细节" class="headerlink" title="关键技术工程细节"></a>关键技术工程细节</h3><h4 id="1-单一-Master-的瓶颈规避与高可用设计"><a href="#1-单一-Master-的瓶颈规避与高可用设计" class="headerlink" title="1. 单一 Master 的瓶颈规避与高可用设计"></a>1. 单一 Master 的瓶颈规避与高可用设计</h4><ul>
+<li><strong>为什么选择单 Master？</strong>：单主设计能够最大程度简化系统的架构设计，使得 Master 可以轻松基于全局集群视图，做出最精确的数据放置（Placement）和重平衡决策。</li>
+<li><strong>如何规避性能瓶颈？</strong>：客户端与 Master 的交互仅限于获取 Chunk 的路由地址。64MB 的大 Chunk 使得一次交互可以维持很久的流式读写，控制流流量极低，数据流完全在 Client 和 Chunkserver 之间点对点爆发。</li>
+<li><strong>高可用选主机制</strong>：Master 本身不内嵌共识投票逻辑，而是依赖 <strong>Chubby（分布式锁服务）</strong>。多个 Master 备份实例通过竞争 Chubby 上的独占锁来确立 Active 状态。Master 在发生状态变更时，会将其<strong>操作日志</strong>（Operation Log）和检查点（Checkpoint）持久化至本地磁盘并同步至远程 Standby 节点，确保秒级故障拉起与状态回放。</li>
+</ul>
+<h4 id="2-为什么将-Chunk-的默认大小设定为-64MB？"><a href="#2-为什么将-Chunk-的默认大小设定为-64MB？" class="headerlink" title="2. 为什么将 Chunk 的默认大小设定为 64MB？"></a>2. 为什么将 Chunk 的默认大小设定为 64MB？</h4><p>在当时单机文件系统普遍采用 4KB 簇大小的背景下，GFS 激进地将 Chunk 设定为 64MB，这是一项极为精妙的工程折中：</p>
+<ul>
+<li><strong>大幅削减元数据规模</strong>：由于 Chunk 颗粒度大，Master 需要维护的“文件 $\rightarrow$ Chunk”的映射表极其小巧，这使得 Master 可以<strong>将所有元数据完全常驻在内存中</strong>，带来极高的路由检索效率。</li>
+<li><strong>降低控制流网络开销</strong>：客户端一次请求即可获取 64MB 数据的路由，在顺序读写大文件时，基本消除了频繁请求 Master 的网络往返延时。</li>
+<li><strong>保持 TCP 长连接</strong>：Client 可以在同一个 Chunkserver 的持久连接上执行持续的大规模操作，极大减轻了网络层建立与销毁连接的吞吐损耗。</li>
+</ul>
+<h4 id="3-内存元数据管理与权威源动态上报"><a href="#3-内存元数据管理与权威源动态上报" class="headerlink" title="3. 内存元数据管理与权威源动态上报"></a>3. 内存元数据管理与权威源动态上报</h4><p>Master 在内存中常驻三种元数据：命名空间、文件到 Chunk 的映射、Chunk 副本位置。</p>
+<blockquote>
+<p><strong>架构</strong>：Master <strong>绝不持久化</strong> Chunk 的具体物理位置信息。相反，当 Master 启动或有新的 Chunkserver 加入集群时，各个 Chunkserver 会通过心跳包（Heartbeat）向 Master <strong>动态上报</strong>其本地磁盘上持有的 Chunk 列表。因为 Chunkserver 才是底层文件的物理“权威源”，这种设计消除了 Master 状态与底层物理硬盘之间因为坏盘、宕机导致的数据不一致隐患。</p>
+</blockquote>
+<h4 id="4-操作日志（Operation-Log）的强一致性持久化"><a href="#4-操作日志（Operation-Log）的强一致性持久化" class="headerlink" title="4. 操作日志（Operation Log）的强一致性持久化"></a>4. 操作日志（Operation Log）的强一致性持久化</h4><p>操作日志是 GFS 唯一的逻辑时间线和全局顺序权威。Master 在修改内存元数据之前，必须先将对应操作追加到操作日志中，并且<strong>必须在日志刷新（Flush）到本地磁盘并成功同步到远程多台 Standby 机器后</strong>，才正式向客户端返回成功。通过这种严格的顺序写日志拓扑，配合周期性生成的快照检查点（Checkpoint），确保了 Master 的灾后零数据丢失恢复。</p>
+<hr>
+<h1 id="一致性模型与并发冲突解决"><a href="#一致性模型与并发冲突解决" class="headerlink" title="一致性模型与并发冲突解决"></a>一致性模型与并发冲突解决</h1><p>GFS 采用了一种<strong>宽松但逻辑自洽</strong>的弱一致性模型。这正是它能够摆脱分布式锁带来的串行化性能瓶颈的关键。</p>
+<h2 id="术语定义"><a href="#术语定义" class="headerlink" title="术语定义"></a>术语定义</h2><ul>
+<li><strong>一致（Consistent）</strong>：无论客户端访问哪一个 Replica 副本，在任何时刻读取到的数据内容都是完全相同的。</li>
+<li><strong>已定义（Defined）</strong>：在一次数据修改后，客户端不仅能看到数据是一致的，还能完整地看到这次修改写入的全部上下文内容。</li>
+</ul>
+<h2 id="租约（Lease）与主副本控制流"><a href="#租约（Lease）与主副本控制流" class="headerlink" title="租约（Lease）与主副本控制流"></a>租约（Lease）与主副本控制流</h2><p>为了防止并发写入时多副本的数据状态由于网络延迟产生脑裂（Split-Brain），Master 引入了<strong>租约机制</strong>：</p>
+<ol>
+<li>Master 挑选一个副本授予租约，该副本被称为 <strong>Primary Chunkserver</strong>。</li>
+<li>Primary 拥有对该 Chunk 写入操作的<strong>绝对定价权（序列号分配权）</strong>。</li>
+<li>多个客户端发起的并发写请求到达 Primary 后，Primary 负责为这些请求分配严格递增的全局序列号，并指挥其他 Backup 副本严格按照该序列号顺序写入本地磁盘。</li>
+<li>租约通常有 60 秒有效期，Primary 可以通过心跳包（Heartbeat）不断向 Master 申请延长续租。</li>
+</ol>
+<hr>
+<h2 id="核心机制：控制流与数据流的彻底解耦"><a href="#核心机制：控制流与数据流的彻底解耦" class="headerlink" title="核心机制：控制流与数据流的彻底解耦"></a>核心机制：控制流与数据流的彻底解耦</h2><p>在执行写操作时，GFS 采用了<strong>控制流</strong>（Control Flow）与<strong>数据流</strong>（Data Flow）完全剥离的流水线（Pipeline）设计，从而榨干全网的对等带宽：</p>
+<ul>
+<li><strong>数据流（链式拓扑推送）</strong>：客户端将大块数据（如 64MB）切分为连续的流水段，然后挑选一个<strong>网络拓扑距离最近</strong>的 Chunkserver（不论它是不是 Primary）开始推送。该 Chunkserver 接收到数据的同时，立即启动向下一个距离最近的 Backup 节点的转发。这种<strong>链式管道</strong>（Linear Pipeline）让每台机器的出口和入口带宽同时处于饱和工作状态，极大地降低了数据传输的木桶效应。</li>
+<li><strong>控制流（发起写入指令）</strong>：当所有的 Chunkserver 都在内存缓冲区（LRU Cache）里收全了这块数据后，客户端才正式向 <strong>Primary Chunkserver</strong> 发送控制命令（写请求）。Primary 开始分配序列号并应用写入，随后通知 Backup 落地磁盘。</li>
+</ul>
+<p>论文中举例：</p>
+<p><img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/20260622182515836.png" srcset="/img/loading.gif" lazyload></p>
+<ol>
+<li>客户端请求 Master：客户端（Client）向 Master 节点询问：当前哪一个 ChunkServer 持有该数据块（Chunk）的租约（Lease）？以及其他副本（Replicas）都在什么位置？</li>
+</ol>
+<blockquote>
+<p>持有租约的副本被称为 Primary（主副本），其余的被称为 Secondary（备副本）。如果此时没有任何副本持有租约，Master 会当场选择一个副本并把租约授予它。</p>
+</blockquote>
+<ol start="2">
+<li>Master 响应与缓存:Master 将 Primary 的身份以及所有 Secondary 的位置回复给客户端。</li>
+</ol>
+<blockquote>
+<p>客户端会将这些信息缓存起来。后续如果还要写这个 Chunk，客户端直接看缓存就行，不需要每次都烦 Master。只有当 Primary 挂了或者租约过期报错时，客户端才会重新联系 Master。</p>
+</blockquote>
+<ol start="3">
+<li>流水线推送数据:客户端开始向所有副本（包含 Primary 和所有 Secondaries）推送真正的文件数据。</li>
+</ol>
+<blockquote>
+<p>任意顺序：客户端可以按任意顺序推，通常会根据网络拓扑结构，选择一条“距离最近”的链式路径（Pipeline）依次传递。</p>
+</blockquote>
+<blockquote>
+<p>暂存内存：每个 ChunkServer 收到数据后，并不会立即写入磁盘，而是将数据存在内存的 LRU 缓存缓冲区中。</p>
+</blockquote>
+<blockquote>
+<p>设计目的：把昂贵的大数据传输（数据流）与业务逻辑（控制流）分离开，让网络带宽得到最大化利用。</p>
+</blockquote>
+<ol start="4">
+<li>客户端触发写请求：当客户端收到所有副本都已成功接收数据的确认（Ack）后，正式向 Primary（主副本） 发送一个“写请求”（Write Request）。</li>
+</ol>
+<blockquote>
+<p>这个请求并不包含大数据本身，它只是告诉 Primary：“我之前推过去的数据已经到你们各家的内存里了，现在可以开始写了。”</p>
+</blockquote>
+<blockquote>
+<p>定序（Serialization）：可能有多个客户端同时并发写同一个 Chunk。Primary 此时充当“裁判”的角色，为所有收到的写请求分配连续的序列号（Serial Numbers）。Primary 自己先按照序列号顺序，把数据从内存写入本地磁盘。</p>
+</blockquote>
+<ol start="5">
+<li>主副本转发命令：Primary 将写请求（带有它刚刚分配的序列号）转发给所有的 Secondary 副本。</li>
+</ol>
+<blockquote>
+<p>所有的 Secondary 收到命令后，必须严格按照 Primary 指定的序列号顺序，将内存中的数据写入本地磁盘。这确保了所有副本的数据修改顺序是绝对一致的。</p>
+</blockquote>
+<ol start="6">
+<li><p>备副本回复主副本：所有的 Secondary 完成磁盘写入操作后，向 Primary 回复</p>
+</li>
+<li><p>主副本回复客户端：Primary 汇总结果，最终向客户端回复操作成功或失败。</p>
+<blockquote>
+<p>如果有任何一个副本写入失败，Primary 就会向客户端报错。</p>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<p>此时，数据可能已经在 Primary 和部分 Secondary 上写成功了，但在个别 Secondary 上失败了，系统处于 不一致状态（Inconsistent state）。</p>
+</blockquote>
+<blockquote>
+<p>GFS 的客户端遭遇这种失败时，代码会自动进行重试（Retry）。它会尝试几次步骤 3 到步骤 7，如果依然不行，就会退回到最开始的步骤 1 重新获取路由。</p>
+</blockquote>
+<hr>
+<h2 id="原子记录追加（Record-Append）的一致性落地方案"><a href="#原子记录追加（Record-Append）的一致性落地方案" class="headerlink" title="原子记录追加（Record Append）的一致性落地方案"></a>原子记录追加（Record Append）的一致性落地方案</h2><p>这是 GFS 最具争议但也最务实的工业设计。当数十个微服务并发向同一个日志文件执行 <code>Record Append</code> 时，Client 并不指定具体的 <code>Offset</code>（文件偏移量），而是将数据交给 GFS，由 GFS 决定写入的位置并返回给客户端。</p>
+<h3 id="追加失败后的数据空洞与重复碎片"><a href="#追加失败后的数据空洞与重复碎片" class="headerlink" title="追加失败后的数据空洞与重复碎片"></a>追加失败后的数据空洞与重复碎片</h3><p>由于分布式环境下的网络超时或单节点磁盘写入失败，重试机制不可避免。这就导致在极端的并发高压下，不同的 Replica 物理磁盘上的数据长相并不严格一致：</p>
+<ul>
+<li><strong>Replica A (Primary - 顺利成功)</strong>: <code>[ 数据块 1 ][ 数据块 2 ][ 填充空洞/Pad ][ 数据块 3 ]</code></li>
+<li><strong>Replica B (Backup 1 - 中途失败过)</strong>: <code>[ 数据块 1 ][ 垃圾数据/Garbage ][ 填充空洞/Pad ][ 数据块 3 ]</code></li>
+</ul>
+<h3 id="上层业务层容错"><a href="#上层业务层容错" class="headerlink" title="上层业务层容错"></a>上层业务层容错</h3><p>GFS 官方承诺：<strong>数据至少被原子性地写入一次（At least once）</strong>。这就意味着它允许副本之间存在少量的“数据重复片段”或“填充空洞（Padding）”。</p>
+<p><strong>上层系统（如 MapReduce&#x2F;BigTable）如何消除不一致？</strong></p>
+<ol>
+<li><strong>内置校验和（Checksum）</strong>：数据块内部带有魔数和 Checksum。上层应用在流式读取时，如果扫描到不合法的“垃圾数据”或“填充空洞”，会自动过滤并跳过。</li>
+<li><strong>唯一标识去重</strong>：上层数据自带业务层面的唯一特征 ID。计算框架在消费这些数据时，会根据 ID 在内存中进行幂等去重（De-duplication）。</li>
+</ol>
+<p><strong>这种将底层强一致性锁的负担“上卷”到高容错业务层的思想，正是互联网分布式系统 AP 模式（可用性优先）的典型体现。</strong></p>
+<hr>
+<h1 id="工业级高级特性"><a href="#工业级高级特性" class="headerlink" title="工业级高级特性"></a>工业级高级特性</h1><h2 id="1-快照（Snapshot）与写时复制（COW）"><a href="#1-快照（Snapshot）与写时复制（COW）" class="headerlink" title="1. 快照（Snapshot）与写时复制（COW）"></a>1. 快照（Snapshot）与写时复制（COW）</h2><p>GFS 可以在几乎不影响即时业务吞吐的前提下，为巨大的文件或目录创建快照。其底层核心采用了经典的<strong>写时复制</strong>（Copy-on-Write, COW）技术：</p>
+<ul>
+<li><strong>快照创建</strong>：Master 收到快照请求，立刻收回目标 Chunk 的所有租约（确保接下来有人写时必须重新申请），然后在内存中复制该文件的元数据指向相同的物理 Chunk。此时物理文件没有任何复制发生，仅仅是 Chunk 的<strong>引用计数</strong>（Reference Count）加 1。</li>
+<li><strong>写时触发（物理分裂）</strong>：此后，当有客户端尝试向该 Chunk 写入数据时，它必须去向 Master 申请新租约。Master 发现该 Chunk 的引用计数大于 1，会通知对应的 Chunkserver 在本地磁盘上迅速<strong>物理克隆</strong>（Clone）出一块新的 Chunk（假设为 Chunk-New）。之后，修改者的控制流指向 Chunk-New 并在其上修改，而历史快照依然安全地指向原有的老 Chunk。</li>
+</ul>
+<h2 id="2-基于全路径前缀锁的无目录树管理"><a href="#2-基于全路径前缀锁的无目录树管理" class="headerlink" title="2. 基于全路径前缀锁的无目录树管理"></a>2. 基于全路径前缀锁的无目录树管理</h2><p>为了规避传统操作系统在并发创建文件时对“父目录”加全局互斥锁导致的吞吐黑洞，GFS 彻底抛弃了传统的树状文件结构。</p>
+<ul>
+<li>GFS 内部是一个扁平化的哈希表，Key 是文件的全路径名（如 <code>/foo/bar/baz</code>）。</li>
+<li>当需要创建文件 <code>/foo/bar/baz</code> 时，系统会对其所有前缀路径加读锁（对 <code>/foo</code>、<code>/foo/bar</code> 加 Read Lock），并对最终的文件路径 <code>/foo/bar/baz</code> 加写锁（Write Lock）。</li>
+<li><strong>效果</strong>：这种精细化的前缀锁机制，使得同一个目录下并发创建千万个不同的文件时完全互不干扰，极大提升了并发度。</li>
+</ul>
+<h2 id="3-延迟垃圾回收（Lazy-Garbage-Collection）"><a href="#3-延迟垃圾回收（Lazy-Garbage-Collection）" class="headerlink" title="3. 延迟垃圾回收（Lazy Garbage Collection）"></a>3. 延迟垃圾回收（Lazy Garbage Collection）</h2><p>在分布式集群中执行 <code>Delete</code>（删除文件）是非常危险的操作，可能会引发大规模的磁盘 I&#x2F;O 剧烈抖动。</p>
+<ul>
+<li>当客户端执行删除时，Master 并不立即去通知 Chunkserver 擦除磁盘。它只是在内存中把文件名重命名为一个带时间戳的隐藏文件（类似于回收站）。</li>
+<li>Master 在每天深夜的后台定时扫描中，才会彻底移除元数据，并把这些真正要清空的 Chunk ID 放入心跳响应包中。</li>
+<li>Chunkserver 收到心跳后，在空闲时段异步、缓慢地清理本地磁盘物理文件。这有效拉平了系统的磁盘 I&#x2F;O 峰值。</li>
+</ul>
+<h2 id="4-陈旧副本检测（Stale-Replica-Detection）"><a href="#4-陈旧副本检测（Stale-Replica-Detection）" class="headerlink" title="4. 陈旧副本检测（Stale Replica Detection）"></a>4. 陈旧副本检测（Stale Replica Detection）</h2><p>如果某个 Chunkserver 在宕机期间，其余副本发生了数据的写入追加，其数据就会落后。</p>
+<ul>
+<li>Master 为每个 Chunk 维护一个单调递增的 <strong>版本号（Version Number）</strong>。</li>
+<li>每次 Master 授予新租约给 Primary 之前，都会把该 Chunk 的版本号加 1，并通知当前所有在线的正常副本同步更新版本号。</li>
+<li>当宕机的 Chunkserver 重启并上报自己的 Chunk 列表时，Master 一眼就能看出其版本号低于内存中的最新版本，该副本会被标记为“Stale（陈旧副本）”，并在随后的垃圾回收中被无情抹去，同时触发从最新副本的异步复制（Re-replication）。</li>
+</ul>
+<hr>
+<h1 id="GFS-的时代局限与演进"><a href="#GFS-的时代局限与演进" class="headerlink" title="GFS 的时代局限与演进"></a>GFS 的时代局限与演进</h1><p>GFS 作为 2003 年发表的奠基性系统，为分布式领域开辟了道路，但站在 2026 年现代云原生架构的角度去回看，它也存在着明显的<strong>时代内存墙与历史局限性</strong>：</p>
+<ol>
+<li><strong>元数据内存墙（Small File Problem）</strong>：单 Master 的内存容量决定了整个集群的文件数上限。如果系统里涌入数亿个几 KB 的小文件，Master 的内存会被瞬间撑爆。这逼得后来的 HDFS 演进出了 ViewFS、联邦（Federation）机制，或者促成了分布式中间件如 <strong>JuiceFS</strong> 直接利用分布式 KV 数据库（如 TiKV）来分布式存储元数据。</li>
+<li><strong>外部锁依赖与去中心化</strong>：GFS 时代极其依赖高度中心化的 Chubby服务来进行 Active Master 的保活和故障选主。而现代的分布式存储（如 Ceph、MinIO 等）和新型架构，更倾向于在存储引擎组件内部<strong>直接原生嵌入 Raft 或 Paxos 协议</strong>（例如利用成熟的 Java 生产级共识库 <code>JRaft</code> 进行多 Master 状态机的自选举和日志复制），从而彻底摆脱了对外部重度锁服务的强依赖，实现了真正意义上的云原生与去中心化。</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" class="category-chain-item">分布式存储</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" class="print-no-link">#分布式存储</a>
+      
+        <a href="/tags/GFS/" class="print-no-link">#GFS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GFS (Google File System)</div>
+      <div>https://yicizhang00.github.io/posts/分布式/分布式存储/GFS/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年6月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E5%88%86%E5%B8%83%E5%BC%8F/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/100TB%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E8%AE%BE%E8%AE%A1/" title="100TB分布式存储系统设计">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">100TB分布式存储系统设计</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/URL%E8%BE%93%E5%85%A5%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" title="从 URL 输入到页面渲染的全过程">
+                        <span class="hidden-mobile">从 URL 输入到页面渲染的全过程</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

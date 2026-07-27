@@ -1,0 +1,1276 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="数据结构1.基本数据类型Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)    数据类型 关键字 大小 取值范围 默认值 包装类    字节型 byte 1字节 -128 ~ 127 0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础数据结构">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="数据结构1.基本数据类型Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)    数据类型 关键字 大小 取值范围 默认值 包装类    字节型 byte 1字节 -128 ~ 127 0">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202508260240314.png">
+<meta property="article:published_time" content="2025-08-11T17:55:16.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.837Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="数据结构与算法">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202508260240314.png">
+  
+  
+  
+  <title>Java基础数据结构 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Java基础数据结构</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-12 01:55" pubdate>
+          2025年8月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          14k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          115 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Java基础数据结构</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><h2 id="1-基本数据类型"><a href="#1-基本数据类型" class="headerlink" title="1.基本数据类型"></a>1.基本数据类型</h2><p>Java中基本数据类型有8种：short(2 Byte), int(4 Byte), float(4 Byte) , long(8 Byte), double(8 Byte), byte(1 Byte), boolean(1 bit), char(1 Byte)</p>
+<table>
+<thead>
+<tr>
+<th align="left">数据类型</th>
+<th align="left">关键字</th>
+<th align="left">大小</th>
+<th align="left">取值范围</th>
+<th align="left">默认值</th>
+<th align="left">包装类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">字节型</td>
+<td align="left">byte</td>
+<td align="left">1字节</td>
+<td align="left">-128 ~ 127</td>
+<td align="left">0</td>
+<td align="left">Byte</td>
+</tr>
+<tr>
+<td align="left">短整型</td>
+<td align="left">short</td>
+<td align="left">2字节</td>
+<td align="left">-32768 ~ 32767</td>
+<td align="left">0</td>
+<td align="left">Short</td>
+</tr>
+<tr>
+<td align="left">整型</td>
+<td align="left">int</td>
+<td align="left">4字节</td>
+<td align="left">-2³¹ ~ 2³¹-1</td>
+<td align="left">0</td>
+<td align="left">Integer</td>
+</tr>
+<tr>
+<td align="left">长整型</td>
+<td align="left">long</td>
+<td align="left">8字节</td>
+<td align="left">-2⁶³ ~ 2⁶³-1</td>
+<td align="left">0L</td>
+<td align="left">Long</td>
+</tr>
+<tr>
+<td align="left">单精度浮点</td>
+<td align="left">float</td>
+<td align="left">4字节</td>
+<td align="left">±3.4^38</td>
+<td align="left">0.0f</td>
+<td align="left">Float</td>
+</tr>
+<tr>
+<td align="left">双精度浮点</td>
+<td align="left">double</td>
+<td align="left">8字节</td>
+<td align="left">±1.7^308</td>
+<td align="left">0.0d</td>
+<td align="left">Double</td>
+</tr>
+<tr>
+<td align="left">字符型</td>
+<td align="left">char</td>
+<td align="left">2字节</td>
+<td align="left">‘\u0000’ ~ ‘\uffff’(UTF-8)</td>
+<td align="left">‘\u0000’</td>
+<td align="left">Character</td>
+</tr>
+<tr>
+<td align="left">布尔型</td>
+<td align="left">boolean</td>
+<td align="left">1位</td>
+<td align="left">true&#x2F;false</td>
+<td align="left">false</td>
+<td align="left">Boolean</td>
+</tr>
+</tbody></table>
+<h3 id="浮点数精度"><a href="#浮点数精度" class="headerlink" title="浮点数精度"></a>浮点数精度</h3><p>浮点数采用IEEE754存储，浮点数无法精确表示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(<span class="hljs-number">0.1</span> + <span class="hljs-number">0.2</span>); <span class="hljs-comment">// 输出：0.30000000000000004</span><br></code></pre></td></tr></table></figure>
+
+<p>因此进行浮点数比较是否相等时必须使用差值小于某一值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span>(a - b &lt; <span class="hljs-number">1e-9</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="float-与-double"><a href="#float-与-double" class="headerlink" title="float 与 double"></a>float 与 double</h3><p>所有单独出现的小数均默认为double类型，如果要定义float类型，后面必须加f后缀。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">float</span> <span class="hljs-variable">f</span> <span class="hljs-operator">=</span> <span class="hljs-number">3.14f</span>;        <span class="hljs-comment">// 必须加f后缀</span><br><span class="hljs-type">double</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> <span class="hljs-number">3.14</span>;        <span class="hljs-comment">// 默认double</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="转换"><a href="#转换" class="headerlink" title="转换"></a>转换</h3><h4 id="隐式转换"><a href="#隐式转换" class="headerlink" title="隐式转换"></a>隐式转换</h4><p>小类型转化为大类型不会丢失精度。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-type">byte</span> → <span class="hljs-type">short</span> → <span class="hljs-type">int</span> → <span class="hljs-type">long</span> → <span class="hljs-type">float</span> → <span class="hljs-type">double</span><br>         ↓<br>        <span class="hljs-type">char</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="强制转换"><a href="#强制转换" class="headerlink" title="强制转换"></a>强制转换</h4><p>大类型强制转为小类型，可能存在精度丢失。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">float</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">3.14f</span>;<br><span class="hljs-type">int</span> <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> (<span class="hljs-type">int</span>) a;<br></code></pre></td></tr></table></figure>
+
+<h3 id="数据装箱、拆箱"><a href="#数据装箱、拆箱" class="headerlink" title="数据装箱、拆箱"></a>数据装箱、拆箱</h3><h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><p><strong>装箱</strong>：基本类型 → 包装类型</p>
+<p><strong>拆箱</strong>：包装类型 → 基本类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 自动装箱</span><br><span class="hljs-type">Integer</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">10</span>;         <span class="hljs-comment">// 等价于 Integer.valueOf(10)</span><br><br><span class="hljs-comment">// 自动拆箱</span><br><span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> i;              <span class="hljs-comment">// 等价于 i.intValue()</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="运算时自动装箱、拆箱"><a href="#运算时自动装箱、拆箱" class="headerlink" title="运算时自动装箱、拆箱"></a>运算时自动装箱、拆箱</h4><p>JDK1.5+的新特性：int 可以直接和Integer类型直接进行运算，自动进行<code>intValue()</code>和<code>valueOf()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">int</span> <span class="hljs-variable">primitiveInt</span> <span class="hljs-operator">=</span> <span class="hljs-number">10</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">wrapperInteger</span> <span class="hljs-operator">=</span> <span class="hljs-number">20</span>;<br><br><span class="hljs-comment">// 情况1：结果赋值给基本数据类型 int</span><br><span class="hljs-comment">// 过程：wrapperInteger 被拆箱为 int，然后与 primitiveInt 相加</span><br><span class="hljs-type">int</span> <span class="hljs-variable">resultToPrimitive</span> <span class="hljs-operator">=</span> primitiveInt + wrapperInteger;<br>System.out.println(<span class="hljs-string">&quot;结果赋值给 int: &quot;</span> + resultToPrimitive); <span class="hljs-comment">// 输出：30</span><br><br><span class="hljs-comment">// 情况2：结果赋值给包装类 Integer</span><br><span class="hljs-comment">// 过程：wrapperInteger 被拆箱 -&gt; 相加 -&gt; 结果 30 被自动装箱为 Integer</span><br><span class="hljs-type">Integer</span> <span class="hljs-variable">resultToWrapper</span> <span class="hljs-operator">=</span> primitiveInt + wrapperInteger;<br>System.out.println(<span class="hljs-string">&quot;结果赋值给 Integer: &quot;</span> + resultToWrapper); <span class="hljs-comment">// 输出：30</span><br><br><span class="hljs-comment">// 情况3：直接在表达式中使用（如打印、作为参数传递）</span><br><span class="hljs-comment">// 过程：wrapperInteger 被拆箱 -&gt; 相加 -&gt; 输出 int 结果</span><br>System.out.println(<span class="hljs-string">&quot;直接运算并打印: &quot;</span> + (primitiveInt + wrapperInteger)); <span class="hljs-comment">// 输出：30</span><br><br><span class="hljs-comment">// 这个过程等价于早期没有自动拆箱/装箱时的手动操作：</span><br><span class="hljs-type">int</span> <span class="hljs-variable">manualResult</span> <span class="hljs-operator">=</span> primitiveInt + wrapperInteger.intValue(); <span class="hljs-comment">// 手动拆箱</span><br>System.out.println(<span class="hljs-string">&quot;手动拆箱等效操作: &quot;</span> + manualResult); <span class="hljs-comment">// 输出：30</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="缓存机制（IntegerCache）"><a href="#缓存机制（IntegerCache）" class="headerlink" title="缓存机制（IntegerCache）"></a>缓存机制（IntegerCache）</h4><p>当Java对某些<strong>特定范围</strong>的整型数据进行自动装箱时，它不会每次都创建一个新的对象，而是会从一个预先创建好的<strong>缓存数组</strong>中直接获取对应的包装类对象。</p>
+<p>例如：对于Integer来说，其缓存范围在-128~127(通常情况下这个范围内的数据使用频率较高)，意味着在创建该范围内的对象时，其使用的对象将会重用同一缓存内的对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Integer</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;<br>System.out.println(a == b);      <span class="hljs-comment">// true (同一对象)</span><br>System.out.println(a.equals(b)); <span class="hljs-comment">// true (值相等)</span><br><br><span class="hljs-type">Integer</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;<br>System.out.println(c == d);      <span class="hljs-comment">// false (不同对象)</span><br>System.out.println(c.equals(d)); <span class="hljs-comment">// true (值相等)</span><br></code></pre></td></tr></table></figure>
+
+<p>而当</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Integer</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;<br>System.out.println(a == b); <span class="hljs-comment">// true - 因为指向缓存中的同一个对象</span><br><br><span class="hljs-comment">// 进行 i1 + 1 操作</span><br><span class="hljs-type">Integer</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> a + <span class="hljs-number">1</span>;      <span class="hljs-comment">// 这里会发生什么？</span><br>System.out.println(a);       <span class="hljs-comment">// 仍然是 127</span><br>System.out.println(b);       <span class="hljs-comment">// 仍然是 127</span><br>System.out.println(result == b); <span class="hljs-comment">// false - result 是新的 Integer 对象</span><br></code></pre></td></tr></table></figure>
+
+<p>对于一个Integer类型的值进行运算，其会先拆箱接着装箱</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Integer</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> i1 + <span class="hljs-number">1</span>;<br><span class="hljs-comment">// 等价于：</span><br><span class="hljs-comment">// int temp = i1.intValue() + 1;  // 拆箱，temp = 128</span><br><span class="hljs-comment">// Integer result = Integer.valueOf(temp); // 装箱</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Integer类型是<code>immutable</code>的，一旦创建值就不能改变，想要改变必须先拆箱后装箱。</p>
+</li>
+<li><p>Integer是一个类，而int是基本数据类型，因此Integer可以等于<code>null</code>，而int不行。</p>
+</li>
+<li><p><code> =</code> 运算会比较JVM中的地址，而<code>equals()</code>则有其不同的重写方法，通常情况下会比较对象所含的值。</p>
+</li>
+</ul>
+<h3 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h3><h4 id="valueOf-NaN"><a href="#valueOf-NaN" class="headerlink" title="valueOf()"></a>valueOf()</h4><p> 参数为基本数据类型，返回包装类对象； </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Integer</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> Integer.valueOf(<span class="hljs-number">100</span>);<br></code></pre></td></tr></table></figure>
+
+<p>参数为String字符串（Character类没有以String为  参数的该方法）,返回包装类对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Integer</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> Integer.valueOf(<span class="hljs-string">&quot;100&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h4 id="parseInt"><a href="#parseInt" class="headerlink" title="parseInt()"></a>parseInt()</h4><p>参数为字符串，返回基本数据类型；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> Integer.parseInt(<span class="hljs-string">&quot;100&quot;</span>;)<br></code></pre></td></tr></table></figure>
+
+<h2 id="2-数组"><a href="#2-数组" class="headerlink" title="2.数组"></a>2.数组</h2><h3 id="int"><a href="#int" class="headerlink" title="int[]"></a>int[]</h3><p>数组是用于存储<strong>固定大小</strong>、<strong>相同类型</strong>元素的线性数据结构。其继承于Object类型，拥有<code>Objet.toString()</code>,<code>Object.equals()</code>,和<code>Obejct.hashCode()</code>等方法，并且保存在<strong>JVM的堆</strong>中。</p>
+<p>数组的声明方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">int</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[];<span class="hljs-comment">//声明数组，然后全部初始化为对应值。整数：0，浮点：0.0，boolean：false，引用类型：null</span><br><span class="hljs-type">int</span>[] a = &#123;<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>&#125;;<span class="hljs-comment">//java风格</span><br><span class="hljs-type">int</span> a[] = &#123;<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>&#125;;<span class="hljs-comment">//c风格</span><br></code></pre></td></tr></table></figure>
+
+<p>由于数组一旦声明长度就不可变，其以连续空间的形式存储在堆中，因此在随机访问时，可以通过下标×偏移量加首地址的方式计算出目标地址，随机访问的时间复杂度为<code>O(1)</code>。</p>
+<h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><p>List<E> 继承了Collection<E>， Collection<E> 继承了Iterable<E>。</p>
+<ul>
+<li><code>Collection&lt;E&gt;</code>: 所有集合类（如 Set, List, Queue）的根接口，定义了添加、删除、遍历等基本操作。</li>
+<li><code>Iterable&lt;E&gt;</code>: <code>Collection</code>的父接口，意味着所有 <code>List</code>都可以使用 <strong>for-each 循环</strong>进行迭代。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">List (接口)<br>├── ArrayList (数组实现，随机访问快)<br>├── LinkedList (链表实现，插入删除快)<br>├── Vector (线程安全，已过时，所有方法都用Synchronized修饰，性能差)<br>│   └── Stack (栈实现，继承Vector，同样有性能问题，推荐使用ArrayDueue实现)<br>└── CopyOnWriteArrayList (线程安全，写时复制)<br></code></pre></td></tr></table></figure>
+
+<h4 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h4><p>ArrayList的底层结构是动态数组，ArrayList <strong>不是线程安全的</strong>，在多线程环境下需要同步。</p>
+<p>如何创建一个线程安全的List：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;String&gt; syncList = Collections.synchronizedList(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;());<span class="hljs-comment">//使用synchronizedList加锁</span><br>List&lt;String&gt; safeList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">CopyOnWriteArrayList</span>&lt;&gt;();<br></code></pre></td></tr></table></figure>
+
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+☆如何创建一个动态扩容数组：ArrayList的底层就是一个 Object[] elementData。默认初始容量为10，当添加元素导致容量不足时，它会创建一个新的更大数组（通常是原容量的1.5 倍，太小扩容频繁，太大浪费空间，1.5倍是经验值），然后使用 Arrays.copyOf()（内部是 System.arraycopy()）将旧数组的数据拷贝到新数组中。
+</div>
+
+<h4 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h4><p>LinkedList的底层结构是双向链表，同样<strong>不是线程安全的</strong>，在多线程环境下需要同步。</p>
+<p>LinkedList可以作为Queue和Dueue的底层结构。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 作为队列使用</span><br>Queue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedList</span>&lt;&gt;();<br>queue.offer(<span class="hljs-string">&quot;a&quot;</span>); <span class="hljs-comment">// 入队</span><br>queue.poll();     <span class="hljs-comment">// 出队</span><br><br><span class="hljs-comment">// 作为双端队列</span><br>Deque&lt;String&gt; deque = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedList</span>&lt;&gt;();<br>deque.offerFirst(<span class="hljs-string">&quot;a&quot;</span>);<br>deque.offerLast(<span class="hljs-string">&quot;b&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+
+
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">ArrayList</th>
+<th align="left">LinkedList</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>底层结构</strong></td>
+<td align="left">动态数组</td>
+<td align="left">双向链表</td>
+</tr>
+<tr>
+<td align="left"><strong>随机访问</strong></td>
+<td align="left">O(1)</td>
+<td align="left">O(n)</td>
+</tr>
+<tr>
+<td align="left"><strong>头部插入</strong></td>
+<td align="left">O(n)</td>
+<td align="left">O(1)</td>
+</tr>
+<tr>
+<td align="left"><strong>尾部插入</strong></td>
+<td align="left">均摊O(1)</td>
+<td align="left">O(1)</td>
+</tr>
+<tr>
+<td align="left"><strong>中间插入</strong></td>
+<td align="left">O(n)</td>
+<td align="left">O(n)</td>
+</tr>
+<tr>
+<td align="left"><strong>内存占用</strong></td>
+<td align="left">较小（连续内存）</td>
+<td align="left">较大（每个元素含两个指针）</td>
+</tr>
+<tr>
+<td align="left"><strong>缓存友好</strong></td>
+<td align="left">是(CPU在取值的时候可以预取)</td>
+<td align="left">否</td>
+</tr>
+</tbody></table>
+<p><strong>如何选择 ArrayList 和 LinkedList？</strong></p>
+<blockquote>
+<p>根据具体场景：如果需要频繁随机访问，选择ArrayList；如果需要频繁在头部插入删除，选择LinkedList。大多数情况下ArrayList是更好的选择，因为CPU缓存友好，实际性能往往优于LinkedList。</p>
+</blockquote>
+<h4 id="stack"><a href="#stack" class="headerlink" title="stack"></a>stack</h4><p>基于vector实现，同样有性能问题，推荐使用ArrayDueue作为栈。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Deque&lt;Integer&gt; stack = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayDeque</span>&lt;&gt;();<br>stack.push(<span class="hljs-number">1</span>);<br>stack.pop();<br></code></pre></td></tr></table></figure>
+
+<h4 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h4><p>写时复制（COW）</p>
+<p>写的时候加锁并复制到新数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">add</span><span class="hljs-params">(E e)</span> &#123;<br>    <span class="hljs-keyword">synchronized</span>(lock) &#123;<br>        Object[] es = getArray();<br>        <span class="hljs-type">int</span> <span class="hljs-variable">len</span> <span class="hljs-operator">=</span> es.length;<br>        es = Arrays.copyOf(es, len + <span class="hljs-number">1</span>); <span class="hljs-comment">// 复制新数组</span><br>        es[len] = e;<br>        setArray(es); <span class="hljs-comment">// 替换引用</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>适用场景？</strong></p>
+<p>读多写少（读操作不需要锁，直接访问数组）</p>
+<p>写操作性能较差（需要复制整个数组）</p>
+<h4 id="toCharArray"><a href="#toCharArray" class="headerlink" title="toCharArray()"></a>toCharArray()</h4><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p><strong>快速失败</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;String&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>list.add(<span class="hljs-string">&quot;a&quot;</span>);<br>Iterator&lt;String&gt; it = list.iterator();<br>list.add(<span class="hljs-string">&quot;b&quot;</span>); <span class="hljs-comment">// 结构修改</span><br>it.next();     <span class="hljs-comment">// 抛出ConcurrentModificationException</span><br></code></pre></td></tr></table></figure>
+
+<p><code>Iterator</code> 在被创建时，会记录下集合的当前<strong>修改次数（modCount）</strong>。当你通过 <code>list.add(&quot;b&quot;)</code> 修改了 <code>list</code> 的结构后，这个修改次数会增加。当迭代器调用 <code>it.next()</code> 方法时，它会<strong>检查</strong>当前集合的修改次数是否与它在创建时记录下来的修改次数一致。一旦不一致，就会抛出ConcurrentModificationException，快速失败</p>
+<p><strong>子列表视图</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">List&lt;Integer&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<br>List&lt;Integer&gt; subList = list.subList(<span class="hljs-number">1</span>, <span class="hljs-number">4</span>); <span class="hljs-comment">// [2, 3, 4]</span><br>subList.set(<span class="hljs-number">0</span>, <span class="hljs-number">99</span>); <span class="hljs-comment">// 原list变为[1, 99, 3, 4, 5]</span><br></code></pre></td></tr></table></figure>
+
+<p><code>subList</code>并非一个新的对象，而是对原对象的一个局部引用</p>
+<h4 id="多维数组"><a href="#多维数组" class="headerlink" title="多维数组"></a><strong>多维数组</strong></h4><p> Java<strong>支持多维数组</strong>，但实际上是<strong>数组的数组</strong>。例如，<code>int[][]</code>是一个一维数组，其中的每个元素又是一个 <code>int[]</code>数组。这意味着多维数组可以是不规则的（每行的长度可以不同）。</p>
+<p>如何创建一个不规则的多维数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 1. 声明并创建外部数组（指定有3行）</span><br><span class="hljs-type">int</span>[][] jaggedArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">3</span>][];<br><br><span class="hljs-comment">// 2. 分别创建每一行的内部数组（指定不同的列数）</span><br>jaggedArray[<span class="hljs-number">0</span>] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">3</span>]; <span class="hljs-comment">// 第一行有3列</span><br>jaggedArray[<span class="hljs-number">1</span>] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">2</span>]; <span class="hljs-comment">// 第二行有2列</span><br>jaggedArray[<span class="hljs-number">2</span>] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">4</span>]; <span class="hljs-comment">// 第三行有4列</span><br></code></pre></td></tr></table></figure>
+
+<p>Java中的多维数组的地址分配更接近于下图：</p>
+<img src="https://raw.githubusercontent.com/yicizhang00/image_host/main/blog-img/202508260240314.png" srcset="/img/loading.gif" lazyload alt="image-20250826024059174" style="zoom:33%;" />
+
+<blockquote>
+<p>在C中int[][] 的大小是固定的，其在堆上连续分配，而JVM中int[0]的地址和int[1]的地址并非连续。</p>
+</blockquote>
+<h4 id="常用方法-1"><a href="#常用方法-1" class="headerlink" title="常用方法"></a>常用方法</h4><p><code>Arrays.sort(arr)</code>: 排序（双轴快排）。</p>
+<p><code>Arrays.sort(arr, Comparator.reverseOrder())</code>：由大到小排序。</p>
+<p><code>Arrays.binarySearch(arr, key)</code>: 二分查找（<strong>数组必须已排序</strong>）。</p>
+<p><code>Arrays.fill(arr, value)</code>: 填充值。</p>
+<p><code>Arrays.equals(arr1, arr2)</code>: 比较两个数组的<strong>内容</strong>是否相等（深层次比较元素）。</p>
+<p><code>Arrays.toString(arr)</code>: 将数组转换为字符串表示形式，便于打印调试。</p>
+<p><code>Arrays.asList(T... a)</code>: 返回一个固定大小的列表（<code>List</code>），由原数组生成。<strong>不能进行增删操作</strong>，否则会抛 <code>UnsupportedOperationException</code>。</p>
+<h4 id="高级与底层"><a href="#高级与底层" class="headerlink" title="高级与底层"></a>高级与底层</h4><h5 id="协变数组"><a href="#协变数组" class="headerlink" title="协变数组"></a>协变数组</h5><p>它允许你用一个<strong>子类型数组的引用</strong>赋值给一个<strong>父类型数组的变量</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Object[] objectArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[<span class="hljs-number">10</span>]; <span class="hljs-comment">// 编译和运行都可以</span><br>objectArray[<span class="hljs-number">0</span>] = <span class="hljs-string">&quot;Hello&quot;</span>; <span class="hljs-comment">// OK</span><br>objectArray[<span class="hljs-number">1</span>] = <span class="hljs-number">1</span>;       <span class="hljs-comment">// 编译通过，但运行时会抛出 ArrayStoreException</span><br></code></pre></td></tr></table></figure>
+
+<p>这种<strong>运行时错误</strong>是协变数组最大的缺陷。为了解决这个问题，Java语言的设计者在泛型（Generics）中引入了**不可变（Invariant）**的概念。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 泛型是不可变的</span><br><span class="hljs-comment">// List&lt;Animal&gt; animals = new ArrayList&lt;Dog&gt;(); // 编译错误！</span><br></code></pre></td></tr></table></figure>
+
+<p>其提供了<strong>编译时</strong>的类型安全保障，避免了运行时的类型转换错误。</p>
+<h2 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h2><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p>使用一个Hash函数，将Key映射到存储位置Index的数据结构</p>
+<h3 id="哈希实现方法"><a href="#哈希实现方法" class="headerlink" title="哈希实现方法"></a>哈希实现方法</h3><p>☆哈希表如何解决哈希冲突：</p>
+<p>1.链地址法：每个哈希桶存储一个链表（或其他结构），所有哈希到同一位置的元素都插入该链表。插入和查找时只需遍历链表即可。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs scss">哈希表（数组）<br>   ↓<br> <span class="hljs-selector-attr">[0]</span> → (key1, val1) → (key5, val5)<br> <span class="hljs-selector-attr">[1]</span> → (key2, val2)<br> <span class="hljs-selector-attr">[2]</span> → null<br> <span class="hljs-selector-attr">[3]</span> → (key3, val3) → (key4, val4)<br></code></pre></td></tr></table></figure>
+
+<p>2.开放地址法：当发生冲突时，按照一定探查方式（如线性探查、二次探查、双重哈希）寻找下一个空位，将元素插入空位。查找时同样按探查顺序查找。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">示例：插入 key1, key2 发生冲突<br>→ key1 放 <span class="hljs-attribute">index</span>=3<br>→ key2 冲突，尝试 4、5<span class="hljs-built_in">..</span>. 找到空位放入<br></code></pre></td></tr></table></figure>
+
+<p>3.再哈希法：发生冲突时，使用另一个哈希函数或者更大的表重新计算位置，直到找到空位。</p>
+<ul>
+<li>扩容与重哈希：当哈希表负载因子过高时，扩容并重新分配所有元素，减少冲突概率。</li>
+<li>双重哈希法：一个位置被占用时，不再简单地线性探测，而是通过另一个哈希函数决定跳步大小</li>
+</ul>
+<p>$$<br>index &#x3D; (hash_1(key) + i * hash_2(key))%M<br>$$</p>
+<p><strong>Java实现</strong><br>Java的HashMap在JEP 180之前采用链表解决冲突，而之后当链表长度超过阈值（通常为8）通过将每个桶存储一个链表转为红黑树。</p>
+<p>具体来说，当一个哈希桶中的链表长度达到 8（即 TREEIFY_THRESHOLD）时，并且此时哈希表的总容量（capacity）也达到了 64（即 MIN_TREEIFY_CAPACITY），这个链表就会被转换为一棵红黑树。</p>
+<p><strong>改进实现</strong><br>在改进之前，字符串冲突的备选是采用hash32，为每一个String新增一个字段，此改进实现了任何Comparable接口的键类型的性能提升，字符串的hash32字段被移除。</p>
+<p>该改进已经在<code>java.util.concurrent.ConcurrentHashMap</code>,<code>HashMap</code>以及<code>LinkedHashMap</code>中实现。但是在<code>HashTable</code>,<code>WeakHashMap</code>和<code>IdentityHashMap</code>中并不实现。</p>
+<p><strong>为什么要满足容量大于 64？</strong><br>因为如果哈希表容量太小，频繁发生哈希冲突的原因很可能不是哈希函数不好，而是哈希表本身太小。在这种情况下，更好的解决办法是进行扩容（resize），而不是转换为红黑树。</p>
+<p>当哈希表容量小于 64 时，即使链表长度达到了 8，<code>HashMap</code> 也会优先选择扩容，通过重新计算哈希值来分散元素。这样可以避免不必要的树化，减少性能开销。</p>
+<p><strong>为什么链表长度为8</strong><br>泊松分布描述稀有事件在固定时间或者空间内发生的概率，适用于：</p>
+<ul>
+<li>事件独立</li>
+<li>事件发生的平均速率已知并固定</li>
+<li>事件发生的概率极低<br>在哈希表中，设容量为m，插入n个键，每个键落入m个桶内，单个键冲突概率为$( \frac{1}{m})$</li>
+</ul>
+<p><strong>IdentityHashMap基于身份哈希的无冲突设计</strong><br>IdentityHsahMap采用”&#x3D;&#x3D;”而非”equals()”</p>
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+
+</div>
+
+<h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><h3 id="WeakHashMap"><a href="#WeakHashMap" class="headerlink" title="WeakHashMap"></a>WeakHashMap</h3><p><strong>WeakHashMap的弱引用与垃圾回收</strong><br><code>WeakHashMap</code> 的核心特点是键（key）是弱引用。这意味着当一个键对象没有其他强引用指向它时，它随时可能被垃圾回收器（Garbage Collector, GC）回收。</p>
+<p>WeakHashMap内部有一个ReferenceQueue队列维护被GC的键，当一个弱引用键被GC后，其会被添加到这个队列中，在每次put,get,remove时，会检查并清理这个队列，所有被GC的键从WeakHashMap中删除。因此带来了：<br>1） 红黑树的维护开销：红黑树在删除节点时会带来节点的旋转和重新着色。<br>2） GC行为无法预测：导致红黑树的结构也不可预测，会带来巨大的性能开销。</p>
+<h3 id="IdentityHashMap"><a href="#IdentityHashMap" class="headerlink" title="IdentityHashMap"></a>IdentityHashMap</h3><p>IdentityHashMap采用”&#x3D;&#x3D;”而不是”equals()”方法判断key是否相同</p>
+<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>底层实现为Hash表＋双向链表</p>
+<p><strong>LRU缓存设计</strong></p>
+<p><strong>Redis的LRU设计</strong><br>redis的LRU并非严格LRU设计，而是近似的LRU设计，因为严格的LRU在每次访问一个键时需要将其移动到链表头部，同时对于内存和开销都有巨大压力：</p>
+<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><h3 id="ConcurrentSkipListMap"><a href="#ConcurrentSkipListMap" class="headerlink" title="ConcurrentSkipListMap"></a>ConcurrentSkipListMap</h3><h3 id="布谷鸟哈希"><a href="#布谷鸟哈希" class="headerlink" title="布谷鸟哈希"></a>布谷鸟哈希</h3><h4 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h4><p>一个键（key）在哈希表中有<strong>两个（或多个）可能的存放位置</strong>，由两个不同的哈希函数决定。就像一只布谷鸟蛋可以放在两个不同的巢中。</p>
+<ul>
+<li><strong>核心机制</strong>：<strong>“踢出”</strong>。当要插入一个新键时，如果它的两个位置都被占了，它不是去找下一个空位（像线性探测那样），而是<strong>随机选择其中一个位置，将占据该位置的老键踢出去</strong>，然后为这个被踢出的老键寻找它的另一个备选位置。这个过程可能会递归地进行，形成一连串的“踢出”操作。</li>
+</ul>
+<h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><p>假设一个键 <code>X</code>有两个候选位置：<code>h1(X)</code>和 <code>h2(X)</code>。</p>
+<ol>
+<li><strong>插入</strong>：计算 <code>h1(X)</code>和 <code>h2(X)</code>。如果两个位置有一个是空的，直接放入。如果两个位置都满了，随机选择一个（比如 <code>h1(X)</code>），将占据该位置的老键 <code>Y</code>踢出，将 <code>X</code>放入。现在，为被踢出的 <code>Y</code>寻找它的另一个家（即 <code>h2(Y)</code>）。如果 <code>h2(Y)</code>是空的，放入。如果 <code>h2(Y)</code>也被占了，重复上述“踢出”过程，直到所有键都安定下来，或者达到最大重试次数（此时需要扩容或重新构建哈希表）。</li>
+<li><strong>查找</strong>：极其高效。只需检查两个确定的位置 <code>h1(X)</code>和 <code>h2(X)</code>。时间复杂度是严格的 <strong>O(1)</strong>，没有链式遍历或长序列的探测。</li>
+<li><strong>删除</strong>：同样，检查两个位置，如果找到则删除。</li>
+</ol>
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>超快查询</strong>：最坏情况下也只有两次内存访问，非常适合延迟敏感的应用。<strong>高负载因子</strong>：通过优化可以实现超过 90% 的空间利用率，而传统线性探测在 80% 时性能就已很差。</li>
+<li><strong>缺点</strong>：<strong>插入不稳定</strong>：插入操作可能在最坏情况下耗时很长（因为连续的踢出循环）。<strong>可能插入失败</strong>：即使表没满，也可能因为循环踢出而无法插入，需要扩容。</li>
+</ul>
+<h3 id="罗宾汉哈希"><a href="#罗宾汉哈希" class="headerlink" title="罗宾汉哈希"></a>罗宾汉哈希</h3><h4 id="核心思想-1"><a href="#核心思想-1" class="headerlink" title="核心思想"></a>核心思想</h4><p>在<strong>开放寻址法</strong>（如线性探测）的框架下，它通过比较键的“探测距离”来实现公平。</p>
+<ul>
+<li><strong>核心概念：探测距离</strong>：一个键的探测距离是指它从自己的初始哈希位置（由哈希函数计算得出）需要移动多少步（探测多少次）才找到现在这个位置。</li>
+<li><strong>核心机制</strong>：<strong>“劫富济贫”</strong>。当一个新的键要插入时，如果目标位置已被占用，它会比较自己当前的探测距离（此时为0）和该位置上老键的探测距离。如果<strong>新键的探测距离大于</strong>老键的探测距离（说明新键“更贫瘠”），它就有权“抢走”这个位置。老键被踢出，然后像新键一样继续为自己寻找新位置。否则，新键继续向后探测。</li>
+</ul>
+<p>这个过程保证了所有键的“贫富差距”不会太大——即<strong>没有哪个键会离它的理想位置特别远</strong>。</p>
+<h4 id="工作流程（以线性探测为例）"><a href="#工作流程（以线性探测为例）" class="headerlink" title="工作流程（以线性探测为例）"></a>工作流程（以线性探测为例）</h4><ol>
+<li><strong>插入键 <code>X</code></strong>：计算初始位置 <code>pos = h(X)</code>，设置新键 <code>X</code>的探测距离 <code>Dnew = 0</code>。如果 <code>pos</code>为空，直接插入。如果 <code>pos</code>被键 <code>Y</code>占据，获取 <code>Y</code>的探测距离 <code>Dold</code>。比较 <code>Dnew</code>和 <code>Dold</code>：如果 <code>Dnew &gt; Dold</code>（“新”的比“老”的更惨）：将 <code>Y</code>踢出，将 <code>X</code>放入 <code>pos</code>。然后被踢出的 <code>Y</code>以 <code>Dold</code>为起点，继续向后探测寻找新家。否则（<code>Dnew &lt;= Dold</code>）：<code>X</code>的 <code>Dnew</code>加1，继续探测下一个位置。</li>
+<li><strong>查找与删除</strong>：与标准线性探测类似，但可以利用探测距离的信息进行优化（例如，如果当前探测距离已经大于正在查找的键的探测距离，说明它不可能在更远的位置，可提前结束）。</li>
+</ol>
+<h4 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>降低最坏情况</strong>：显著减少了长探测序列的发生，使所有操作的时间方差变小，性能更可预测。<strong>更高的平均负载因子</strong>：比传统开放寻址法能承受更高的负载。</li>
+<li><strong>缺点</strong>：<strong>实现更复杂</strong>：需要为每个槽存储键的探测距离信息。<strong>删除操作更麻烦</strong>：需要像线性探测一样使用“墓碑”标记。</li>
+</ul>
+<h3 id="Hopscotch-Hashing（跳房子哈希）"><a href="#Hopscotch-Hashing（跳房子哈希）" class="headerlink" title="Hopscotch Hashing（跳房子哈希）"></a>Hopscotch Hashing（跳房子哈希）</h3><p>Hopscotch Hashing 是一种基于<strong>线性探测</strong>的开放寻址法，它的核心目标是<strong>将每个键的探测序列长度控制在一个非常小的常数范围内</strong>，从而获得稳定、可预测的查询性能。</p>
+<h4 id="核心思想：邻域概念"><a href="#核心思想：邻域概念" class="headerlink" title="核心思想：邻域概念"></a>核心思想：邻域概念</h4><p>它为每个哈希槽位 <code>i</code>定义了一个逻辑上的<strong>邻域</strong>。这个邻域包含了从 <code>i</code>开始向后连续的 <code>H</code>个槽位（例如 <code>H=32</code>，包含槽位 <code>i</code>到 <code>i+31</code>）。</p>
+<ul>
+<li><strong>核心规则</strong>：一个哈希值为 <code>h(k)</code>的键 <code>k</code>，最终必须被存储在它的<strong>初始槽位 <code>h(k)</code>的邻域内</strong>。</li>
+<li>这保证了查找该键最多只需要检查 <code>H</code>个槽位，实现了 <strong>O(1)</strong> 的严格查询时间。</li>
+</ul>
+<h4 id="工作流程与关键操作"><a href="#工作流程与关键操作" class="headerlink" title="工作流程与关键操作"></a>工作流程与关键操作</h4><ol>
+<li><strong>插入</strong>当试图将一个键 <code>X</code>插入到它的初始位置 <code>pos = h(X)</code>时，如果该位置已被占用，插入过程不是简单地线性向后探测，而是包含一个关键的<strong>重排过程</strong>：<ul>
+<li><strong>a) 顺序探测</strong>：从 <code>pos</code>开始，线性地向后查找，直到找到一个空槽。</li>
+<li><strong>b) 检查距离</strong>：计算这个空槽到初始位置 <code>pos</code>的距离。如果这个距离小于邻域大小 <code>H</code>（即空槽在邻域内），那么直接将 <code>X</code>放入该空槽即可。</li>
+<li><strong>c) 重排</strong>：如果空槽太远（距离 &gt;&#x3D; <code>H</code>），就需要进行“跳房子”式的重排。算法会从空槽开始<strong>向前扫描</strong>（最多扫描 <code>H-1</code>个槽位），寻找一个键 <code>Y</code>。这个键 <code>Y</code>需要满足一个条件：<strong>如果把它移动到后面的空槽，它仍然在自己的初始槽位的邻域内</strong>。找到这样的 <code>Y</code>后，将 <code>Y</code>移动到空槽中，此时 <code>Y</code>原来的位置就变成了新的空槽。这个操作相当于让空槽向前“跳”了一步。重复这个过程，直到空槽被“搬运”到初始位置 <code>pos</code>的邻域内，然后将 <code>X</code>放入这个空槽。</li>
+</ul>
+</li>
+<li><strong>查找</strong>仅在初始槽位 <code>h(X)</code>的邻域（<code>H</code>个槽位）内进行线性查找。因为规则保证了键一定在这个范围内。</li>
+<li><strong>删除</strong>找到并删除键，然后标记为“空”。</li>
+</ol>
+<h4 id="优缺点-2"><a href="#优缺点-2" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>极佳的缓存局部性</strong>：由于键被限制在一个小邻域内，查找时内存访问集中，效率高。<strong>稳定的高性能</strong>：查询和插入在最坏情况下都是 <strong>O(1)</strong>，因为只与常数 <code>H</code>有关。</li>
+<li><strong>缺点</strong>：<strong>插入可能失败</strong>：即使表中有空位，但如果无法通过重排将空槽移入邻域，插入仍然会失败，需要扩容。<strong>实现稍复杂</strong>：重排逻辑比简单的线性探测复杂。</li>
+</ul>
+<h3 id="Extendible-Hashing（可扩展哈希）"><a href="#Extendible-Hashing（可扩展哈希）" class="headerlink" title="Extendible Hashing（可扩展哈希）"></a>Extendible Hashing（可扩展哈希）</h3><p>Extendible Hashing 是为<strong>磁盘等外部存储</strong>设计的哈希方法，其核心目标是<strong>在数据量增长时最小化磁盘I&#x2F;O次数</strong>。它通过一种“目录”机制来实现动态的、平滑的扩容。</p>
+<h4 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h4><ol>
+<li><strong>目录</strong>：一个在内存中维护的数组，每个目录项是一个指针，指向一个<strong>页（桶）</strong>。目录的大小是 2^G，其中 <code>G</code>称为<strong>全局深度</strong>。</li>
+<li><strong>页（桶）</strong>：实际存储键值对的数据块（通常对应一个磁盘页）。每个页有一个<strong>局部深度</strong> <code>L</code>，满足 <code>L &lt;= G</code>。</li>
+</ol>
+<h4 id="工作流程-1"><a href="#工作流程-1" class="headerlink" title="工作流程"></a>工作流程</h4><ol>
+<li><strong>哈希计算</strong>：对键 <code>k</code>计算哈希值 <code>h(k)</code>，然后取这个哈希值的<strong>后 <code>G</code>位</strong>（全局深度位）作为目录索引。例如，<code>G=3</code>，就取后3位，目录有8项。</li>
+<li><strong>查找</strong>：根据后 <code>G</code>位找到目录项，然后访问该目录项指向的页，在页内进行线性查找。<strong>只需一次磁盘I&#x2F;O</strong>。</li>
+<li><strong>插入与分裂（核心）</strong>：找到键对应的页。如果页内还有空间，直接插入。如果页已满，则需要<strong>页分裂</strong>：a. 增加该页的<strong>局部深度</strong> <code>L</code>（例如从1增加到2）。b. 创建一个新页。c. 将原页中的所有键重新哈希，根据它们哈希值的<strong>第 <code>L</code>位</strong>（新增加的这一位）进行分配。位为0的留在原页，位为1的移到新页。d. 更新目录：因为全局深度 <code>G</code>可能等于或大于新的局部深度 <code>L</code>。算法需要确保所有索引位<strong>后 <code>L</code>位</strong>与原页相同的目录项都指向原页，所有索引位<strong>后 <code>L</code>位</strong>与新页相同的目录项都指向新页。<strong>情况一：<code>L &lt;= G</code></strong>。只需更新部分目录指针。这是最常见的情况，扩容非常高效。<strong>情况二：<code>L &gt; G</code></strong>。这意味着目录需要翻倍（<strong>目录扩容</strong>）。将 <code>G</code>加1，目录大小翻倍，然后重新设置所有目录项的指针。</li>
+</ol>
+<h4 id="优缺点-3"><a href="#优缺点-3" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li><strong>优点</strong>：<strong>高效扩容</strong>：扩容时通常只需要分裂一个满的页，而不是重建整个表，成本低。<strong>一次磁盘访问</strong>：在任何情况下，查找一个键都只需要一次磁盘I&#x2F;O（因为目录在内存中，能直接定位到正确的页）。</li>
+<li><strong>缺点</strong>：<strong>目录可能很大</strong>：当数据量非常大时，目录本身可能变得很大，虽然它在内存中，但仍是一种开销。<strong>空间可能浪费</strong>：如果数据分布不均，多个目录项可能指向同一个页，造成目录空间浪费。</li>
+</ul>
+<h1 id="进阶数据结构"><a href="#进阶数据结构" class="headerlink" title="进阶数据结构"></a>进阶数据结构</h1><h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><h2 id="优先队列"><a href="#优先队列" class="headerlink" title="优先队列"></a>优先队列</h2><p>普通队列按照<strong>先进先出</strong>的方式出入队。</p>
+<p>优先队列则是 <strong>按照元素的优先级出队</strong>，而不是进入的先后顺序。</p>
+<p>Java中实现了<code>PriorityQueue&lt;E&gt;</code>的方法，默认为最小堆。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.*;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestPQ</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        PriorityQueue&lt;Integer&gt; pq = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PriorityQueue</span>&lt;&gt;();<br>        pq.offer(<span class="hljs-number">5</span>);<br>        pq.offer(<span class="hljs-number">1</span>);<br>        pq.offer(<span class="hljs-number">3</span>);<br><br>        System.out.println(pq.poll()); <span class="hljs-comment">// 1 （最小的先出）</span><br>        System.out.println(pq.poll()); <span class="hljs-comment">// 3</span><br>        System.out.println(pq.poll()); <span class="hljs-comment">// 5</span><br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>可以传入自定义的比较器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">PriorityQueue&lt;Integer&gt; maxHeap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PriorityQueue</span>&lt;&gt;(Comparator.reverseOrder());<br>maxHeap.offer(<span class="hljs-number">5</span>);<br>maxHeap.offer(<span class="hljs-number">1</span>);<br>maxHeap.offer(<span class="hljs-number">3</span>);<br><br>System.out.println(maxHeap.poll()); <span class="hljs-comment">// 5 （最大的先出）</span><br><br></code></pre></td></tr></table></figure>
+
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ul>
+<li><strong>任务调度</strong>：高优先级任务先执行。</li>
+<li><strong>Dijkstra 最短路径算法</strong>：每次取“当前距离最小的点”。</li>
+<li><strong>Huffman 编码</strong>：每次合并权值最小的两棵树。</li>
+<li><strong>Top-K 问题</strong>：找出最大的 K 个元素。</li>
+</ul>
+<h2 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h2><h2 id="Deque-双端队列"><a href="#Deque-双端队列" class="headerlink" title="Deque 双端队列"></a>Deque 双端队列</h2><h2 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h2><h2 id="图"><a href="#图" class="headerlink" title="图"></a>图</h2><h2 id="并查集DSU"><a href="#并查集DSU" class="headerlink" title="并查集DSU"></a>并查集DSU</h2><h1 id="高级数据结构"><a href="#高级数据结构" class="headerlink" title="高级数据结构"></a>高级数据结构</h1><h2 id="跳表"><a href="#跳表" class="headerlink" title="跳表"></a>跳表</h2><h2 id="线段树"><a href="#线段树" class="headerlink" title="线段树"></a>线段树</h2><h2 id="前缀树"><a href="#前缀树" class="headerlink" title="前缀树"></a>前缀树</h2><h2 id="AVL"><a href="#AVL" class="headerlink" title="AVL"></a>AVL</h2><h2 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h2><h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><p>布隆过滤器是一种空间效率极高的概率型数据结构，用于判断一个元素是否在集合中。它通过多个哈希函数将元素映射到位数组的不同位置，插入时将对应位设为1，查询时只要有一个位为0则一定不在集合中，否则可能在集合中（存在误判）。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>占用空间小，插入和查询速度快。</li>
+<li>适合大数据场景下的快速去重和存在性判断。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>存在一定的误判率（假阳性），无法删除元素（标准实现）。</li>
+<li>不支持元素的遍历。</li>
+</ul>
+<p><strong>应用场景：</strong></p>
+<ul>
+<li>数据库缓存过滤（如Redis缓存穿透防护）</li>
+<li>网络黑名单检测</li>
+<li>大规模去重（如爬虫URL判重）</li>
+</ul>
+<p><strong>时间复杂度：</strong></p>
+<ul>
+<li>插入操作(Add): O(K)</li>
+<li>查询操作(Check): O(K)<br>k是哈希函数的数量</li>
+</ul>
+<div style="border: 2px solid #150404ff; border-radius: 10px; padding: 10px; background: #f8f9fa;">
+☆★布隆过滤器的原理是用 k 个哈希函数将元素映射到位数组的 k 个位置。插入时，需要对元素进行 k 次哈希并设置 k 个位；查询时，需要对元素进行 k 次哈希并检查 k 个位。因此，时间复杂度与哈希函数数量 k 成线性关系，通常 k 是常数，所以实际操作接近 O(1)。
+</div>
+
+<h3 id="Java实现"><a href="#Java实现" class="headerlink" title="Java实现"></a>Java实现</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SimpleBloomFilter</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> size;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span>[] bits;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span>[] seeds = &#123;<span class="hljs-number">7</span>, <span class="hljs-number">11</span>, <span class="hljs-number">13</span>, <span class="hljs-number">31</span>, <span class="hljs-number">37</span>, <span class="hljs-number">61</span>&#125;;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">SimpleBloomFilter</span><span class="hljs-params">(<span class="hljs-type">int</span> capacity)</span> &#123;<br>        <span class="hljs-built_in">this</span>.size = capacity;<br>        <span class="hljs-built_in">this</span>.bits = <span class="hljs-keyword">new</span> <span class="hljs-title class_">boolean</span>[size];<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-title function_">hash</span><span class="hljs-params">(String value, <span class="hljs-type">int</span> seed)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; value.length(); i++) &#123;<br>            result = seed * result + value.charAt(i);<br>        &#125;<br>        <span class="hljs-keyword">return</span> (size - <span class="hljs-number">1</span>) &amp; result;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(String value)</span> &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> seed : seeds) &#123;<br>            bits[hash(value, seed)] = <span class="hljs-literal">true</span>;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">contains</span><span class="hljs-params">(String value)</span> &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> seed : seeds) &#123;<br>            <span class="hljs-keyword">if</span> (!bits[hash(value, seed)]) &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="第三方库"><a href="#第三方库" class="headerlink" title="第三方库"></a>第三方库</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">BloomFilter&lt;String&gt; bloomFilter = BloomFilter.create(<br>    Funnels.stringFunnel(Charset.defaultCharset()), <br>    <span class="hljs-number">1000</span>, <span class="hljs-comment">// 预期元素数量</span><br>    <span class="hljs-number">0.01</span>  <span class="hljs-comment">// 误报率</span><br>);<br>bloomFilter.put(<span class="hljs-string">&quot;item1&quot;</span>);<br>System.out.println(bloomFilter.mightContain(<span class="hljs-string">&quot;item1&quot;</span>)); <span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="有序哈希表LinkedHashMap"><a href="#有序哈希表LinkedHashMap" class="headerlink" title="有序哈希表LinkedHashMap"></a>有序哈希表LinkedHashMap</h2><h2 id="WeakHashMap-1"><a href="#WeakHashMap-1" class="headerlink" title="WeakHashMap"></a>WeakHashMap</h2><h2 id="EnumSet"><a href="#EnumSet" class="headerlink" title="EnumSet"></a>EnumSet</h2><h2 id="EnumMap-1"><a href="#EnumMap-1" class="headerlink" title="EnumMap"></a>EnumMap</h2><h2 id="地址哈希表IdentityHashMap"><a href="#地址哈希表IdentityHashMap" class="headerlink" title="地址哈希表IdentityHashMap"></a>地址哈希表IdentityHashMap</h2><h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><h2 id="时间轮Time-Wheel"><a href="#时间轮Time-Wheel" class="headerlink" title="时间轮Time Wheel"></a>时间轮Time Wheel</h2><h2 id="位图BitMap"><a href="#位图BitMap" class="headerlink" title="位图BitMap"></a>位图BitMap</h2><p>BitMap是一段把二进制位当做String来操作的一组位操作接口。例如要存储列</p>
+<table>
+<thead>
+<tr>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+<th align="left">0</th>
+</tr>
+</thead>
+</table>
+<h3 id="位集-BitSet"><a href="#位集-BitSet" class="headerlink" title="位集 BitSet"></a>位集 BitSet</h3><ul>
+<li><p>是对位图的一种<strong>抽象&#x2F;封装</strong>。</p>
+</li>
+<li><p>在 Java 里，<code>java.util.BitSet</code> 是一个类，内部本质上就是用 <code>long[]</code> 存储位，但对外暴露了更友好的 API（如 <code>set()</code>, <code>get()</code>, <code>clear()</code>, <code>and()</code>, <code>or()</code> 等）。</p>
+</li>
+<li><p>强调的是「集合语义」——把每个 bit 看作集合元素的 membership。</p>
+</li>
+</ul>
+<p>java中的BitSet采用<code>Long[]</code>实现，其索引是int型，即最大值在2^31-1，约为21亿。</p>
+<p>BitMap最常用的方法是</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/Java%E5%9F%BA%E7%A1%80/" class="category-chain-item">Java基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" class="print-no-link">#数据结构与算法</a>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Java基础数据结构</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/Java基础/数据结构/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E5%9F%BA%E7%A1%80/java%E5%9F%BA%E7%A1%80/" title="Java基础">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Java基础</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/" title="JVM类加载">
+                        <span class="hidden-mobile">JVM类加载</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

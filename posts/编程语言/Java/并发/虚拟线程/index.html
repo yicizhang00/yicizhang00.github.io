@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Yici Zhang">
+  <meta name="keywords" content="Distributed Systems,Raft,Paxos,Java,Backend">
+  
+    <meta name="description" content="JDK21 之前的多线程模型在 JDK21 之前，Java 的多线程全部依赖于平台线程（即操作系统线程），JVM 直接将线程的创建与调度全部交给操作系统内核负责。主要调度机制包括：  抢占式调度：高优先级线程可随时中断低优先级线程。 时间片轮转：同一优先级的线程以时间片为单位轮流执行，时间片用完主动让出 CPU。 多级反馈队列：IO密集型线程优先级会被提升，CPU密集型则可能被降低，有助于提高系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟线程">
+<meta property="og:url" content="https://yicizhang00.github.io/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B9%B6%E5%8F%91/%E8%99%9A%E6%8B%9F%E7%BA%BF%E7%A8%8B/">
+<meta property="og:site_name" content="Yici&#39;s Blog">
+<meta property="og:description" content="JDK21 之前的多线程模型在 JDK21 之前，Java 的多线程全部依赖于平台线程（即操作系统线程），JVM 直接将线程的创建与调度全部交给操作系统内核负责。主要调度机制包括：  抢占式调度：高优先级线程可随时中断低优先级线程。 时间片轮转：同一优先级的线程以时间片为单位轮流执行，时间片用完主动让出 CPU。 多级反馈队列：IO密集型线程优先级会被提升，CPU密集型则可能被降低，有助于提高系统">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-05T17:40:05.000Z">
+<meta property="article:modified_time" content="2026-07-27T18:04:27.838Z">
+<meta property="article:author" content="Yici Zhang">
+<meta property="article:tag" content="Distributed Systems">
+<meta property="article:tag" content="Raft">
+<meta property="article:tag" content="Paxos">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Backend">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>虚拟线程 - Yici&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yicizhang00.github.io","root":"/","version":"1.9.9","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Yici&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">虚拟线程</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-06 01:40" pubdate>
+          2026年1月6日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          27 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">虚拟线程</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="JDK21-之前的多线程模型"><a href="#JDK21-之前的多线程模型" class="headerlink" title="JDK21 之前的多线程模型"></a>JDK21 之前的多线程模型</h1><p>在 JDK21 之前，Java 的多线程全部依赖于平台线程（即操作系统线程），JVM 直接将线程的创建与调度全部交给操作系统内核负责。主要调度机制包括：</p>
+<ul>
+<li><strong>抢占式调度</strong>：高优先级线程可随时中断低优先级线程。</li>
+<li><strong>时间片轮转</strong>：同一优先级的线程以时间片为单位轮流执行，时间片用完主动让出 CPU。</li>
+<li><strong>多级反馈队列</strong>：IO密集型线程优先级会被提升，CPU密集型则可能被降低，有助于提高系统整体吞吐。</li>
+<li><strong>中断机制</strong>：通过线程中断响应外部事件或资源变更。</li>
+</ul>
+<p>但传统平台线程模型存在如下弊端：</p>
+<ul>
+<li><strong>上下文切换开销大</strong>：线程切换需要在用户态与内核态间频繁转换，并保存&#x2F;恢复寄存器、堆栈等，极大消耗了性能。</li>
+<li><strong>资源受限</strong>：受限于内存和 CPU 资源，操作系统可创建的线程数量有限。大量线程挂起&#x2F;恢复会显著降低 CPU 性能。</li>
+</ul>
+<h2 id="多线程的核心思想"><a href="#多线程的核心思想" class="headerlink" title="多线程的核心思想"></a>多线程的核心思想</h2><p><strong>IO密集型任务</strong>理论上可支持远超 CPU 核心数的线程。以 10 核 CPU 跑 Tomcat 为例：</p>
+<ul>
+<li>10核 CPU 实际只能物理并行 10 个线程。</li>
+<li>大多数请求线程实际长时间被阻塞在 IO 上（如数据库、Redis、文件）。</li>
+<li>阻塞时，线程会被 OS 挂起，CPU 能做别的工作。</li>
+<li>所以 Tomcat 默认配置 200 线程甚至以上是合理的——关键在于线程大部分都是等 IO。</li>
+</ul>
+<h2 id="线程的休眠和唤醒机制"><a href="#线程的休眠和唤醒机制" class="headerlink" title="线程的休眠和唤醒机制"></a>线程的休眠和唤醒机制</h2><ul>
+<li>当线程因 IO 需要等待数据时，不应再占用 CPU，因此会进入睡眠（阻塞）状态。此时，调度器不会将不可执行（阻塞）的线程放入运行队列。</li>
+<li>睡眠时，内核会将线程移出可执行队列（例如红黑树），加入等待队列。被唤醒时，再重新移回可执行队列，标记为“可运行”。</li>
+</ul>
+<h2 id="IO密集型-vs-CPU密集型"><a href="#IO密集型-vs-CPU密集型" class="headerlink" title="IO密集型 vs CPU密集型"></a>IO密集型 vs CPU密集型</h2><ul>
+<li><strong>IO密集型</strong>：线程大部分时间在等待 IO，处于阻塞、睡眠或等待状态。典型如 Web GUI，用户输入&#x2F;网络等 IO 事件，空闲时也会等事件。</li>
+<li><strong>CPU密集型</strong>：大量时间用于计算，如复杂科学运算、死循环模拟等。此类线程建议降低优先级，避免“贪占”主机资源。</li>
+</ul>
+<h2 id="线程数的选择"><a href="#线程数的选择" class="headerlink" title="线程数的选择"></a>线程数的选择</h2><ul>
+<li>线程池过大，可能引发频繁挂起&#x2F;切换，影响系统性能。</li>
+<li>线程池过小，则可能导致 CPU 没被充分利用。</li>
+<li>对于高并发 IO 密集场景，需要更灵活的线程模型——<strong>虚拟线程</strong>应运而生（见下节）。</li>
+</ul>
+<hr>
+<h2 id="内核态与用户态"><a href="#内核态与用户态" class="headerlink" title="内核态与用户态"></a>内核态与用户态</h2><p>线程&#x2F;进程平常运行在用户态，仅在需要访问关键资源或做系统调用时切换到内核态（称“陷入内核”）。</p>
+<ul>
+<li><strong>用户态</strong>：只能访问本进程内的资源，安全但受限。</li>
+<li><strong>内核态</strong>：可获取全系统资源（磁盘、网络等），拥有最高权限。</li>
+</ul>
+<h3 id="哪些场景必须进入内核态？"><a href="#哪些场景必须进入内核态？" class="headerlink" title="哪些场景必须进入内核态？"></a>哪些场景必须进入内核态？</h3><ol>
+<li><strong>进程&#x2F;线程调度切换</strong></li>
+<li><strong>系统调用</strong>：文件操作、网络数据、申请资源（如扩堆、新建线程）。<ul>
+<li>例如 <code>FileInputStream.read()</code>、线程阻塞&#x2F;恢复。</li>
+</ul>
+</li>
+<li><strong>时间片耗尽</strong>：判断并切换到其他线程。</li>
+</ol>
+<h4 id="为什么调度必须内核态？"><a href="#为什么调度必须内核态？" class="headerlink" title="为什么调度必须内核态？"></a>为什么调度必须内核态？</h4><p>只有内核才能安全保存现场、切换栈指针，并了解&#x2F;控制所有进程状态。否则用户态进程之间互不可见，无法实现可靠切换。</p>
+<hr>
+<h1 id="JDK21-之后的多线程革命：虚拟线程"><a href="#JDK21-之后的多线程革命：虚拟线程" class="headerlink" title="JDK21 之后的多线程革命：虚拟线程"></a>JDK21 之后的多线程革命：虚拟线程</h1><h2 id="虚拟线程简介"><a href="#虚拟线程简介" class="headerlink" title="虚拟线程简介"></a>虚拟线程简介</h2><p>Java 21 引入<strong>虚拟线程</strong>（Virtual Thread），将线程调度从 OS“用户态化”，由 JVM 负责线程的创建、挂起与切换，实现高并发、轻量级线程。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>平台线程</th>
+<th>虚拟线程</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sleep</td>
+<td>陷入内核，挂起&#x2F;等待唤醒</td>
+<td>用户态调度，直接切换下一个虚拟线程</td>
+</tr>
+<tr>
+<td>阻塞 I&#x2F;O</td>
+<td>陷入内核，线程挂起</td>
+<td>用户态处理，底层常结合 Netty 等异步模型</td>
+</tr>
+<tr>
+<td>线程切换</td>
+<td>内核态切换</td>
+<td>全部用户态完成，极大减少切换损耗</td>
+</tr>
+</tbody></table>
+<h3 id="协作式用户态调度"><a href="#协作式用户态调度" class="headerlink" title="协作式用户态调度"></a>协作式用户态调度</h3><ul>
+<li>不依赖操作系统的线程调度，完全由 JVM 管理。</li>
+<li>极大降低线程开销和上下文切换代价。</li>
+<li>适合高并发、大量短生命周期任务。</li>
+</ul>
+<hr>
+<h1 id="Go-协程与调度模型全解析"><a href="#Go-协程与调度模型全解析" class="headerlink" title="Go 协程与调度模型全解析"></a>Go 协程与调度模型全解析</h1><h2 id="什么是协程（goroutine）"><a href="#什么是协程（goroutine）" class="headerlink" title="什么是协程（goroutine）"></a>什么是协程（goroutine）</h2><p>Go 语言内置<strong>goroutine</strong>，比 OS 线程更轻量的用户态线程，“百万级”并发推进器。通过 Go runtime 管理 goroutine 的创建、挂起、恢复和销毁，适合大规模高并发场景。</p>
+<h2 id="GMP-调度模型详解"><a href="#GMP-调度模型详解" class="headerlink" title="GMP 调度模型详解"></a>GMP 调度模型详解</h2><ul>
+<li><strong>G（Goroutine）</strong>：代表需调度执行的协程。</li>
+<li><strong>M（Machine）</strong>：底层 OS 线程。</li>
+<li><strong>P（Processor）</strong>：虚拟的调度器逻辑核，维护本地 goroutine 队列及分配执行。</li>
+<li>P 的数量（GOMAXPROCS）控制物理并发度，各 P 独立调度、减少锁争用。</li>
+</ul>
+<h3 id="GMP-模型调度流程"><a href="#GMP-模型调度流程" class="headerlink" title="GMP 模型调度流程"></a>GMP 模型调度流程</h3><ol>
+<li>每个 P 绑定一个 M，P 维护本地 goroutine 队列。</li>
+<li>M (OS 线程) 必须占有 P 才能调度 G 执行。</li>
+<li>G 交由所属 P 分配调度，最终运行在 M 上。</li>
+<li>全部切换和调度都发生在用户态，无需频繁进入内核。</li>
+</ol>
+<p><strong>目标</strong>：最大化利用 M（OS 线程）资源、高效流转大量 G。</p>
+<h2 id="协作式与抢占式调度"><a href="#协作式与抢占式调度" class="headerlink" title="协作式与抢占式调度"></a>协作式与抢占式调度</h2><ul>
+<li><strong>协作式调度</strong>（Go 1.13 及以前）：只有在 goroutine 主动让出、函数调用、IO 挂起等”安全点”才调度。死循环&#x2F;大计算任务可能导致“饿死”其他协程。</li>
+<li><strong>抢占式调度</strong>（Go 1.14 起）：goroutine 占用 CPU 超过一定时长（如 10ms）会被强制挂起，让权给其它协程，调度公平性与系统响应极大提升。</li>
+</ul>
+<h4 id="与-Java-虚拟线程比较"><a href="#与-Java-虚拟线程比较" class="headerlink" title="与 Java 虚拟线程比较"></a>与 Java 虚拟线程比较</h4><ul>
+<li>Java 虚拟线程同样为协作式调度，JVM 用户态实现。</li>
+<li>Go 基于 GMP 架构支持多核并行，且抢占更早成熟，调度&#x2F;自稳健性较好。</li>
+</ul>
+<h3 id="示例对比"><a href="#示例对比" class="headerlink" title="示例对比"></a>示例对比</h3><p>以 10 核心为例：</p>
+<ul>
+<li>10 个死循环的虚拟线程或 goroutine（Go 1.13-）将“饿死”第 11 个新加入者，得不到调度机会。</li>
+<li>Go 1.14+ 强制抢占，哪怕已有高负载死循环，新增协程也能公平调度。</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// 死循环协程示例</span><br><span class="hljs-keyword">for</span> &#123;<br>    <span class="hljs-comment">// ... do something</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Go 协程（goroutine）与 GMP 的组合，让 Go 在超大并发场景下极高性价比地调度和管理线程。协作+抢占调度结合，既快又稳。Java 虚拟线程有同样的理念，Go 在多核、高并发与调度器健壮性上经验更为丰富。</p>
+<hr>
+<h1 id="虚拟线程的优势与亮点"><a href="#虚拟线程的优势与亮点" class="headerlink" title="虚拟线程的优势与亮点"></a>虚拟线程的优势与亮点</h1><ol>
+<li><strong>极低开销</strong>：全部用户态分配&#x2F;销毁，远低于传统平台线程。</li>
+<li><strong>无需池化</strong>：虚拟线程可以“用多少开多少”，无需固定池，减少参数调优及 OOM 风险。</li>
+<li><strong>高并发友好</strong>：切换和唤醒均由 JVM 用户态管理，非常适合短小&#x2F;高频切换的高并发任务。</li>
+<li><strong>透明兼容</strong>：与平台线程 API 相同，原有多线程代码易适配迁移。</li>
+</ol>
+<hr>
+<h1 id="扩展与补充"><a href="#扩展与补充" class="headerlink" title="扩展与补充"></a>扩展与补充</h1><h2 id="Python-的-GIL（全局解释器锁）"><a href="#Python-的-GIL（全局解释器锁）" class="headerlink" title="Python 的 GIL（全局解释器锁）"></a>Python 的 GIL（全局解释器锁）</h2><p>CPython 解释器用 GIL 保证同一时间只有一个线程执行字节码，简化了内存管理和线程安全，但严重影响了多核 CPU 下的线程并发性能。因此 Python 高并发常采用多进程&#x2F;异步（如 asyncio）以缓解 GIL 限制。</p>
+<h2 id="Spring-Cloud-Gateway-与-WebFlux"><a href="#Spring-Cloud-Gateway-与-WebFlux" class="headerlink" title="Spring Cloud Gateway 与 WebFlux"></a>Spring Cloud Gateway 与 WebFlux</h2><ul>
+<li><strong>Spring WebFlux</strong>：响应式异步模型，结合 Reactor&#x2F;Netty 用非阻塞 IO，不再为每个连接分配独立线程，从而极大减少线程&#x2F;上下文切换的内核开销。<ul>
+<li><strong>Servlet 模型</strong>：线程池式，每个请求独占线程，遇 IO 阻塞则线程挂起无法处理其他请求，高并发下资源浪费严重。</li>
+<li><strong>WebFlux 模型</strong>：固定数量事件循环（一般 &#x3D; CPU 核数），IO 操作注册回调立即释放线程，极大提高资源复用，适合大量并发连接。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="总结-发展趋势"><a href="#总结-发展趋势" class="headerlink" title="总结 &amp; 发展趋势"></a>总结 &amp; 发展趋势</h2><p>现代高并发&#x2F;大规模并行编程的趋势：</p>
+<ul>
+<li><strong>线程用户态化</strong>：把线程（或协程）的管理从 OS 下沉到运行时（JVM、Go runtime），极大减少切换开销，增强弹性。</li>
+<li><strong>调度混合化</strong>：协作式+抢占式调度，既高吞吐又更公平，防止“饿死”。</li>
+<li><strong>更细粒度线程&#x2F;协程</strong>：允许应用根据业务特点灵活选择。</li>
+<li><strong>代表技术</strong>：Java 虚拟线程（Project Loom）、Go goroutine、C# async&#x2F;await、Python asyncio。</li>
+</ul>
+<p><strong>一句话总结</strong>：<br>高并发范式正从“粗粒度操作系统线程”向“轻量级用户态线程&#x2F;协程”演化，虚拟线程和协程正是最佳实践的典范。把握此趋势，是现代后端&#x2F;并发编程的关键能力。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/%E5%B9%B6%E5%8F%91/" class="category-chain-item">并发</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>虚拟线程</div>
+      <div>https://yicizhang00.github.io/posts/编程语言/Java/并发/虚拟线程/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Yici Zhang</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/%E5%9F%8B%E7%82%B9/" title="埋点">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">埋点</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/" title="全局异常捕获">
+                        <span class="hidden-mobile">全局异常捕获</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2026 Yici Zhang | Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://fluid.ist/" target="_blank">Fluid Theme</a>
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.staticfile.org/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.staticfile.org/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

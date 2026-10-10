@@ -166,7 +166,8 @@ markdown:
     breaks: true
     linkify: true
     typographer: true
-
+  plugins:
+    - markdown-it-obsidian-callouts
 # ---------------------------------------------------------------
 # Search
 # ---------------------------------------------------------------

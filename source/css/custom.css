@@ -24,3 +24,95 @@
     color: #a3c1da;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+/* ===============================
+   Callout / 告警块通用样式
+   =============================== */
+.callout {
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 8px; /* 圆角边框 */
+  border-left: 4px solid #8c8c8c;
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* 核心修复：强制标题栏使用 Flex 布局，使图标与文字同行单行排列 */
+.callout-title {
+  display: flex !important;
+  align-items: center !important;  /* 垂直居中对齐 */
+  flex-direction: row !important;  /* 强制水平排列 */
+  gap: 8px !important;            /* 图标与标题文字的间距 */
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* 消除内部可能存在的 p/div 标签自带的外边距导致换行 */
+.callout-title p,
+.callout-title div,
+.callout-icon,
+.callout-title-inner {
+  display: inline-flex !important;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 图标大小控制 */
+.callout-icon svg,
+.callout-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0; /* 防止图标被文字挤压变形 */
+}
+
+/* 正文段落微调 */
+.callout-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ===============================
+   不同类型的颜色配置
+   =============================== */
+
+/* 警告 Warning */
+.callout-warning,
+.callout[data-callout="warning"] {
+  background-color: #fffbe6;
+  border-left-color: #faad14;
+  color: #614700;
+}
+.callout-warning .callout-title,
+.callout[data-callout="warning"] .callout-title {
+  color: #d46b08;
+}
+
+/* 提示 Note / Info */
+.callout-note,
+.callout-info,
+.callout[data-callout="note"],
+.callout[data-callout="info"] {
+  background-color: #e6f7ff;
+  border-left-color: #1890ff;
+  color: #002766;
+}
+.callout-note .callout-title,
+.callout[data-callout="note"] .callout-title {
+  color: #096dd9;
+}
+
+/* 错误 Error / Danger / Caution */
+.callout-error,
+.callout-danger,
+.callout-caution,
+.callout[data-callout="error"],
+.callout[data-callout="danger"],
+.callout[data-callout="caution"] {
+  background-color: #fff1f0;
+  border-left-color: #ff4d4f;
+  color: #5c0011;
+}
+.callout-error .callout-title,
+.callout[data-callout="error"] .callout-title {
+  color: #cf1322;
+}

@@ -1,4 +1,4 @@
-```yaml
+
 name: Blog CI/CD
 
 on:
@@ -64,4 +64,3 @@ jobs:
           user_name: yicizhang00
           user_email: zhangyici2000@outlook.com
           commit_message: "deploy: site updated"
-```

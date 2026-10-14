@@ -1106,19 +1106,19 @@ static_prefix:
   internal_css: /css
   internal_img: /img
 
-  anchor: https://cdn.staticfile.org/anchor-js/5.0.0/
-  github_markdown: https://cdn.staticfile.org/github-markdown-css/4.0.0/
-  jquery: https://cdn.staticfile.org/jquery/3.6.4/
-  bootstrap: https://cdn.staticfile.org/twitter-bootstrap/4.6.1/
-  prismjs: https://cdn.staticfile.org/prism/1.29.0/
-  tocbot: https://cdn.staticfile.org/tocbot/4.20.1/
-  typed: https://cdn.staticfile.org/typed.js/2.0.12/
-  fancybox: https://cdn.staticfile.org/fancybox/3.5.7/
-  nprogress: https://cdn.staticfile.org/nprogress/0.2.0/
-  mathjax: https://cdn.staticfile.org/mathjax/3.2.2/
-  katex: https://cdn.staticfile.org/KaTeX/0.16.2/
-  clipboard: https://cdn.staticfile.org/clipboard.js/2.0.11/
-  mermaid: https://cdn.staticfile.org/mermaid/8.14.0/
-  valine: https://cdn.staticfile.org/valine/1.5.1/
-  gitalk: https://cdn.staticfile.org/gitalk/1.8.0/
-  moment: https://cdn.staticfile.org/moment.js/2.29.4/
+  anchor: https://cdn.bootcdn.net/ajax/libs/anchor-js/5.0.0/
+  github_markdown: https://cdn.bootcdn.net/ajax/libs/github-markdown-css/4.0.0/
+  jquery: https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/
+  bootstrap: https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.1/
+  prismjs: https://cdn.bootcdn.net/ajax/libs/prism/1.29.0/
+  tocbot: https://cdn.bootcdn.net/ajax/libs/tocbot/4.20.1/
+  typed: https://cdn.bootcdn.net/ajax/libs/typed.js/2.0.12/
+  fancybox: https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/
+  nprogress: https://cdn.bootcdn.net/ajax/libs/nprogress/0.2.0/
+  mathjax: https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/
+  katex: https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.2/
+  clipboard: https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.11/
+  mermaid: https://cdn.bootcdn.net/ajax/libs/mermaid/8.14.0/
+  valine: https://cdn.bootcdn.net/ajax/libs/valine/1.5.1/
+  gitalk: https://cdn.bootcdn.net/ajax/libs/gitalk/1.8.0/
+  moment: https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.4/
